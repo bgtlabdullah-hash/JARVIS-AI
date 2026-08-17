@@ -192,7 +192,7 @@
     <!-- Header Actions -->
     <div class="flex items-center gap-2 sm:gap-3">
       <!-- VIP Pass Unlock Button (Header) -->
-      <button onclick="openVipPassModal()" aria-label="Unlock VIP Pass" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs shadow-md hover:scale-105 transition-all border border-emerald-400/40">
+      <button onclick="openVipPassModal(event)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs shadow-md hover:scale-105 transition-all border border-emerald-400/40 cursor-pointer">
         <i data-lucide="ticket" class="w-4 h-4 text-emerald-100"></i>
         <span id="headerVipBtnText">🎟️ VIP Pass</span>
       </button>
@@ -248,7 +248,7 @@
       <!-- Navigation Links -->
       <div class="p-3 space-y-1.5 overflow-y-auto custom-scrollbar flex-1">
         <!-- Prominent VIP Pass Option in Sidebar -->
-        <button onclick="openVipPassModal()" aria-label="Open VIP Pass Modal" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-black transition-all bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-500 text-white shadow-lg hover:brightness-110 border border-emerald-400/50">
+        <button onclick="openVipPassModal(event)" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-black transition-all bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-500 text-white shadow-lg hover:brightness-110 border border-emerald-400/50 cursor-pointer">
           <div class="flex items-center gap-2">
             <span class="text-base">🎟️</span>
             <div class="text-left">
@@ -582,5 +582,211 @@
 
     </main>
   </div>
+
+  <!-- ================= VIP PASS MODAL DIALOG ================= -->
+  <div id="vipPassModal" style="display: none;" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
+    <div class="bg-king-card border-2 border-emerald-400/80 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+      <button type="button" onclick="closeVipPassModal(event)" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-all">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Header -->
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg">
+          🎟️
+        </div>
+        <div>
+          <h3 class="font-royal font-black text-lg text-white">VIP Unlimited Pass</h3>
+          <p class="text-xs text-emerald-300 font-semibold">Special Edition Access Pass</p>
+        </div>
+      </div>
+
+      <!-- Password Input View -->
+      <div id="vipInputSection" class="space-y-4">
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Enter the VIP Secret Key to unlock <strong>Unlimited 8K Image Generation</strong>, <strong>Unlimited Chat Messages</strong>, and <strong>Multi-Image Adder</strong> without any daily restrictions.
+        </p>
+
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">VIP Password</label>
+          <div class="relative">
+            <input 
+              id="vipPassInput" 
+              type="text" 
+              placeholder="Enter VIP Password..." 
+              onkeydown="if(event.key === 'Enter') submitVipPassword(event)"
+              class="w-full bg-slate-950 text-white placeholder-slate-500 text-xs rounded-xl p-3.5 border border-slate-700 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 font-mono"
+            >
+          </div>
+          <p id="vipErrorMsg" style="display: none;" class="text-[11px] text-rose-400 font-bold mt-1.5"></p>
+        </div>
+
+        <button 
+          type="button"
+          onclick="submitVipPassword(event)" 
+          class="w-full py-3.5 rounded-xl font-black bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 hover:brightness-110 active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <i data-lucide="key" class="w-4 h-4"></i>
+          <span>Activate VIP Pass Now</span>
+        </button>
+      </div>
+
+      <!-- VIP Unlocked View -->
+      <div id="vipUnlockedSection" style="display: none;" class="p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/50 text-center space-y-2">
+        <div class="text-sm font-bold text-emerald-300 flex items-center justify-center gap-2">
+          <i data-lucide="sparkles" class="w-4 h-4 text-emerald-400"></i> VIP PASS 100% UNLOCKED
+        </div>
+        <p class="text-xs text-slate-300">Unlimited AI chat, unlimited 8K photorealistic image generation, and multi-image attachments are enabled forever.</p>
+        <button type="button" onclick="closeVipPassModal(event)" class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:brightness-110 mt-2 cursor-pointer">
+          Enjoy Unlimited VIP Access
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- 1. VIP CONFIGURATION & QUOTA DEFAULTS ---
+    const VIP_PASSWORD = "Abdullah@hero123";
+    const MAX_DAILY_MESSAGES = 50;
+    const MAX_DAILY_IMAGES = 3;
+    const REST_PERIOD_MS = 24 * 60 * 60 * 1000; // 24 Hours Reset
+
+    let STATE = {
+      activeTab: 'chat',
+      chatHistory: [],
+      currentSessionId: null,
+      isVipActive: localStorage.getItem('king_ai_vip_unlocked') === 'true',
+      isProActive: localStorage.getItem('king_ai_vip_unlocked') === 'true',
+      dailyMsgCount: 0,
+      dailyImgCount: 0,
+      quotaResetTime: Date.now() + REST_PERIOD_MS,
+      attachedImages: [], // Holds up to 3 attached images
+      gallery: []
+    };
+
+    // Mobile Sidebar Control Helper
+    function closeMobileSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      if (sidebar) sidebar.classList.add('-translate-x-full');
+      if (overlay) overlay.classList.add('hidden');
+    }
+
+    // --- 4. JAVASCRIPT FUNCTIONS FOR MODAL & KEY VALIDATION ---
+    // Open the VIP Modal
+    function openVipPassModal(event) {
+      if (event && event.preventDefault) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      closeMobileSidebar();
+      const modal = document.getElementById('vipPassModal');
+      if (!modal) return;
+
+      const inputSection = document.getElementById('vipInputSection');
+      const unlockedSection = document.getElementById('vipUnlockedSection');
+      const errorMsg = document.getElementById('vipErrorMsg');
+      const passInput = document.getElementById('vipPassInput');
+
+      if (errorMsg) {
+        errorMsg.innerText = '';
+        errorMsg.classList.add('hidden');
+        errorMsg.style.display = 'none';
+      }
+      if (passInput) passInput.value = '';
+
+      if (STATE.isVipActive) {
+        if (inputSection) { inputSection.classList.add('hidden'); inputSection.style.display = 'none'; }
+        if (unlockedSection) { unlockedSection.classList.remove('hidden'); unlockedSection.style.display = 'block'; }
+      } else {
+        if (inputSection) { inputSection.classList.remove('hidden'); inputSection.style.display = 'block'; }
+        if (unlockedSection) { unlockedSection.classList.add('hidden'); unlockedSection.style.display = 'none'; }
+      }
+
+      modal.classList.remove('hidden');
+      modal.style.display = 'flex';
+
+      setTimeout(() => {
+        if (passInput && !STATE.isVipActive) passInput.focus();
+        if (window.lucide && lucide.createIcons) lucide.createIcons();
+      }, 50);
+    }
+
+    // Close the VIP Modal
+    function closeVipPassModal(event) {
+      if (event && event.preventDefault) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      const modal = document.getElementById('vipPassModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+      }
+    }
+
+    // Validate and Activate the VIP Key
+    function submitVipPassword(event) {
+      if (event && event.preventDefault) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      const passInput = document.getElementById('vipPassInput');
+      const errorMsg = document.getElementById('vipErrorMsg');
+      const val = (passInput ? passInput.value : '').trim();
+
+      // Check matching password
+      if (val === VIP_PASSWORD || val.toLowerCase() === VIP_PASSWORD.toLowerCase()) {
+        STATE.isVipActive = true;
+        STATE.isProActive = true;
+        localStorage.setItem('king_ai_vip_unlocked', 'true');
+
+        updateQuotaUI();
+
+        const inputSection = document.getElementById('vipInputSection');
+        const unlockedSection = document.getElementById('vipUnlockedSection');
+        if (inputSection) { inputSection.classList.add('hidden'); inputSection.style.display = 'none'; }
+        if (unlockedSection) { unlockedSection.classList.remove('hidden'); unlockedSection.style.display = 'block'; }
+        if (window.lucide && lucide.createIcons) lucide.createIcons();
+      } else {
+        if (errorMsg) {
+          errorMsg.innerText = "❌ Incorrect VIP password. Please enter the valid key: Abdullah@hero123";
+          errorMsg.classList.remove('hidden');
+          errorMsg.style.display = 'block';
+        }
+      }
+    }
+
+    // Update UI Badge when VIP is Active
+    function updateQuotaUI() {
+      const tierBadge = document.getElementById('tierBadge');
+      const headerVipBtnText = document.getElementById('headerVipBtnText');
+      const topVipBadge = document.getElementById('topVipBadge');
+      const sideVipStatusTag = document.getElementById('sideVipStatusTag');
+      const msgCountDisplay = document.getElementById('msgCountDisplay');
+      const imgCountDisplay = document.getElementById('imgCountDisplay');
+
+      if (STATE.isVipActive || STATE.isProActive) {
+        if (tierBadge) tierBadge.innerText = '👑 VIP PASS (UNLIMITED)';
+        if (headerVipBtnText) headerVipBtnText.innerText = '👑 VIP ACTIVE';
+        if (topVipBadge) {
+          topVipBadge.innerText = 'VIP PRO';
+          topVipBadge.className = 'vip-gradient-bg text-[10px] font-black uppercase px-2 py-0.5 rounded-full text-white tracking-widest shadow-md';
+        }
+        if (sideVipStatusTag) {
+          sideVipStatusTag.innerText = 'UNLOCKED';
+          sideVipStatusTag.className = 'px-2 py-0.5 bg-emerald-500 text-slate-950 text-[10px] font-black rounded-lg shadow-sm';
+        }
+        if (msgCountDisplay) msgCountDisplay.innerText = 'UNLIMITED';
+        if (imgCountDisplay) imgCountDisplay.innerText = 'UNLIMITED';
+      }
+    }
+
+    // Initialize Lucide Icons & Quota UI on Load
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide && lucide.createIcons) lucide.createIcons();
+      updateQuotaUI();
+    });
+  </script>
 </body>
 </html>
