@@ -1,0 +1,6 @@
+{
+  "name": "KING AI",
+  "description": "KING AI PRO - Created & Owned by Abdullah Waheed. Royal AI Intelligence Suite with real-time AI Chat, Image Generation, Monogram Maker, and Cinema Studio.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

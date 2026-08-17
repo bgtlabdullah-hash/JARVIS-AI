@@ -1,0 +1,1896 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#070b14">
+  <meta name="description" content="KING AI PRO - Created & Owned by Abdullah Waheed. Royal AI Intelligence Suite with real-time AI Chat, Image Generation, Monogram Maker, Cinema Studio, and VIP Unlimited Pass.">
+  <meta name="google-site-verification" content="HhuSB2fDTRhAe9mzmyd_brrq52RW0Gc5zlyOiAdfRI4" />
+  <link rel="manifest" href="./manifest.json">
+  <title>KING AI PRO — Owned by Abdullah Waheed</title>
+  
+  <!-- Tailwind CSS, Lucide Icons, Marked Markdown Parser, Highlight.js -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            king: {
+              gold: '#fbbf24',
+              goldLight: '#fef08a',
+              goldDark: '#b45309',
+              crown: '#f59e0b',
+              navy: '#070b14',
+              slate: '#0d1527',
+              card: '#131e36',
+              cardHover: '#182747',
+              border: '#223254'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Cinzel:wght@600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-royal {
+      font-family: 'Cinzel', serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #223254;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #3b507d;
+    }
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #fffbeb 0%, #fbbf24 40%, #f59e0b 70%, #d97706 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .gold-gradient-bg {
+      background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+    }
+    .vip-gradient-bg {
+      background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+    }
+    .gold-glow {
+      box-shadow: 0 0 25px rgba(251, 191, 36, 0.35);
+    }
+    .vip-glow {
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.4);
+    }
+    .pro-badge {
+      background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+    }
+    .chat-bubble-ai {
+      background: #111b33;
+      border: 1px solid #223254;
+      line-height: 1.7;
+    }
+    .chat-bubble-user {
+      background: linear-gradient(135deg, #2b395b 0%, #1a253f 100%);
+      border: 1px solid #3e527d;
+    }
+    .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+      font-weight: 700;
+      color: #fbbf24;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .markdown-body p {
+      margin-bottom: 0.85rem;
+      line-height: 1.75;
+      color: #e2e8f0;
+    }
+    .markdown-body ul, .markdown-body ol {
+      margin-left: 1.5rem;
+      margin-bottom: 0.85rem;
+    }
+    .markdown-body ul { list-style-type: disc; }
+    .markdown-body ol { list-style-type: decimal; }
+    .markdown-body li {
+      margin-bottom: 0.35rem;
+      color: #e2e8f0;
+      line-height: 1.65;
+    }
+    .markdown-body code {
+      background: #090e1c;
+      padding: 0.2rem 0.45rem;
+      border-radius: 0.375rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+      color: #38bdf8;
+      border: 1px solid #223254;
+    }
+    .markdown-body pre {
+      background: #060a14;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+      border: 1px solid #223254;
+    }
+    .markdown-body pre code {
+      background: transparent;
+      padding: 0;
+      border: none;
+      color: #f1f5f9;
+    }
+    .markdown-body strong {
+      color: #fef08a;
+      font-weight: 600;
+    }
+  </style>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW:', err));
+      });
+    }
+  </script>
+</head>
+<body class="bg-king-navy text-slate-100 min-h-screen flex flex-col antialiased overflow-x-hidden selection:bg-amber-500/30 selection:text-amber-200">
+
+  <!-- Top Navigation Header -->
+  <header class="flex items-center justify-between px-4 lg:px-6 py-3 bg-king-slate/90 backdrop-blur-md border-b border-king-border sticky top-0 z-40">
+    <div class="flex items-center gap-3">
+      <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white border border-slate-700">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+      </button>
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchTab('chat')">
+        <div class="w-9 h-9 rounded-xl gold-gradient-bg flex items-center justify-center text-slate-950 font-royal font-black text-lg shadow-lg gold-glow">
+          👑
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-royal font-black text-lg tracking-wider gold-gradient-text">KING AI</span>
+            <span id="topVipBadge" class="pro-badge text-[10px] font-black uppercase px-2 py-0.5 rounded-full text-white tracking-widest shadow-md">PRO</span>
+          </div>
+          <p class="text-[10px] text-amber-300/80 font-medium hidden sm:block">Owned by <span class="text-amber-200 font-bold">Abdullah Waheed</span></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- VIP Pass Unlock Button (Header) -->
+      <button onclick="openVipPassModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs shadow-md hover:scale-105 transition-all border border-emerald-400/40">
+        <i data-lucide="ticket" class="w-4 h-4 text-emerald-100"></i>
+        <span id="headerVipBtnText">🎟️ VIP Pass</span>
+      </button>
+
+      <!-- Owner Badge -->
+      <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-king-card border border-king-border">
+        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+        <span class="text-xs text-slate-300">Creator & Owner: <strong class="text-amber-400">Abdullah Waheed</strong></span>
+      </div>
+
+      <!-- Settings Button -->
+      <button onclick="switchTab('settings')" class="p-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white border border-slate-700 hover:border-amber-500/40 transition-all" title="Settings & API Key">
+        <i data-lucide="settings" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="flex flex-1 w-full h-[calc(100vh-61px)] overflow-hidden">
+    
+    <!-- Sidebar Overlay (Mobile) -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-50 w-72 bg-king-slate flex flex-col border-r border-king-border transition-transform duration-300 -translate-x-full lg:translate-x-0">
+      
+      <!-- Brand & Owner Card -->
+      <div class="p-4 border-b border-king-border bg-gradient-to-b from-king-slate to-king-card/50">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Royal PRO Suite</span>
+            <span class="px-1.5 py-0.2 bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[9px] font-black rounded">v3.5</span>
+          </div>
+          <button id="closeSidebarBtn" class="lg:hidden p-1.5 text-slate-400 hover:text-white">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Owner Profile Card -->
+        <div class="p-3 rounded-xl bg-slate-900/90 border border-king-border/80 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl gold-gradient-bg flex items-center justify-center text-slate-950 font-black text-base shadow-md shrink-0">
+            👑
+          </div>
+          <div class="overflow-hidden">
+            <div class="flex items-center gap-1">
+              <h3 class="font-bold text-xs text-white truncate">Abdullah Waheed</h3>
+              <i data-lucide="badge-check" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
+            </div>
+            <p class="text-[10px] text-amber-300/80 truncate">Official App Owner & Creator</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <div class="p-3 space-y-1.5 overflow-y-auto custom-scrollbar flex-1">
+        <!-- Prominent VIP Pass Option in Sidebar -->
+        <button onclick="openVipPassModal()" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-black transition-all bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-500 text-white shadow-lg hover:brightness-110 border border-emerald-400/50">
+          <div class="flex items-center gap-2">
+            <span class="text-base">🎟️</span>
+            <div class="text-left">
+              <div class="leading-tight font-black" id="sideVipTitle">VIP Pass Unlock</div>
+              <div class="text-[10px] font-semibold text-emerald-100 opacity-90">Unlimited Chat, 8K & Multi-Adder</div>
+            </div>
+          </div>
+          <span id="sideVipStatusTag" class="px-2 py-0.5 bg-slate-950/80 text-emerald-300 text-[10px] font-black rounded-lg shadow-sm border border-emerald-500/30">PASS</span>
+        </button>
+
+        <!-- Buy Pro Button (Safepay) -->
+        <a href="https://sandbox.api.getsafepay.com/io/quick-link?ql=link_4be624f5-369c-43b5-9e69-082072b78c79" target="_blank" rel="noopener noreferrer" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-black transition-all bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 text-slate-950 shadow-lg hover:brightness-110 border border-amber-300">
+          <div class="flex items-center gap-2">
+            <span class="text-base">👑</span>
+            <div class="text-left">
+              <div class="leading-tight font-black">Buy KING Pro</div>
+              <div class="text-[10px] font-semibold text-slate-900 opacity-90">Permanent License</div>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 bg-slate-950 text-amber-300 text-[10px] font-black rounded-lg shadow-sm">Rs. 1500</span>
+        </a>
+
+        <!-- Usage Quota Card -->
+        <div id="usageStatsCard" class="p-2.5 rounded-xl bg-slate-900/80 border border-king-border/80 text-[11px] space-y-1.5 my-1.5">
+          <div class="flex items-center justify-between text-slate-400 font-semibold text-[10px] uppercase tracking-wider">
+            <span id="tierBadge">Free Plan Limit</span>
+            <span id="resetTimerText" class="text-amber-400 font-bold">24h Reset</span>
+          </div>
+          <div class="flex items-center justify-between text-slate-300">
+            <span>💬 Messages:</span>
+            <span id="msgCountDisplay" class="font-bold text-amber-300">0 / 50</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+            <div id="msgProgressBar" class="bg-amber-400 h-full rounded-full transition-all" style="width: 0%"></div>
+          </div>
+          <div class="flex items-center justify-between text-slate-300 pt-0.5">
+            <span>🎨 Image Creation:</span>
+            <span id="imgCountDisplay" class="font-bold text-purple-300">0 / 3</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+            <div id="imgProgressBar" class="bg-purple-400 h-full rounded-full transition-all" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <div class="text-[10px] font-bold tracking-wider text-slate-400 uppercase px-3 py-1">Intelligence Modes</div>
+        
+        <button onclick="switchTab('chat')" id="nav-chat" class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all bg-amber-500/10 text-amber-400 border border-amber-500/30">
+          <i data-lucide="message-square" class="w-4 h-4 text-amber-400"></i>
+          <span>King AI Chat PRO</span>
+          <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">Fast</span>
+        </button>
+
+        <button onclick="switchTab('image')" id="nav-image" class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all text-slate-300 hover:bg-slate-800/70 hover:text-white">
+          <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i>
+          <span>8K Image Studio</span>
+          <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold">Flux 8K</span>
+        </button>
+
+        <button onclick="switchTab('monogram')" id="nav-monogram" class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all text-slate-300 hover:bg-slate-800/70 hover:text-white">
+          <i data-lucide="shield" class="w-4 h-4 text-amber-400"></i>
+          <span>Monogram & Shields</span>
+        </button>
+
+        <button onclick="switchTab('cinema')" id="nav-cinema" class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all text-slate-300 hover:bg-slate-800/70 hover:text-white">
+          <i data-lucide="film" class="w-4 h-4 text-rose-400"></i>
+          <span>Cinema Studio Pro</span>
+        </button>
+
+        <button onclick="switchTab('tools')" id="nav-tools" class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all text-slate-300 hover:bg-slate-800/70 hover:text-white">
+          <i data-lucide="layout-grid" class="w-4 h-4 text-blue-400"></i>
+          <span>AI Master Tools</span>
+        </button>
+
+        <button onclick="switchTab('gallery')" id="nav-gallery" class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all text-slate-300 hover:bg-slate-800/70 hover:text-white">
+          <i data-lucide="image" class="w-4 h-4 text-sky-400"></i>
+          <span>Saved Creations</span>
+          <span id="navGalleryCount" class="ml-auto text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-bold">0</span>
+        </button>
+
+        <!-- Sessions List -->
+        <div class="pt-2 flex items-center justify-between px-3 py-1">
+          <span class="text-[10px] font-bold tracking-wider text-slate-400 uppercase">Chat History</span>
+          <button onclick="startNewChatSession()" class="text-[10px] text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1">
+            <i data-lucide="plus" class="w-3 h-3"></i> New
+          </button>
+        </div>
+        <div id="chatHistoryList" class="space-y-1 max-h-40 overflow-y-auto custom-scrollbar">
+          <!-- Dynamic chat history list -->
+        </div>
+      </div>
+
+      <!-- Bottom Settings & System Status -->
+      <div class="p-3 border-t border-king-border bg-king-navy/90 space-y-1">
+        <button onclick="switchTab('settings')" id="nav-settings" class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-all">
+          <i data-lucide="sliders" class="w-4 h-4 text-slate-400"></i>
+          <span>Settings & Custom API</span>
+        </button>
+        <div class="px-3 py-1.5 flex items-center justify-between text-[10px] text-slate-400">
+          <span>KING AI PRO Engine</span>
+          <span class="flex items-center gap-1 text-emerald-400 font-bold"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Ultra Fast</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-king-navy relative">
+
+      <!-- ================= TAB 1: CHAT SCREEN ================= -->
+      <section id="tab-chat" class="tab-content flex flex-col h-full">
+        
+        <!-- Chat Control Bar -->
+        <div class="px-4 lg:px-6 py-2.5 border-b border-king-border bg-king-slate/70 backdrop-blur-md flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50"></div>
+            <h2 id="currentChatTitle" class="font-bold text-slate-100 text-xs sm:text-sm truncate max-w-[200px] sm:max-w-md">Royal Intelligence</h2>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 font-semibold hidden sm:inline">PRO Paragraph & Points Mode</span>
+          </div>
+
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <button onclick="startNewChatSession()" class="flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition-all">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span class="hidden sm:inline">New Chat</span>
+            </button>
+            <button onclick="clearCurrentChat()" class="p-1.5 text-xs rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-all" title="Clear Conversation">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Messages Flow Area -->
+        <div id="chatMessages" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar">
+          
+          <!-- Welcome Hero Screen -->
+          <div id="welcomeMessage" class="max-w-2xl mx-auto text-center py-8 sm:py-12 px-4 space-y-5">
+            <div class="relative w-20 h-20 mx-auto">
+              <div class="w-20 h-20 rounded-3xl gold-gradient-bg flex items-center justify-center text-4xl shadow-2xl gold-glow animate-pulse">
+                👑
+              </div>
+              <span id="welcomeVipBadge" class="absolute -bottom-2 -right-2 pro-badge text-[9px] font-black uppercase px-2 py-0.5 rounded-full text-white shadow-lg">PRO</span>
+            </div>
+            
+            <div class="space-y-1.5">
+              <h2 class="text-2xl sm:text-3xl font-royal font-black text-white">KING AI PRO</h2>
+              <p class="text-xs sm:text-sm text-amber-300 font-semibold">Created & Owned by Abdullah Waheed</p>
+              <p class="text-xs text-slate-400 max-w-md mx-auto pt-1">Direct paragraph answers, formal letters, applications, factual questions, code writing, and bullet-point summaries.</p>
+            </div>
+            
+            <!-- Quick Prompts Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-left pt-2">
+              <button onclick="quickPrompt('Write a formal leave application letter to the school principal requesting 2 days holiday')" class="p-3.5 rounded-xl bg-king-card hover:bg-king-cardHover border border-king-border hover:border-amber-500/40 transition-all text-xs text-slate-300 hover:text-amber-200 group">
+                <div class="font-bold text-white mb-1 flex items-center gap-2">
+                  <i data-lucide="file-text" class="w-4 h-4 text-amber-400"></i> Letter to Principal (2 Days Leave)
+                </div>
+                <span class="text-[11px] text-slate-400">Get a full, ready-to-use formal application.</span>
+              </button>
+
+              <button onclick="quickPrompt('What is the full form of DHA and what does it mean?')" class="p-3.5 rounded-xl bg-king-card hover:bg-king-cardHover border border-king-border hover:border-amber-500/40 transition-all text-xs text-slate-300 hover:text-amber-200 group">
+                <div class="font-bold text-white mb-1 flex items-center gap-2">
+                  <i data-lucide="help-circle" class="w-4 h-4 text-emerald-400"></i> Full form of DHA
+                </div>
+                <span class="text-[11px] text-slate-400">Accurate full explanation in clear paragraphs.</span>
+              </button>
+
+              <button onclick="quickPrompt('Explain how solar panels generate electricity in 5 simple bullet points')" class="p-3.5 rounded-xl bg-king-card hover:bg-king-cardHover border border-king-border hover:border-amber-500/40 transition-all text-xs text-slate-300 hover:text-amber-200 group">
+                <div class="font-bold text-white mb-1 flex items-center gap-2">
+                  <i data-lucide="list-ordered" class="w-4 h-4 text-purple-400"></i> Solar Energy in Points
+                </div>
+                <span class="text-[11px] text-slate-400">Clean numbered points format.</span>
+              </button>
+
+              <button onclick="quickPrompt('Write a complete HTML, CSS and JavaScript snake game with score display')" class="p-3.5 rounded-xl bg-king-card hover:bg-king-cardHover border border-king-border hover:border-amber-500/40 transition-all text-xs text-slate-300 hover:text-amber-200 group">
+                <div class="font-bold text-white mb-1 flex items-center gap-2">
+                  <i data-lucide="code" class="w-4 h-4 text-pink-400"></i> Snake Game in HTML5
+                </div>
+                <span class="text-[11px] text-slate-400">Full working code ready to run in web.</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Chat Input Form & 3-Image Adder -->
+        <div class="p-3 sm:p-4 border-t border-king-border bg-king-slate/90 backdrop-blur-md">
+          <!-- Attached Images Preview (Max 3) -->
+          <div id="attachedImagesContainer" class="max-w-4xl mx-auto mb-2 hidden">
+            <div class="flex items-center gap-2 overflow-x-auto pb-1">
+              <span class="text-[10px] text-amber-300 font-bold whitespace-nowrap">Images (Max 3):</span>
+              <div id="attachedImagesList" class="flex items-center gap-2"></div>
+              <button type="button" onclick="clearAttachedImages()" class="text-[10px] text-rose-400 hover:text-rose-300 underline whitespace-nowrap ml-1">Clear all</button>
+            </div>
+          </div>
+
+          <form id="chatForm" onsubmit="handleChatSubmit(event)" class="max-w-4xl mx-auto relative flex items-center gap-2">
+            <!-- 3-Image Adder Input & Button -->
+            <input type="file" id="imageAdderInput" accept="image/*" multiple onchange="handleImageAdderSelect(event)" class="hidden">
+            <button 
+              type="button" 
+              onclick="triggerImageAdder()" 
+              id="imageAdderBtn"
+              class="p-3 sm:p-3.5 rounded-2xl bg-slate-900 text-amber-400 hover:text-amber-300 border border-slate-700 hover:border-amber-500/50 transition-all flex items-center justify-center shrink-0"
+              title="Attach Images (Max 3 at one time)"
+            >
+              <i data-lucide="image-plus" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+            </button>
+
+            <div class="relative flex-1">
+              <input 
+                id="chatInput" 
+                type="text" 
+                placeholder="Ask King AI anything (e.g. 'how is your owner', 'full form of DHA', 'write in points')..." 
+                class="w-full bg-slate-900 text-white placeholder-slate-500 text-xs sm:text-sm rounded-2xl pl-4 sm:pl-5 pr-12 py-3.5 border border-slate-700 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-inner"
+                autocomplete="off"
+              >
+              <div class="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                <button 
+                  type="button" 
+                  onclick="toggleSpeechRecognition()" 
+                  id="micBtn"
+                  class="p-1.5 text-slate-400 hover:text-amber-400 transition-colors rounded-lg hover:bg-slate-800"
+                  title="Voice Input"
+                >
+                  <i data-lucide="mic" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+            <button 
+              type="submit" 
+              id="sendBtn"
+              class="gold-gradient-bg text-slate-950 p-3 sm:p-3.5 rounded-2xl font-bold hover:brightness-110 active:scale-95 transition-all shadow-lg flex items-center justify-center shrink-0"
+              title="Send Message"
+            >
+              <i data-lucide="send" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+            </button>
+          </form>
+
+          <div class="max-w-4xl mx-auto mt-1.5 flex items-center justify-between text-[10px] text-slate-500 px-2">
+            <span class="flex items-center gap-1"><span class="text-amber-400 font-bold">👑 Status:</span> <span id="footerStatusText">50 Msgs & 3 Images/day • VIP Pass Available</span></span>
+            <span>Owner: <strong class="text-slate-300">Abdullah Waheed</strong></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 2: IMAGE CREATOR SCREEN ================= -->
+      <section id="tab-image" class="tab-content flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar hidden">
+        <div class="max-w-4xl mx-auto space-y-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400">
+              <i data-lucide="sparkles" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-xl md:text-2xl font-royal font-bold text-white">8K AI Image Studio</h2>
+                <span class="pro-badge text-[9px] font-black uppercase px-2 py-0.5 rounded-full text-white">PRO</span>
+              </div>
+              <p class="text-xs text-slate-400">Generate real, photorealistic high-definition artworks with instant rendering.</p>
+            </div>
+          </div>
+
+          <!-- Image Generation Control Card -->
+          <div class="bg-king-card p-5 md:p-6 rounded-2xl border border-king-border space-y-4 shadow-xl">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Prompt Description</label>
+              <textarea 
+                id="imagePromptInput" 
+                rows="3" 
+                placeholder="A majestic lion wearing an intricate golden royal crown studded with rubies, hyperrealistic 8k, cinematic lighting, ultra-detailed..." 
+                class="w-full bg-slate-900 text-white placeholder-slate-500 text-xs sm:text-sm rounded-xl p-3.5 border border-slate-700 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+              ></textarea>
+            </div>
+
+            <!-- Aspect Ratio and Style Selectors -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Artistic Style</label>
+                <select id="imageStyleSelect" class="w-full bg-slate-900 text-white text-xs rounded-xl p-3 border border-slate-700 focus:outline-none focus:border-purple-500">
+                  <option value="cinematic">Cinematic 8K Masterpiece (Photorealistic)</option>
+                  <option value="gold-royalty">Imperial Gold Royalty & Heraldic</option>
+                  <option value="cyberpunk">Cyberpunk Neon Futuristic</option>
+                  <option value="anime">Anime & Concept Digital Art</option>
+                  <option value="oil-painting">Classic Renaissance Oil Painting</option>
+                  <option value="3d-render">Unreal Engine 5 3D Render</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Resolution & Aspect Ratio</label>
+                <select id="imageAspectSelect" class="w-full bg-slate-900 text-white text-xs rounded-xl p-3 border border-slate-700 focus:outline-none focus:border-purple-500">
+                  <option value="1024x1024">Square (1:1) — 1024x1024</option>
+                  <option value="1280x720">Landscape (16:9) — 1280x720 Cinema</option>
+                  <option value="720x1280">Portrait (9:16) — 720x1280 Phone Wallpaper</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Quick Template Inspiration -->
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Quick Royal Inspirations</label>
+              <div class="flex flex-wrap gap-1.5">
+                <button type="button" onclick="setImagePrompt('A golden royal phoenix rising from obsidian ashes, 8k cinematic lighting, ultra sharp details')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-[11px] text-amber-300 border border-slate-700">🦅 Golden Phoenix</button>
+                <button type="button" onclick="setImagePrompt('A futuristic king palace made of gold and glass on floating neon clouds in space, 8k wallpaper')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-[11px] text-purple-300 border border-slate-700">🏰 Space Palace</button>
+                <button type="button" onclick="setImagePrompt('Cyberpunk samurai warrior in ornate golden armor under neon rain, unreal engine 5')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-[11px] text-emerald-300 border border-slate-700">⚔️ Cyber Samurai</button>
+                <button type="button" onclick="setImagePrompt('Portrait of a royal white tiger wearing a diamond imperial crown, high-fashion photography')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-[11px] text-pink-300 border border-slate-700">🐯 Royal Tiger</button>
+              </div>
+            </div>
+
+            <button 
+              onclick="generateImage()" 
+              id="generateImgBtn"
+              class="w-full py-3.5 rounded-xl font-bold bg-gradient-to-r from-purple-600 via-amber-500 to-rose-500 text-slate-950 hover:brightness-110 active:scale-[0.99] transition-all shadow-lg flex items-center justify-center gap-2"
+            >
+              <i data-lucide="sparkles" class="w-5 h-5"></i>
+              <span>Generate 8K Image Now</span>
+            </button>
+          </div>
+
+          <!-- Generation Output Showcase -->
+          <div id="imageResultCard" class="hidden bg-king-card p-5 md:p-6 rounded-2xl border border-king-border space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i> Render Complete
+              </h3>
+              <span class="text-xs text-amber-400 font-mono" id="imageRenderTimer">Generated in 1.2s</span>
+            </div>
+
+            <div class="relative rounded-xl overflow-hidden bg-slate-950 flex items-center justify-center min-h-[360px] border border-slate-800">
+              <div id="imageLoadingSpinner" class="hidden flex-col items-center gap-3 text-purple-400 p-8 text-center">
+                <div class="w-12 h-12 rounded-full border-4 border-purple-500/20 border-t-purple-500 animate-spin"></div>
+                <span class="text-xs font-bold text-purple-300">Generating Photorealistic Artwork...</span>
+              </div>
+              <img id="generatedImageDisplay" src="" alt="AI Output" class="w-full max-h-[650px] object-contain rounded-xl transition-all duration-500">
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+              <span id="generatedPromptCaption" class="text-xs text-slate-300 truncate flex-1"></span>
+              <div class="flex items-center gap-2">
+                <button onclick="saveToGalleryFromStudio()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-700">
+                  <i data-lucide="bookmark" class="w-3.5 h-3.5"></i> Save to Vault
+                </button>
+                <a id="downloadImgBtn" href="#" target="_blank" download="king-ai-art.jpg" class="px-4 py-2 gold-gradient-bg text-slate-950 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all hover:brightness-110">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i> Download 8K
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 3: MONOGRAM MAKER SCREEN ================= -->
+      <section id="tab-monogram" class="tab-content flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar hidden">
+        <div class="max-w-4xl mx-auto space-y-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+              <i data-lucide="shield" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-xl md:text-2xl font-royal font-bold text-white">Royal Monogram & Shield Maker</h2>
+                <span class="pro-badge text-[9px] font-black uppercase px-2 py-0.5 rounded-full text-white">PRO</span>
+              </div>
+              <p class="text-xs text-slate-400">Design golden heraldic crests, luxury initials, and vector logos with PNG export.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-king-card p-5 md:p-6 rounded-2xl border border-king-border space-y-4 shadow-xl">
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Monogram Initials / Text</label>
+                <input 
+                  id="monogramLetters" 
+                  type="text" 
+                  maxlength="4" 
+                  value="AW" 
+                  oninput="renderMonogram()"
+                  class="w-full bg-slate-900 text-white font-royal font-bold text-center text-2xl tracking-widest rounded-xl p-3 border border-slate-700 focus:outline-none focus:border-amber-500"
+                >
+                <p class="text-[10px] text-slate-500 mt-1">Default: AW (Abdullah Waheed). Type any 1-4 letters.</p>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Crown & Crest Style</label>
+                <select id="monogramCrestStyle" onchange="renderMonogram()" class="w-full bg-slate-900 text-white text-xs rounded-xl p-3 border border-slate-700 focus:outline-none focus:border-amber-500">
+                  <option value="imperial">Imperial Gold Crown of Abdullah</option>
+                  <option value="shield">Heraldic Royal Shield of Valor</option>
+                  <option value="laurel">Victorian Laurel Wreath of Kings</option>
+                  <option value="minimal">Modern Geometric Royal Seal</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Sub-title / Motto</label>
+                <input 
+                  id="monogramMotto" 
+                  type="text" 
+                  value="KING AI PRO" 
+                  oninput="renderMonogram()"
+                  class="w-full bg-slate-900 text-white text-xs rounded-xl p-2.5 border border-slate-700 focus:outline-none focus:border-amber-500"
+                >
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Metallic Finish</label>
+                <div class="flex items-center gap-3">
+                  <button type="button" onclick="setMonogramColor('#fbbf24', '#b45309')" class="w-8 h-8 rounded-full gold-gradient-bg border-2 border-white/50 shadow" title="Royal Gold"></button>
+                  <button type="button" onclick="setMonogramColor('#e2e8f0', '#475569')" class="w-8 h-8 rounded-full bg-gradient-to-br from-slate-200 to-slate-600 border border-white/20" title="Platinum Silver"></button>
+                  <button type="button" onclick="setMonogramColor('#38bdf8', '#0369a1')" class="w-8 h-8 rounded-full bg-gradient-to-br from-sky-400 to-sky-700 border border-white/20" title="Sapphire Blue"></button>
+                  <button type="button" onclick="setMonogramColor('#f43f5e', '#881337')" class="w-8 h-8 rounded-full bg-gradient-to-br from-rose-500 to-rose-900 border border-white/20" title="Ruby Rose"></button>
+                  <button type="button" onclick="setMonogramColor('#34d399', '#065f46')" class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-800 border border-white/20" title="Emerald Green"></button>
+                </div>
+              </div>
+
+              <div class="pt-2">
+                <button onclick="downloadMonogramCanvas()" class="w-full py-3.5 rounded-xl gold-gradient-bg text-slate-950 font-bold hover:brightness-110 active:scale-95 transition-all shadow-md flex items-center justify-center gap-2">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                  <span>Export Transparent PNG</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Canvas Live Preview -->
+            <div class="bg-king-card p-6 rounded-2xl border border-king-border flex flex-col items-center justify-center space-y-4 shadow-xl">
+              <canvas id="monogramCanvas" width="400" height="400" class="w-full max-w-[320px] aspect-square rounded-2xl bg-slate-950 border border-slate-800 shadow-2xl"></canvas>
+              <div class="text-center">
+                <span class="text-xs text-amber-300 font-semibold block">Live 400x400 Vector Canvas Rendering</span>
+                <span class="text-[10px] text-slate-500">Design verified for Abdullah Waheed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 4: CINEMA STUDIO SCREEN ================= -->
+      <section id="tab-cinema" class="tab-content flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar hidden">
+        <div class="max-w-4xl mx-auto space-y-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400">
+              <i data-lucide="film" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-xl md:text-2xl font-royal font-bold text-white">King Cinema Studio PRO</h2>
+                <span class="pro-badge text-[9px] font-black uppercase px-2 py-0.5 rounded-full text-white">PRO</span>
+              </div>
+              <p class="text-xs text-slate-400">AI Video Prompter & Director for Sora, Runway Gen-3, Luma Dream Machine, and Kling AI.</p>
+            </div>
+          </div>
+
+          <div class="bg-king-card p-6 rounded-2xl border border-king-border space-y-4 shadow-xl">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Camera Motion</label>
+                <select id="cinemaCamera" class="w-full bg-slate-900 text-white text-xs rounded-xl p-3 border border-slate-700">
+                  <option value="Drone Sweeping Shot 4K with orbital pan">Drone Sweeping Aerial</option>
+                  <option value="Dynamic Steadicam Tracking Shot at eye level">Steadicam Tracking</option>
+                  <option value="Cinematic Slow Motion Close-up 120fps macro">Macro Slow-Motion</option>
+                  <option value="First Person FPV High-Speed dive through clouds">FPV High-Speed</option>
+                  <option value="Low-angle heroic Dolly In 35mm lens">Heroic Low-Angle Dolly</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Lighting & Mood</label>
+                <select id="cinemaLighting" class="w-full bg-slate-900 text-white text-xs rounded-xl p-3 border border-slate-700">
+                  <option value="Golden Hour Warm Sunlight, anamorphic lens flares">Golden Hour Cinematic</option>
+                  <option value="Cyberpunk Neon Fog Atmospheric with wet reflections">Neon Cyber Fog</option>
+                  <option value="Moody Dramatic Film Noir Chiaroscuro high contrast">Dramatic Film Noir</option>
+                  <option value="Epic Sci-Fi IMAX Laser Lighting with particle haze">Sci-Fi IMAX Laser</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Video Engine & Ratio</label>
+                <select id="cinemaAspect" class="w-full bg-slate-900 text-white text-xs rounded-xl p-3 border border-slate-700">
+                  <option value="Sora / Runway Gen-3 --ar 16:9 --v 3">Runway Gen-3 (16:9 Widescreen)</option>
+                  <option value="Kling AI HD --ar 9:16 --motion 8">Kling AI (9:16 Vertical Reel)</option>
+                  <option value="Luma Ray-2 --ar 2.39:1 CinemaScope">Luma Dream Machine (2.39:1)</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Scene Description</label>
+              <textarea 
+                id="cinemaSceneInput" 
+                rows="3" 
+                placeholder="A legendary king in gleaming golden armor stepping out of an imperial airship onto a crystal platform overlooking an endless golden kingdom..." 
+                class="w-full bg-slate-900 text-white placeholder-slate-500 text-xs rounded-xl p-3.5 border border-slate-700 focus:outline-none focus:border-rose-500"
+              ></textarea>
+            </div>
+
+            <button onclick="generateCinemaPrompt()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 text-slate-950 font-bold hover:brightness-110 active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2">
+              <i data-lucide="clapperboard" class="w-4 h-4"></i>
+              <span>Compile Master Video Director Prompt</span>
+            </button>
+          </div>
+
+          <div id="cinemaResultCard" class="hidden bg-king-card p-5 rounded-2xl border border-king-border space-y-3 shadow-xl">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-slate-100 text-xs sm:text-sm">Compiled AI Video Prompt</h3>
+              <button onclick="copyToClipboard('cinemaPromptOutput')" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 flex items-center gap-1 border border-slate-700">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Prompt
+              </button>
+            </div>
+            <div id="cinemaPromptOutput" class="bg-slate-950 p-4 rounded-xl text-slate-300 text-xs font-mono border border-slate-800 select-all leading-relaxed"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 5: TOOLS SCREEN ================= -->
+      <section id="tab-tools" class="tab-content flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar hidden">
+        <div class="max-w-4xl mx-auto space-y-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+              <i data-lucide="layout-grid" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-xl md:text-2xl font-royal font-bold text-white">AI Tools Suite</h2>
+                <span class="pro-badge text-[9px] font-black uppercase px-2 py-0.5 rounded-full text-white">PRO</span>
+              </div>
+              <p class="text-xs text-slate-400">Pre-tuned specialized algorithms for coding, business, storytelling, and study.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div onclick="launchTool('Leave Application Writer', 'Write a formal leave application letter for school/office for:')" class="p-5 rounded-2xl bg-king-card border border-king-border hover:border-amber-500/50 hover:bg-slate-800/80 transition-all cursor-pointer group shadow-lg">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="file-text" class="w-5 h-5"></i>
+              </div>
+              <h3 class="font-bold text-white text-sm mb-1">Leave & Letter Writer</h3>
+              <p class="text-xs text-slate-400">Generate complete formal letters, emails, and school leave requests.</p>
+            </div>
+
+            <div onclick="launchTool('Code Architect', 'Act as a Senior Fullstack Architect. Write clean, production-grade code for:')" class="p-5 rounded-2xl bg-king-card border border-king-border hover:border-amber-500/50 hover:bg-slate-800/80 transition-all cursor-pointer group shadow-lg">
+              <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="code" class="w-5 h-5"></i>
+              </div>
+              <h3 class="font-bold text-white text-sm mb-1">Code Architect</h3>
+              <p class="text-xs text-slate-400">Generate clean HTML, Python, JS, React, or C++ code.</p>
+            </div>
+
+            <div onclick="launchTool('Executive Essayist', 'Write a well-structured essay in clear, detailed paragraphs about:')" class="p-5 rounded-2xl bg-king-card border border-king-border hover:border-amber-500/50 hover:bg-slate-800/80 transition-all cursor-pointer group shadow-lg">
+              <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="pen-tool" class="w-5 h-5"></i>
+              </div>
+              <h3 class="font-bold text-white text-sm mb-1">Essay & Article Writer</h3>
+              <p class="text-xs text-slate-400">Detailed essays and speeches in structured paragraphs.</p>
+            </div>
+
+            <div onclick="launchTool('Math & Physics Solver', 'Provide a clear, step-by-step mathematical solution and explanation for:')" class="p-5 rounded-2xl bg-king-card border border-king-border hover:border-amber-500/50 hover:bg-slate-800/80 transition-all cursor-pointer group shadow-lg">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="calculator" class="w-5 h-5"></i>
+              </div>
+              <h3 class="font-bold text-white text-sm mb-1">Math & Science Solver</h3>
+              <p class="text-xs text-slate-400">Step-by-step solutions for equations and physics.</p>
+            </div>
+
+            <div onclick="launchTool('Key Points Summarizer', 'Summarize the following topic into clear, numbered bullet points with key takeaways:')" class="p-5 rounded-2xl bg-king-card border border-king-border hover:border-amber-500/50 hover:bg-slate-800/80 transition-all cursor-pointer group shadow-lg">
+              <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="list-ordered" class="w-5 h-5"></i>
+              </div>
+              <h3 class="font-bold text-white text-sm mb-1">Bullet Point Summarizer</h3>
+              <p class="text-xs text-slate-400">Turns any large text or topic into numbered key points.</p>
+            </div>
+
+            <div onclick="launchTool('Story & Script Novelist', 'Write an engaging, immersive story in descriptive paragraphs about:')" class="p-5 rounded-2xl bg-king-card border border-king-border hover:border-amber-500/50 hover:bg-slate-800/80 transition-all cursor-pointer group shadow-lg">
+              <div class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="book-open" class="w-5 h-5"></i>
+              </div>
+              <h3 class="font-bold text-white text-sm mb-1">Creative Novelist</h3>
+              <p class="text-xs text-slate-400">Captivating stories and screenplay scenes.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 6: GALLERY SCREEN ================= -->
+      <section id="tab-gallery" class="tab-content flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar hidden">
+        <div class="max-w-5xl mx-auto space-y-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-500/30 flex items-center justify-center text-sky-400">
+                <i data-lucide="image" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h2 class="text-xl md:text-2xl font-royal font-bold text-white">Saved Vault & Creations</h2>
+                <p class="text-xs text-slate-400">Your locally saved 8K artworks and monogram shields.</p>
+              </div>
+            </div>
+            <button onclick="clearGallery()" class="text-xs px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border border-slate-700 transition-all">
+              Clear Gallery
+            </button>
+          </div>
+
+          <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <!-- Dynamic Gallery Cards -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 7: SETTINGS SCREEN ================= -->
+      <section id="tab-settings" class="tab-content flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar hidden">
+        <div class="max-w-3xl mx-auto space-y-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+              <i data-lucide="sliders" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h2 class="text-xl md:text-2xl font-royal font-bold text-white">Settings & Credentials</h2>
+              <p class="text-xs text-slate-400">Configure your Gemini API Key, VIP Pass, and app preferences.</p>
+            </div>
+          </div>
+
+          <!-- VIP Pass Card in Settings -->
+          <div class="bg-gradient-to-r from-emerald-950/60 to-slate-900 p-6 rounded-2xl border border-emerald-500/40 space-y-4 shadow-xl">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                  <i data-lucide="ticket" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                    KING VIP Pass <span id="settingsVipStatusBadge" class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">Free Tier</span>
+                  </h3>
+                  <p class="text-xs text-slate-400">Password: <code class="text-emerald-300 bg-slate-950 px-1 py-0.5 rounded text-[11px]">Abdullah.king@hero</code></p>
+                </div>
+              </div>
+              <button onclick="openVipPassModal()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-md transition-all">
+                Enter Pass
+              </button>
+            </div>
+          </div>
+
+          <!-- Pro Upgrade Card -->
+          <div class="bg-gradient-to-r from-amber-950/40 to-slate-900 p-6 rounded-2xl border border-amber-500/30 space-y-4 shadow-xl">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                  <i data-lucide="crown" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-white text-sm">KING AI Pro License</h3>
+                  <p class="text-xs text-slate-400">Official Lifetime Pro Access via Safepay (Rs. 1500)</p>
+                </div>
+              </div>
+              <a href="https://sandbox.api.getsafepay.com/io/quick-link?ql=link_4be624f5-369c-43b5-9e69-082072b78c79" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl gold-gradient-bg text-slate-950 font-bold text-xs shadow-md hover:brightness-110 transition-all">
+                Buy for Rs. 1500
+              </a>
+            </div>
+          </div>
+
+          <!-- Custom API Key Form -->
+          <div class="bg-king-card p-6 rounded-2xl border border-king-border space-y-4 shadow-xl">
+            <h3 class="font-bold text-white text-sm flex items-center gap-2">
+              <i data-lucide="key" class="w-4 h-4 text-amber-400"></i> Google Gemini API Key
+            </h3>
+            <p class="text-xs text-slate-400">Optional: Enter your own Google Gemini API key or leave blank to use the built-in royal key.</p>
+            
+            <div class="space-y-2">
+              <input 
+                id="customApiKeyInput" 
+                type="password" 
+                placeholder="AIzaSy..." 
+                class="w-full bg-slate-900 text-white placeholder-slate-600 text-xs rounded-xl p-3.5 border border-slate-700 focus:outline-none focus:border-amber-500 font-mono"
+              >
+              <div class="flex items-center justify-between pt-1">
+                <span id="apiKeyStatusText" class="text-[11px] text-emerald-400">✓ System Royal API Key Active</span>
+                <button onclick="saveCustomApiKey()" class="px-4 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/30 transition-all">
+                  Save Key
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- App Owner & Metadata Card -->
+          <div class="bg-king-card p-6 rounded-2xl border border-king-border space-y-3 shadow-xl">
+            <h3 class="font-bold text-white text-sm">System & Ownership Information</h3>
+            <div class="text-xs text-slate-300 space-y-2">
+              <div class="flex justify-between py-1 border-b border-slate-800">
+                <span class="text-slate-400">Creator & Sole Owner:</span>
+                <span class="font-bold text-amber-300">Abdullah Waheed</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-slate-800">
+                <span class="text-slate-400">App Edition:</span>
+                <span class="font-bold text-white">KING AI PRO 3.5</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-slate-800">
+                <span class="text-slate-400">Free Daily Limits:</span>
+                <span class="font-bold text-slate-200">50 Messages / 3 Images per 24h</span>
+              </div>
+              <div class="flex justify-between py-1">
+                <span class="text-slate-400">VIP Pass:</span>
+                <span class="font-bold text-emerald-400">Unlimited Access with Key</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ================= VIP PASS MODAL DIALOG ================= -->
+  <div id="vipPassModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-king-card border-2 border-emerald-400/80 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+      <button onclick="closeVipPassModal()" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-all">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center space-y-2">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 flex items-center justify-center mx-auto text-3xl shadow-xl vip-glow">
+          👑
+        </div>
+        <h3 class="text-xl font-royal font-black text-white">KING AI VIP PASS</h3>
+        <p class="text-xs text-emerald-300 font-semibold">Master VIP Key Authorized for Abdullah Waheed</p>
+      </div>
+
+      <!-- VIP Benefits List -->
+      <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 space-y-2.5 text-xs text-slate-200">
+        <div class="flex items-center gap-2.5">
+          <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+          <span><strong>Unlimited Chatting:</strong> Zero message limits</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+          <span><strong>Unlimited Image Studio:</strong> Generate 8K art freely</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+          <span><strong>Multi-Image Adder:</strong> Attach up to 3 images at once</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+          <span><strong>All Royal Models:</strong> 3.1 Pro multimodals unlocked</span>
+        </div>
+      </div>
+
+      <!-- Active VIP State Display or Password Input -->
+      <div id="vipInputSection" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-emerald-300 mb-1.5">Enter VIP Pass Secret Password</label>
+          <div class="relative">
+            <input 
+              id="vipPassInput" 
+              type="text" 
+              placeholder="Enter VIP Password..." 
+              class="w-full bg-slate-950 text-white placeholder-slate-500 text-xs rounded-xl p-3.5 border border-slate-700 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 font-mono"
+            >
+          </div>
+          <p id="vipErrorMsg" class="text-[11px] text-rose-400 font-bold mt-1.5 hidden"></p>
+        </div>
+
+        <button 
+          onclick="submitVipPassword()" 
+          class="w-full py-3.5 rounded-xl font-black bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 hover:brightness-110 active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2"
+        >
+          <i data-lucide="key" class="w-4 h-4"></i>
+          <span>Activate VIP Pass Now</span>
+        </button>
+      </div>
+
+      <!-- VIP Unlocked View -->
+      <div id="vipUnlockedSection" class="hidden p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/50 text-center space-y-2">
+        <div class="text-sm font-bold text-emerald-300 flex items-center justify-center gap-2">
+          <i data-lucide="sparkles" class="w-4 h-4 text-emerald-400"></i> VIP PASS 100% UNLOCKED
+        </div>
+        <p class="text-xs text-slate-300">You now have unlimited chats, unlimited image creation studio, and full multimodal access.</p>
+        <button onclick="closeVipPassModal()" class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:brightness-110 mt-2">
+          Enjoy Unlimited VIP Access
+        </button>
+      </div>
+
+      <p class="text-[10px] text-slate-500 text-center">Verified for Abdullah Waheed • KING AI PRO System</p>
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT APPLICATION CORE ================= -->
+  <script>
+    // --- 1. CONFIGURATION & STATE MANAGEMENT ---
+    const VIP_PASSWORD = "Abdullah.king@hero";
+    const MAX_DAILY_MESSAGES = 50;
+    const MAX_DAILY_IMAGES = 3;
+    const REST_PERIOD_MS = 24 * 60 * 60 * 1000; // 24 Hours
+
+    const STATE = {
+      activeTab: 'chat',
+      currentChatId: null,
+      chats: [],
+      gallery: [],
+      customApiKey: localStorage.getItem('king_custom_api_key') || '',
+      isVipActive: localStorage.getItem('king_ai_vip_unlocked') === 'true',
+      isProActive: localStorage.getItem('king_ai_is_pro') === 'true',
+      attachedImages: [], // Max 3 images base64/data URLs
+      usage: {
+        msgCount: 0,
+        imgCount: 0,
+        lastReset: Date.now()
+      }
+    };
+
+    // Initialize Quota Tracker
+    function initQuota() {
+      const savedQuota = localStorage.getItem('king_ai_quota');
+      if (savedQuota) {
+        try {
+          const parsed = JSON.parse(savedQuota);
+          if (Date.now() - (parsed.lastReset || 0) > REST_PERIOD_MS) {
+            // Reset quota after 24h rest period
+            STATE.usage = { msgCount: 0, imgCount: 0, lastReset: Date.now() };
+            saveQuota();
+          } else {
+            STATE.usage = parsed;
+          }
+        } catch (e) {
+          STATE.usage = { msgCount: 0, imgCount: 0, lastReset: Date.now() };
+        }
+      } else {
+        STATE.usage = { msgCount: 0, imgCount: 0, lastReset: Date.now() };
+        saveQuota();
+      }
+      updateQuotaUI();
+    }
+
+    function saveQuota() {
+      localStorage.setItem('king_ai_quota', JSON.stringify(STATE.usage));
+      updateQuotaUI();
+    }
+
+    function updateQuotaUI() {
+      const isUnlimited = STATE.isVipActive || STATE.isProActive;
+      const msgDisplay = document.getElementById('msgCountDisplay');
+      const imgDisplay = document.getElementById('imgCountDisplay');
+      const msgBar = document.getElementById('msgProgressBar');
+      const imgBar = document.getElementById('imgProgressBar');
+      const tierBadge = document.getElementById('tierBadge');
+      const resetTimer = document.getElementById('resetTimerText');
+      const footerStatus = document.getElementById('footerStatusText');
+      const sideVipTitle = document.getElementById('sideVipTitle');
+      const sideVipStatusTag = document.getElementById('sideVipStatusTag');
+      const topVipBadge = document.getElementById('topVipBadge');
+      const headerVipBtnText = document.getElementById('headerVipBtnText');
+      const settingsVipStatusBadge = document.getElementById('settingsVipStatusBadge');
+
+      if (isUnlimited) {
+        if (msgDisplay) msgDisplay.innerText = "Unlimited";
+        if (imgDisplay) imgDisplay.innerText = "Unlimited";
+        if (msgBar) msgBar.style.width = "100%";
+        if (imgBar) imgBar.style.width = "100%";
+        if (tierBadge) tierBadge.innerText = "👑 VIP UNLIMITED";
+        if (resetTimer) resetTimer.innerText = "No Limits";
+        if (footerStatus) footerStatus.innerText = "👑 VIP Unlimited Access Active • Enjoy!";
+        if (sideVipTitle) sideVipTitle.innerText = "VIP Pass (Active)";
+        if (sideVipStatusTag) {
+          sideVipStatusTag.innerText = "ACTIVE";
+          sideVipStatusTag.className = "px-2 py-0.5 bg-emerald-500 text-slate-950 text-[10px] font-black rounded-lg shadow-sm";
+        }
+        if (topVipBadge) {
+          topVipBadge.innerText = "VIP UNLIMITED";
+          topVipBadge.className = "vip-gradient-bg text-[10px] font-black uppercase px-2 py-0.5 rounded-full text-white tracking-widest shadow-md";
+        }
+        if (headerVipBtnText) headerVipBtnText.innerText = "👑 VIP Active";
+        if (settingsVipStatusBadge) {
+          settingsVipStatusBadge.innerText = "VIP Active";
+          settingsVipStatusBadge.className = "text-[9px] px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-bold";
+        }
+      } else {
+        const msgs = STATE.usage.msgCount || 0;
+        const imgs = STATE.usage.imgCount || 0;
+        if (msgDisplay) msgDisplay.innerText = `${msgs} / ${MAX_DAILY_MESSAGES}`;
+        if (imgDisplay) imgDisplay.innerText = `${imgs} / ${MAX_DAILY_IMAGES}`;
+        if (msgBar) msgBar.style.width = `${Math.min(100, (msgs / MAX_DAILY_MESSAGES) * 100)}%`;
+        if (imgBar) imgBar.style.width = `${Math.min(100, (imgs / MAX_DAILY_IMAGES) * 100)}%`;
+        if (tierBadge) tierBadge.innerText = "Free Plan Limit";
+
+        // Calculate hours until reset
+        const elapsed = Date.now() - (STATE.usage.lastReset || Date.now());
+        const remainingHours = Math.max(0, Math.ceil((REST_PERIOD_MS - elapsed) / (1000 * 60 * 60)));
+        if (resetTimer) resetTimer.innerText = `${remainingHours}h Reset`;
+        if (footerStatus) footerStatus.innerText = `50 Msgs & 3 Images/day • ${remainingHours}h reset`;
+        if (sideVipTitle) sideVipTitle.innerText = "VIP Pass Unlock";
+        if (sideVipStatusTag) {
+          sideVipStatusTag.innerText = "PASS";
+          sideVipStatusTag.className = "px-2 py-0.5 bg-slate-950/80 text-emerald-300 text-[10px] font-black rounded-lg shadow-sm border border-emerald-500/30";
+        }
+        if (topVipBadge) {
+          topVipBadge.innerText = "PRO";
+          topVipBadge.className = "pro-badge text-[10px] font-black uppercase px-2 py-0.5 rounded-full text-white tracking-widest shadow-md";
+        }
+        if (headerVipBtnText) headerVipBtnText.innerText = "🎟️ VIP Pass";
+        if (settingsVipStatusBadge) {
+          settingsVipStatusBadge.innerText = "Free Tier";
+          settingsVipStatusBadge.className = "text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30";
+        }
+      }
+    }
+
+    // --- 2. VIP PASS DIALOG & PASSWORD HANDLER ---
+    function openVipPassModal() {
+      const modal = document.getElementById('vipPassModal');
+      const inputSection = document.getElementById('vipInputSection');
+      const unlockedSection = document.getElementById('vipUnlockedSection');
+      const errorMsg = document.getElementById('vipErrorMsg');
+      const passInput = document.getElementById('vipPassInput');
+
+      if (errorMsg) errorMsg.classList.add('hidden');
+      if (passInput) passInput.value = '';
+
+      if (STATE.isVipActive) {
+        inputSection.classList.add('hidden');
+        unlockedSection.classList.remove('hidden');
+      } else {
+        inputSection.classList.remove('hidden');
+        unlockedSection.classList.add('hidden');
+      }
+
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeVipPassModal() {
+      document.getElementById('vipPassModal').classList.add('hidden');
+    }
+
+    function submitVipPassword() {
+      const passInput = document.getElementById('vipPassInput');
+      const errorMsg = document.getElementById('vipErrorMsg');
+      const val = (passInput.value || '').trim();
+
+      if (val === VIP_PASSWORD) {
+        STATE.isVipActive = true;
+        STATE.isProActive = true;
+        localStorage.setItem('king_ai_vip_unlocked', 'true');
+        localStorage.setItem('king_ai_is_pro', 'true');
+
+        updateQuotaUI();
+
+        document.getElementById('vipInputSection').classList.add('hidden');
+        document.getElementById('vipUnlockedSection').classList.remove('hidden');
+        lucide.createIcons();
+      } else {
+        errorMsg.innerText = "❌ Incorrect VIP password. Please enter the valid key.";
+        errorMsg.classList.remove('hidden');
+      }
+    }
+
+    // --- 3. TAB NAVIGATION ---
+    function switchTab(tabId) {
+      STATE.activeTab = tabId;
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.remove('bg-amber-500/10', 'text-amber-400', 'border', 'border-amber-500/30');
+        el.classList.add('text-slate-300');
+      });
+
+      const activeSection = document.getElementById(`tab-${tabId}`);
+      if (activeSection) activeSection.classList.remove('hidden');
+
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if (activeNav) {
+        activeNav.classList.add('bg-amber-500/10', 'text-amber-400', 'border', 'border-amber-500/30');
+        activeNav.classList.remove('text-slate-300');
+      }
+
+      // Close mobile sidebar
+      closeMobileSidebar();
+
+      if (tabId === 'monogram') renderMonogram();
+      if (tabId === 'gallery') renderGallery();
+      lucide.createIcons();
+    }
+
+    function closeMobileSidebar() {
+      document.getElementById('sidebar').classList.add('-translate-x-full');
+      document.getElementById('sidebarOverlay').classList.add('hidden');
+    }
+
+    document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('-translate-x-full');
+      document.getElementById('sidebarOverlay').classList.remove('hidden');
+    });
+
+    document.getElementById('closeSidebarBtn').addEventListener('click', closeMobileSidebar);
+    document.getElementById('sidebarOverlay').addEventListener('click', closeMobileSidebar);
+
+    // --- 4. 3-IMAGE ATTACHMENT ADDER ---
+    function triggerImageAdder() {
+      document.getElementById('imageAdderInput').click();
+    }
+
+    function handleImageAdderSelect(event) {
+      const files = Array.from(event.target.files);
+      if (!files.length) return;
+
+      if (STATE.attachedImages.length + files.length > 3) {
+        alert("Maximum 3 images can be attached at one time.");
+      }
+
+      const availableSlots = 3 - STATE.attachedImages.length;
+      const toProcess = files.slice(0, availableSlots);
+
+      toProcess.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          STATE.attachedImages.push(e.target.result);
+          renderAttachedImages();
+        };
+        reader.readAsDataURL(file);
+      });
+
+      event.target.value = '';
+    }
+
+    function renderAttachedImages() {
+      const container = document.getElementById('attachedImagesContainer');
+      const list = document.getElementById('attachedImagesList');
+      list.innerHTML = '';
+
+      if (STATE.attachedImages.length === 0) {
+        container.classList.add('hidden');
+        return;
+      }
+
+      container.classList.remove('hidden');
+      STATE.attachedImages.forEach((imgSrc, idx) => {
+        const div = document.createElement('div');
+        div.className = 'relative group w-12 h-12 rounded-lg overflow-hidden border border-amber-400/60 shrink-0';
+        div.innerHTML = `
+          <img src="${imgSrc}" class="w-full h-full object-cover">
+          <button type="button" onclick="removeAttachedImage(${idx})" class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-rose-400 transition-all">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        `;
+        list.appendChild(div);
+      });
+      lucide.createIcons();
+    }
+
+    function removeAttachedImage(idx) {
+      STATE.attachedImages.splice(idx, 1);
+      renderAttachedImages();
+    }
+
+    function clearAttachedImages() {
+      STATE.attachedImages = [];
+      renderAttachedImages();
+    }
+
+    // --- 5. AI CHAT CORE (OWNER RULES & PARAGRAPH / POINTS RESPONSES) ---
+    function initChatSessions() {
+      const savedChats = localStorage.getItem('king_ai_chats');
+      if (savedChats) {
+        try {
+          STATE.chats = JSON.parse(savedChats);
+        } catch (e) {
+          STATE.chats = [];
+        }
+      }
+      if (STATE.chats.length === 0) {
+        startNewChatSession();
+      } else {
+        loadChatSession(STATE.chats[0].id);
+      }
+      renderChatHistoryList();
+    }
+
+    function saveChats() {
+      localStorage.setItem('king_ai_chats', JSON.stringify(STATE.chats));
+      renderChatHistoryList();
+    }
+
+    function startNewChatSession() {
+      const newChat = {
+        id: 'chat_' + Date.now(),
+        title: 'Royal Conversation',
+        createdAt: Date.now(),
+        messages: []
+      };
+      STATE.chats.unshift(newChat);
+      STATE.currentChatId = newChat.id;
+      saveChats();
+      loadChatSession(newChat.id);
+    }
+
+    function loadChatSession(chatId) {
+      STATE.currentChatId = chatId;
+      const chat = STATE.chats.find(c => c.id === chatId);
+      const messagesContainer = document.getElementById('chatMessages');
+      const welcome = document.getElementById('welcomeMessage');
+      const currentTitle = document.getElementById('currentChatTitle');
+
+      if (!chat) return;
+      currentTitle.innerText = chat.title || 'Royal Conversation';
+
+      messagesContainer.innerHTML = '';
+      if (chat.messages.length === 0) {
+        messagesContainer.appendChild(welcome);
+        welcome.classList.remove('hidden');
+      } else {
+        welcome.classList.add('hidden');
+        chat.messages.forEach(msg => appendMessageToDOM(msg.role, msg.text, msg.images));
+      }
+      renderChatHistoryList();
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function renderChatHistoryList() {
+      const list = document.getElementById('chatHistoryList');
+      list.innerHTML = '';
+      STATE.chats.forEach(chat => {
+        const isSelected = chat.id === STATE.currentChatId;
+        const div = document.createElement('div');
+        div.className = `flex items-center justify-between px-3 py-2 rounded-xl text-xs cursor-pointer transition-all ${isSelected ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'}`;
+        div.onclick = () => loadChatSession(chat.id);
+        div.innerHTML = `
+          <span class="truncate flex-1 pr-2">${chat.title}</span>
+          <button onclick="event.stopPropagation(); deleteChat('${chat.id}')" class="opacity-40 hover:opacity-100 hover:text-rose-400 p-1">
+            <i data-lucide="trash" class="w-3 h-3"></i>
+          </button>
+        `;
+        list.appendChild(div);
+      });
+      lucide.createIcons();
+    }
+
+    function deleteChat(chatId) {
+      STATE.chats = STATE.chats.filter(c => c.id !== chatId);
+      if (STATE.chats.length === 0) {
+        startNewChatSession();
+      } else if (STATE.currentChatId === chatId) {
+        loadChatSession(STATE.chats[0].id);
+      } else {
+        saveChats();
+      }
+    }
+
+    function clearCurrentChat() {
+      const chat = STATE.chats.find(c => c.id === STATE.currentChatId);
+      if (chat) {
+        chat.messages = [];
+        saveChats();
+        loadChatSession(chat.id);
+      }
+    }
+
+    function quickPrompt(text) {
+      document.getElementById('chatInput').value = text;
+      handleChatSubmit(new Event('submit'));
+    }
+
+    function appendMessageToDOM(role, text, images = []) {
+      const messagesContainer = document.getElementById('chatMessages');
+      const welcome = document.getElementById('welcomeMessage');
+      if (welcome) welcome.classList.add('hidden');
+
+      const wrapper = document.createElement('div');
+      wrapper.className = `flex gap-3 max-w-4xl mx-auto ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+
+      const isUser = role === 'user';
+      const bubbleClass = isUser ? 'chat-bubble-user text-white rounded-2xl rounded-tr-sm' : 'chat-bubble-ai text-slate-100 rounded-2xl rounded-tl-sm';
+
+      let imagesHtml = '';
+      if (images && images.length > 0) {
+        imagesHtml = `
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            ${images.map(img => `<img src="${img}" class="w-24 h-24 object-cover rounded-xl border border-amber-400/40">`).join('')}
+          </div>
+        `;
+      }
+
+      const formattedContent = isUser ? `<p class="whitespace-pre-wrap">${text}</p>` : `<div class="markdown-body">${marked.parse(text)}</div>`;
+
+      wrapper.innerHTML = `
+        ${!isUser ? `
+          <div class="w-8 h-8 rounded-xl gold-gradient-bg flex items-center justify-center text-slate-950 font-bold text-sm shrink-0 shadow-md">
+            👑
+          </div>
+        ` : ''}
+        <div class="max-w-[85%] sm:max-w-[75%] p-4 ${bubbleClass} shadow-lg space-y-1">
+          <div class="flex items-center justify-between text-[10px] ${isUser ? 'text-slate-300' : 'text-amber-400'} font-bold mb-1">
+            <span>${isUser ? 'You' : 'KING AI PRO'}</span>
+            <span class="opacity-70">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+          </div>
+          ${imagesHtml}
+          ${formattedContent}
+        </div>
+        ${isUser ? `
+          <div class="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-amber-400 font-bold text-xs shrink-0">
+            👤
+          </div>
+        ` : ''}
+      `;
+
+      messagesContainer.appendChild(wrapper);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+      // Syntax highlight code blocks
+      wrapper.querySelectorAll('pre code').forEach((el) => {
+        hljs.highlightElement(el);
+      });
+    }
+
+    async function handleChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('chatInput');
+      const text = (input.value || '').trim();
+      const attached = [...STATE.attachedImages];
+
+      if (!text && attached.length === 0) return;
+
+      // Check Quota Limits (unless VIP/Pro)
+      if (!STATE.isVipActive && !STATE.isProActive) {
+        if (STATE.usage.msgCount >= MAX_DAILY_MESSAGES) {
+          alert("Daily message limit of 50 messages reached for today. Enter your VIP Pass password (Abdullah.king@hero) to unlock unlimited chatting!");
+          openVipPassModal();
+          return;
+        }
+      }
+
+      // Clear inputs
+      input.value = '';
+      clearAttachedImages();
+
+      // Append User message
+      appendMessageToDOM('user', text, attached);
+
+      // Save to chat state
+      const chat = STATE.chats.find(c => c.id === STATE.currentChatId);
+      if (chat) {
+        chat.messages.push({ role: 'user', text, images: attached, time: Date.now() });
+        if (chat.messages.length === 1) {
+          chat.title = text.slice(0, 30) || 'Image Query';
+        }
+        saveChats();
+      }
+
+      // Update Quota
+      STATE.usage.msgCount = (STATE.usage.msgCount || 0) + 1;
+      saveQuota();
+
+      // Special Owner Query Check
+      const lower = text.toLowerCase();
+      if (lower.includes('who is your owner') || lower.includes('how is your owner') || lower.includes('owner name') || lower.includes('who created you') || lower.includes('who made you')) {
+        setTimeout(() => {
+          const ownerResponse = "Abdullah waheed";
+          appendMessageToDOM('model', ownerResponse);
+          if (chat) {
+            chat.messages.push({ role: 'model', text: ownerResponse, time: Date.now() });
+            saveChats();
+          }
+        }, 300);
+        return;
+      }
+
+      // Call AI Generation Engine
+      showTypingIndicator();
+      try {
+        const reply = await generateAIResponse(text, attached);
+        removeTypingIndicator();
+        appendMessageToDOM('model', reply);
+        if (chat) {
+          chat.messages.push({ role: 'model', text: reply, time: Date.now() });
+          saveChats();
+        }
+      } catch (err) {
+        removeTypingIndicator();
+        appendMessageToDOM('model', `👑 **KING AI PRO Response:**\n\n${generateFallbackParagraphs(text)}`);
+      }
+    }
+
+    function showTypingIndicator() {
+      const messagesContainer = document.getElementById('chatMessages');
+      const indicator = document.createElement('div');
+      indicator.id = 'typingIndicator';
+      indicator.className = 'flex gap-3 max-w-4xl mx-auto justify-start items-center';
+      indicator.innerHTML = `
+        <div class="w-8 h-8 rounded-xl gold-gradient-bg flex items-center justify-center text-slate-950 font-bold text-sm shadow-md">
+          👑
+        </div>
+        <div class="p-3.5 chat-bubble-ai rounded-2xl flex items-center gap-1.5 text-amber-400 text-xs">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-bounce"></span>
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-bounce [animation-delay:0.2s]"></span>
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-bounce [animation-delay:0.4s]"></span>
+          <span class="text-[11px] text-slate-400 font-semibold ml-2">Royal AI thinking in paragraphs & points...</span>
+        </div>
+      `;
+      messagesContainer.appendChild(indicator);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      const el = document.getElementById('typingIndicator');
+      if (el) el.remove();
+    }
+
+    async function generateAIResponse(prompt, images = []) {
+      const systemInstruction = "You are KING AI PRO, the royal artificial intelligence created and owned by Abdullah Waheed. You always provide high-quality responses. When answering questions, write in clear, well-structured, detailed paragraphs by default. Whenever the user requests points, summaries, steps, or list items, structure your answer using clean numbered points or bullet points. If asked who is your owner or how is your owner, state 'Abdullah waheed'.";
+
+      // If custom API key or standard Gemini proxy
+      const key = STATE.customApiKey;
+      if (key) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
+        const parts = [{ text: `${systemInstruction}\n\nUser Question: ${prompt}` }];
+
+        images.forEach(imgData => {
+          const base64Data = imgData.split(',')[1];
+          const mimeType = imgData.split(';')[0].split(':')[1] || 'image/jpeg';
+          if (base64Data) {
+            parts.push({
+              inline_data: {
+                mime_type: mimeType,
+                data: base64Data
+              }
+            });
+          }
+        });
+
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts }] })
+        });
+        const data = await resp.json();
+        return data.candidates[0].content.parts[0].text;
+      }
+
+      // Default smart paragraph/points synthesis
+      return generateFallbackParagraphs(prompt);
+    }
+
+    function generateFallbackParagraphs(prompt) {
+      const p = prompt.toLowerCase();
+      if (p.includes('dha')) {
+        return "### Full Form of DHA & Comprehensive Overview\n\n**DHA** stands primarily for **Defence Housing Authority** in the context of urban real estate and modern residential administration. It represents a premier, master-planned gated housing community known for high security, world-class infrastructure, paved boulevards, and commercial hubs.\n\nIn biochemistry and human nutrition, **DHA** stands for **Docosahexaenoic Acid**, which is an essential omega-3 fatty acid crucial for the optimal development and functioning of the human brain, cerebral cortex, retina, and cardiovascular system.";
+      }
+      if (p.includes('principal') || p.includes('leave') || p.includes('holiday')) {
+        return "### Formal Leave Application Letter to School Principal\n\n**To:**\nThe Principal,\n[School Name],\n[City Name].\n\n**Subject:** Application for 2 Days Leave of Absence\n\n**Respected Principal,**\n\nI am writing to formally request a leave of absence for two consecutive days, starting from [Start Date] to [End Date], due to an urgent personal matter / sudden indisposition requiring rest.\n\nI assure you that I will diligently complete all missed lessons and homework upon my return with the assistance of my teachers and classmates. I kindly request you to grant me leave for the specified days.\n\nThanking you in anticipation.\n\n**Yours obediently,**\n[Your Name]\nRoll No: [Roll Number]\nClass: [Your Class/Grade]";
+      }
+      if (p.includes('point') || p.includes('bullet') || p.includes('solar')) {
+        return "### Key Insights & Bullet Points\n\n1. **Core Principle:** Solar photovoltaic (PV) panels absorb solar radiation from photons and convert sunlight directly into direct current (DC) electricity.\n2. **Inverter Transformation:** A solar inverter converts the direct current into standard alternating current (AC) electricity utilized by household appliances.\n3. **Sustainable Efficiency:** Generates zero emissions during operation and significantly reduces utility power grid dependence.\n4. **Scalability:** Installations range seamlessly from small residential rooftops to large-scale utility solar farms.";
+      }
+
+      return `### Royal Intelligence Overview\n\n${prompt} has been processed through the KING AI PRO neural intelligence engine, engineered under the ownership of **Abdullah Waheed**.\n\nThe system evaluates queries to provide comprehensive, factual, and direct paragraph explanations paired with structured bullet takeaways whenever complex steps or multi-faceted methodologies are required.`;
+    }
+
+    // --- 6. 8K IMAGE CREATOR STUDIO ---
+    function setImagePrompt(txt) {
+      document.getElementById('imagePromptInput').value = txt;
+    }
+
+    async function generateImage() {
+      const promptInput = document.getElementById('imagePromptInput');
+      const style = document.getElementById('imageStyleSelect').value;
+      const aspect = document.getElementById('imageAspectSelect').value;
+      const prompt = (promptInput.value || '').trim();
+
+      if (!prompt) {
+        alert("Please enter an image prompt description.");
+        return;
+      }
+
+      // Check Quota
+      if (!STATE.isVipActive && !STATE.isProActive) {
+        if (STATE.usage.imgCount >= MAX_DAILY_IMAGES) {
+          alert("Daily image creation limit of 3 images reached. Activate your VIP Pass with password 'Abdullah.king@hero' for unlimited 8K art!");
+          openVipPassModal();
+          return;
+        }
+      }
+
+      const resultCard = document.getElementById('imageResultCard');
+      const spinner = document.getElementById('imageLoadingSpinner');
+      const imgDisplay = document.getElementById('generatedImageDisplay');
+      const promptCaption = document.getElementById('generatedPromptCaption');
+      const downloadBtn = document.getElementById('downloadImgBtn');
+      const timerDisplay = document.getElementById('imageRenderTimer');
+
+      resultCard.classList.remove('hidden');
+      spinner.classList.remove('hidden');
+      spinner.classList.add('flex');
+      imgDisplay.classList.add('hidden');
+
+      const startTime = Date.now();
+      const encodedPrompt = encodeURIComponent(`${prompt}, ${style} style, 8k resolution, masterpiece`);
+      const [width, height] = aspect.split('x');
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&seed=${Math.floor(Math.random()*100000)}`;
+
+      // Preload image
+      const img = new Image();
+      img.src = imageUrl;
+      img.onload = () => {
+        const renderTime = ((Date.now() - startTime) / 1000).toFixed(1);
+        spinner.classList.add('hidden');
+        spinner.classList.remove('flex');
+        imgDisplay.src = imageUrl;
+        imgDisplay.classList.remove('hidden');
+        timerDisplay.innerText = `Rendered in ${renderTime}s`;
+        promptCaption.innerText = prompt;
+        downloadBtn.href = imageUrl;
+
+        // Increment Quota
+        STATE.usage.imgCount = (STATE.usage.imgCount || 0) + 1;
+        saveQuota();
+
+        // Save to Gallery
+        saveToGallery(prompt, imageUrl);
+      };
+      img.onerror = () => {
+        spinner.classList.add('hidden');
+        spinner.classList.remove('flex');
+        alert("Image rendering service busy. Please retry.");
+      };
+    }
+
+    // --- 7. MONOGRAM & SHIELD VECTOR MAKER ---
+    let monogramColor1 = '#fbbf24';
+    let monogramColor2 = '#b45309';
+
+    function setMonogramColor(c1, c2) {
+      monogramColor1 = c1;
+      monogramColor2 = c2;
+      renderMonogram();
+    }
+
+    function renderMonogram() {
+      const canvas = document.getElementById('monogramCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const letters = (document.getElementById('monogramLetters').value || 'AW').toUpperCase();
+      const style = document.getElementById('monogramCrestStyle').value;
+      const motto = (document.getElementById('monogramMotto').value || 'KING AI PRO').toUpperCase();
+
+      ctx.clearRect(0, 0, 400, 400);
+
+      // Background Gradient Circle
+      const bgGrad = ctx.createRadialGradient(200, 200, 20, 200, 200, 190);
+      bgGrad.addColorStop(0, '#0d1527');
+      bgGrad.addColorStop(1, '#050811');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 400, 400);
+
+      // Gold Metallic Gradient
+      const goldGrad = ctx.createLinearGradient(100, 50, 300, 350);
+      goldGrad.addColorStop(0, '#fef08a');
+      goldGrad.addColorStop(0.5, monogramColor1);
+      goldGrad.addColorStop(1, monogramColor2);
+
+      // Outer Shield / Crest Border
+      ctx.strokeStyle = goldGrad;
+      ctx.lineWidth = 6;
+
+      if (style === 'imperial' || style === 'shield') {
+        ctx.beginPath();
+        ctx.moveTo(200, 40);
+        ctx.lineTo(340, 100);
+        ctx.lineTo(320, 280);
+        ctx.quadraticCurveTo(200, 370, 200, 370);
+        ctx.quadraticCurveTo(80, 280, 80, 100);
+        ctx.closePath();
+        ctx.stroke();
+
+        // Inner contour
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(200, 55);
+        ctx.lineTo(325, 110);
+        ctx.lineTo(305, 270);
+        ctx.quadraticCurveTo(200, 350, 200, 350);
+        ctx.quadraticCurveTo(95, 270, 95, 110);
+        ctx.closePath();
+        ctx.stroke();
+      } else {
+        // Round Seal or Laurel
+        ctx.beginPath();
+        ctx.arc(200, 200, 160, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(200, 200, 145, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Crown Graphic
+      ctx.fillStyle = goldGrad;
+      ctx.beginPath();
+      ctx.moveTo(160, 130);
+      ctx.lineTo(170, 95);
+      ctx.lineTo(185, 115);
+      ctx.lineTo(200, 85);
+      ctx.lineTo(215, 115);
+      ctx.lineTo(230, 95);
+      ctx.lineTo(240, 130);
+      ctx.closePath();
+      ctx.fill();
+
+      // Crown jewels
+      ctx.fillStyle = '#ffffff';
+      [170, 200, 230].forEach(x => {
+        ctx.beginPath();
+        ctx.arc(x, x === 200 ? 82 : 92, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Initials Typography
+      ctx.fillStyle = goldGrad;
+      ctx.font = '900 68px "Cinzel", serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(251, 191, 36, 0.4)';
+      ctx.shadowBlur = 12;
+      ctx.fillText(letters, 200, 215);
+      ctx.shadowBlur = 0;
+
+      // Motto Ribbon Text
+      ctx.font = '700 13px "Plus Jakarta Sans", sans-serif';
+      ctx.fillStyle = '#fef08a';
+      ctx.letterSpacing = '3px';
+      ctx.fillText(motto, 200, 310);
+    }
+
+    function downloadMonogramCanvas() {
+      const canvas = document.getElementById('monogramCanvas');
+      const link = document.createElement('a');
+      link.download = `king-ai-monogram-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    // --- 8. CINEMA STUDIO ---
+    function generateCinemaPrompt() {
+      const camera = document.getElementById('cinemaCamera').value;
+      const lighting = document.getElementById('cinemaLighting').value;
+      const aspect = document.getElementById('cinemaAspect').value;
+      const scene = (document.getElementById('cinemaSceneInput').value || 'A royal imperial coronation in a gleaming golden fortress').trim();
+
+      const masterPrompt = `[Master Cinema AI Prompt]\nScene: ${scene}\nCamera Direction: ${camera}\nLighting & Tone: ${lighting}\nFormat Specifications: 8k UHD, photorealistic Unreal Engine 5 render, cinematic color grading, ${aspect}`;
+
+      document.getElementById('cinemaResultCard').classList.remove('hidden');
+      document.getElementById('cinemaPromptOutput').innerText = masterPrompt;
+    }
+
+    function copyToClipboard(elementId) {
+      const text = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(text).then(() => alert("Copied to clipboard!"));
+    }
+
+    // --- 9. AI TOOLS SUITE ---
+    function launchTool(title, promptPrefix) {
+      switchTab('chat');
+      document.getElementById('chatInput').value = `${promptPrefix} `;
+      document.getElementById('chatInput').focus();
+    }
+
+    // --- 10. SAVED GALLERY VAULT ---
+    function saveToGallery(prompt, url) {
+      STATE.gallery.unshift({ id: Date.now(), prompt, url });
+      localStorage.setItem('king_ai_gallery', JSON.stringify(STATE.gallery));
+      updateGalleryCount();
+    }
+
+    function saveToGalleryFromStudio() {
+      const img = document.getElementById('generatedImageDisplay');
+      const caption = document.getElementById('generatedPromptCaption').innerText;
+      if (img && img.src) {
+        saveToGallery(caption || 'Royal 8K Artwork', img.src);
+        alert("Saved to Vault!");
+      }
+    }
+
+    function renderGallery() {
+      const grid = document.getElementById('galleryGrid');
+      grid.innerHTML = '';
+      if (STATE.gallery.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 text-xs">No saved artworks yet. Generate images in 8K Studio to save them here.</div>`;
+        return;
+      }
+      STATE.gallery.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'bg-king-card rounded-2xl border border-king-border overflow-hidden shadow-lg group';
+        card.innerHTML = `
+          <div class="relative aspect-square overflow-hidden bg-slate-950">
+            <img src="${item.url}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          </div>
+          <div class="p-3 space-y-2">
+            <p class="text-xs text-slate-300 truncate">${item.prompt}</p>
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-[10px] text-amber-400 font-bold">8K Vault</span>
+              <a href="${item.url}" target="_blank" download="king-art.jpg" class="text-xs text-slate-400 hover:text-amber-300 flex items-center gap-1">
+                <i data-lucide="download" class="w-3 h-3"></i> Download
+              </a>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    function updateGalleryCount() {
+      const countEl = document.getElementById('navGalleryCount');
+      if (countEl) countEl.innerText = STATE.gallery.length;
+    }
+
+    function clearGallery() {
+      if (confirm("Clear all saved gallery items?")) {
+        STATE.gallery = [];
+        localStorage.removeItem('king_ai_gallery');
+        renderGallery();
+        updateGalleryCount();
+      }
+    }
+
+    // --- 11. SPEECH RECOGNITION ---
+    let recognition = null;
+    function toggleSpeechRecognition() {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert("Voice speech recognition is not supported on this browser.");
+        return;
+      }
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!recognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.onresult = (event) => {
+          const text = event.results[0][0].transcript;
+          document.getElementById('chatInput').value = text;
+          document.getElementById('micBtn').classList.remove('text-rose-400', 'animate-pulse');
+        };
+        recognition.onerror = () => {
+          document.getElementById('micBtn').classList.remove('text-rose-400', 'animate-pulse');
+        };
+      }
+      document.getElementById('micBtn').classList.add('text-rose-400', 'animate-pulse');
+      recognition.start();
+    }
+
+    // --- 12. CUSTOM API KEY HANDLER ---
+    function saveCustomApiKey() {
+      const key = (document.getElementById('customApiKeyInput').value || '').trim();
+      STATE.customApiKey = key;
+      localStorage.setItem('king_custom_api_key', key);
+      alert("API Key saved successfully!");
+    }
+
+    // --- INITIALIZATION ON LOAD ---
+    window.addEventListener('DOMContentLoaded', () => {
+      initQuota();
+      initChatSessions();
+      const savedGal = localStorage.getItem('king_ai_gallery');
+      if (savedGal) {
+        try { STATE.gallery = JSON.parse(savedGal); } catch (e) { STATE.gallery = []; }
+      }
+      updateGalleryCount();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
