@@ -47,9 +47,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(reg => {
-          reg.update();
-        }).catch(err => console.log('SW:', err));
+        navigator.serviceWorker.register('./sw.js').then(reg => reg.update()).catch(err => console.log('SW:', err));
       });
     }
   </script>
@@ -236,6 +234,7 @@
 
   <script>
     let isVip = sessionStorage.getItem('king_ai_vip') === 'true';
+    let chatHistory = JSON.parse(localStorage.getItem('king_ai_chat_history') || '[]');
 
     function updateUI() {
       if (isVip) {
@@ -248,6 +247,7 @@
       if (savedKey) {
         document.getElementById('apiKeyInput').value = savedKey;
       }
+      loadChatHistory();
     }
 
     function switchTab(tab) {
@@ -281,7 +281,23 @@
       handleChatSubmit();
     }
 
+    function loadChatHistory() {
+      if (chatHistory.length > 0) {
+        const welcome = document.getElementById('welcomeScreen');
+        if (welcome) welcome.style.display = 'none';
+        chatHistory.forEach(msg => {
+          renderMsgBubble(msg.role, msg.text, msg.id);
+        });
+      }
+    }
+
+    function saveChatHistory() {
+      localStorage.setItem('king_ai_chat_history', JSON.stringify(chatHistory));
+    }
+
     function clearChat() {
+      chatHistory = [];
+      localStorage.removeItem('king_ai_chat_history');
       document.getElementById('chatMessages').innerHTML = `
         <div id="welcomeScreen" class="max-w-xl mx-auto text-center py-6 space-y-4">
           <div class="w-16 h-16 mx-auto rounded-2xl gold-gradient-bg flex items-center justify-center text-3xl">👑</div>
@@ -317,17 +333,26 @@
       const welcome = document.getElementById('welcomeScreen');
       if (welcome) welcome.style.display = 'none';
 
-      appendMsg('user', query);
+      // Store User Message
+      chatHistory.push({ role: 'user', text: query });
+      saveChatHistory();
+      renderMsgBubble('user', query);
       input.value = '';
 
       const aiId = 'ai-' + Date.now();
-      appendMsg('ai', '👑 Thinking...', aiId);
+      renderMsgBubble('ai', '👑 Thinking...', aiId);
 
       try {
+        // Format previous turns into API contents array for conversation memory
+        const apiContents = chatHistory.map(item => ({
+          role: item.role === 'user' ? 'user' : 'model',
+          parts: [{ text: item.text }]
+        }));
+
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: query }] }] })
+          body: JSON.stringify({ contents: apiContents })
         });
         
         const data = await res.json();
@@ -338,13 +363,18 @@
         }
 
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
-        document.getElementById(aiId).innerHTML = marked.parse(text);
+        const htmlContent = marked.parse(text);
+        document.getElementById(aiId).innerHTML = htmlContent;
+
+        // Store AI Response in history
+        chatHistory.push({ role: 'ai', text: htmlContent, id: aiId });
+        saveChatHistory();
       } catch (err) {
         document.getElementById(aiId).innerHTML = '<span class="text-red-400 font-bold">⚠️ Network Error. Check your internet connection or API Key.</span>';
       }
     }
 
-    function appendMsg(role, text, id = null) {
+    function renderMsgBubble(role, text, id = null) {
       const container = document.getElementById('chatMessages');
       const div = document.createElement('div');
       div.className = role === 'user' ? 'chat-bubble-user p-3 rounded-xl text-xs max-w-lg ml-auto' : 'chat-bubble-ai p-3 rounded-xl text-xs max-w-lg mr-auto';
