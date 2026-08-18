@@ -1,8 +1,8 @@
 const CACHE_NAME = 'king-ai-v1';
 const URLS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json'
+  './',
+  './index.html',
+  './manifest.json'
 ];
 
 // Install Service Worker and cache basic assets
