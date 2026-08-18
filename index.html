@@ -242,6 +242,10 @@
         document.getElementById('tierLabel').innerText = 'VIP PASS ACTIVE';
         document.getElementById('topVipText').innerText = 'VIP ACTIVE';
       }
+      const savedKey = localStorage.getItem('king_ai_api_key');
+      if (savedKey) {
+        document.getElementById('apiKeyInput').value = savedKey;
+      }
     }
 
     function switchTab(tab) {
@@ -303,7 +307,7 @@
 
       const apiKey = localStorage.getItem('king_ai_api_key');
       if (!apiKey) {
-        alert('Please enter your Gemini API key in Settings first.');
+        alert('Please enter your Gemini API key in Settings (⚙️) first.');
         switchTab('settings');
         return;
       }
@@ -318,16 +322,23 @@
       appendMsg('ai', '👑 Thinking...', aiId);
 
       try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contents: [{ parts: [{ text: query }] }] })
         });
+        
         const data = await res.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response.';
+
+        if (!res.ok) {
+          document.getElementById(aiId).innerHTML = `<span class="text-red-400 font-bold">⚠️ API Error (${res.status}): ${data.error?.message || 'Invalid Request'}</span>`;
+          return;
+        }
+
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
         document.getElementById(aiId).innerHTML = marked.parse(text);
       } catch (err) {
-        document.getElementById(aiId).innerText = '⚠️ API Request Failed. Check key.';
+        document.getElementById(aiId).innerHTML = '<span class="text-red-400 font-bold">⚠️ Network Error. Check your internet connection or API Key.</span>';
       }
     }
 
