@@ -1,4 +1,4 @@
-const CACHE_NAME = 'king-ai-v4';
+const CACHE_NAME = 'king-ai-v5';
 const URLS_TO_CACHE = [
   './',
   './index.html',
