@@ -67,9 +67,10 @@
       <button onclick="openVipModal()" id="topVipBtn" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs">
         🎟️ <span id="topVipText">VIP Pass</span>
       </button>
-      <button onclick="createNewChat()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs">
-        + New Chat
-      </button>
+      <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-king-card border border-king-border text-xs">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>Creator & Owner: <strong class="text-amber-400">Abdullah Waheed</strong></span>
+      </div>
       <button onclick="switchTab('settings')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700">
         <i data-lucide="settings" class="w-4 h-4"></i>
       </button>
@@ -78,10 +79,10 @@
 
   <div class="flex flex-1 h-[calc(100vh-57px)] overflow-hidden">
 
-    <!-- Sidebar with Chat Sessions History -->
+    <!-- Sidebar / Drawer -->
     <aside class="w-64 bg-king-slate border-r border-king-border flex flex-col p-3 space-y-3 overflow-y-auto">
       
-      <!-- User Info -->
+      <!-- User Info Card -->
       <div class="p-3 rounded-xl bg-slate-900 border border-king-border flex items-center gap-2.5">
         <div class="w-8 h-8 rounded-lg gold-gradient-bg flex items-center justify-center text-slate-950 font-bold">👑</div>
         <div class="overflow-hidden">
@@ -90,29 +91,56 @@
         </div>
       </div>
 
-      <!-- VIP Button -->
+      <!-- VIP Pass Unlock Button -->
       <button onclick="openVipModal()" class="w-full p-2.5 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs text-left">
         <div>🎟️ VIP Pass Unlock</div>
-        <div class="text-[9px] text-slate-900 font-semibold">Unlimited Fast Chat</div>
+        <div class="text-[9px] text-slate-900 font-semibold">Unlimited Chat, 8K & Multi-Adder</div>
       </button>
 
-      <!-- Chat History Drawer -->
-      <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase pt-2">
-        <span>Recent Chats</span>
-        <button onclick="clearAllHistory()" class="text-red-400 hover:underline">Clear All</button>
-      </div>
-      <div id="chatHistoryList" class="space-y-1 max-h-48 overflow-y-auto">
-        <!-- Rendered dynamically -->
-      </div>
+      <!-- Buy KING Pro Link -->
+      <a href="https://sandbox.api.getsafepay.com/io/quick-link?ql=link_4be624f5-369c-43b5-9e69-082072b78c79" target="_blank" class="w-full p-2.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs flex justify-between items-center">
+        <span>👑 Buy KING Pro</span>
+        <span class="px-1.5 py-0.5 bg-slate-950 text-amber-300 text-[9px] rounded">Rs. 1500</span>
+      </a>
 
-      <!-- Usage Limits -->
-      <div class="p-2.5 rounded-xl bg-slate-900 border border-king-border text-[10px] space-y-1 mt-auto">
+      <!-- Usage Limits Indicator -->
+      <div class="p-2.5 rounded-xl bg-slate-900 border border-king-border text-[10px] space-y-1">
         <div class="flex justify-between text-slate-400 font-bold">
           <span id="tierLabel">FREE PLAN LIMIT</span>
           <span class="text-amber-400">24H RESET</span>
         </div>
         <div class="flex justify-between"><span>💬 Messages:</span><span id="msgCount" class="font-bold text-amber-300">0 / 50</span></div>
+        <div class="flex justify-between"><span>🎨 Image Creation:</span><span id="imgCount" class="font-bold text-purple-300">0 / 3</span></div>
       </div>
+
+      <!-- Chat History Drawer Section -->
+      <div class="border-t border-king-border pt-2 space-y-1">
+        <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
+          <span>Recent Chats</span>
+          <button onclick="createNewChat()" class="text-amber-400 hover:underline">+ New</button>
+        </div>
+        <div id="chatHistoryList" class="space-y-1 max-h-32 overflow-y-auto">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Intelligence Modes -->
+      <div class="text-[10px] font-bold text-slate-400 uppercase pt-2 border-t border-king-border">Intelligence Modes</div>
+      <button onclick="switchTab('chat')" class="w-full text-left p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold flex justify-between items-center">
+        <span>💬 King AI Chat PRO</span>
+        <span class="text-[9px] bg-amber-500/20 px-1 rounded">Fast</span>
+      </button>
+      <button onclick="alert('8K Image Studio Feature Active')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold flex justify-between items-center">
+        <span>🎨 8K Image Studio</span>
+        <span class="text-[9px] bg-purple-500/20 text-purple-300 px-1 rounded">Flux 8K</span>
+      </button>
+      <button onclick="alert('Monogram Studio Coming Soon!')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold">🛡️ Monogram & Shields</button>
+      <button onclick="alert('Cinema Studio Coming Soon!')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold">🎬 Cinema Studio Pro</button>
+      <button onclick="alert('AI Master Tools Coming Soon!')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold">🧰 AI Master Tools</button>
+      <button onclick="alert('Saved Creations Empty')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold flex justify-between">
+        <span>📁 Saved Creations</span>
+        <span class="text-[10px] bg-slate-800 px-1.5 rounded">0</span>
+      </button>
     </aside>
 
     <!-- Main Content -->
@@ -120,11 +148,15 @@
       
       <!-- TAB: CHAT -->
       <section id="tab-chat" class="flex-1 flex flex-col h-full">
-        <!-- Top Info Bar -->
+        <!-- Chat Topbar -->
         <div class="px-4 py-2 border-b border-king-border bg-king-slate flex justify-between items-center text-xs">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-            <span class="font-bold">Fast Engine: gemini-3.6-flash</span>
+            <span class="font-bold">Royal Intelligence</span>
+            <span class="bg-amber-500/10 text-amber-300 text-[10px] px-2 py-0.5 rounded-full border border-amber-500/30">PRO Paragraph & Points Mode</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="createNewChat()" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded text-[11px] font-black">+ New Chat</button>
           </div>
         </div>
 
@@ -135,18 +167,49 @@
             <div>
               <h1 class="text-2xl font-royal font-bold">KING AI PRO</h1>
               <p class="text-xs text-amber-300 font-semibold">Created & Owned by Abdullah Waheed</p>
+              <p class="text-[11px] text-slate-400 mt-1">Direct paragraph answers, formal letters, applications, factual questions, code writing, and bullet-point summaries.</p>
+            </div>
+
+            <!-- Prompt Cards -->
+            <div id="promptCardsContainer" class="grid grid-cols-2 gap-2 text-left pt-2">
+              <button onclick="usePrompt('Write a letter to Principal asking for 2 days leave')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
+                <div class="font-bold text-amber-300">📄 Letter to Principal (2 Days Leave)</div>
+                <div class="text-[10px] text-slate-400">Get a full, ready-to-use formal application.</div>
+              </button>
+              <button onclick="usePrompt('What is the full form of DHA?')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
+                <div class="font-bold text-amber-300">❓ Full form of DHA</div>
+                <div class="text-[10px] text-slate-400">Accurate full explanation in clear paragraphs.</div>
+              </button>
+              <button onclick="usePrompt('Explain Solar Energy in points')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
+                <div class="font-bold text-amber-300">📑 Solar Energy in Points</div>
+                <div class="text-[10px] text-slate-400">Clean numbered points format.</div>
+              </button>
+              <button onclick="usePrompt('Write full code for Snake Game in HTML5')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
+                <div class="font-bold text-amber-300">💻 Snake Game in HTML5</div>
+                <div class="text-[10px] text-slate-400">Full working code ready to run in web.</div>
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- Input Bar -->
+        <!-- Chat Input Bar -->
         <div class="p-3 border-t border-king-border bg-king-slate">
           <form onsubmit="handleChatSubmit(event)" class="max-w-3xl mx-auto flex items-center gap-2">
-            <input id="chatInput" type="text" placeholder="Ask King AI..." class="flex-1 bg-slate-900 text-xs rounded-xl px-4 py-3 border border-slate-700 focus:outline-none focus:border-amber-500">
+            <button type="button" onclick="alert('Image upload ready')" class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-amber-400">
+              <i data-lucide="image-plus" class="w-4 h-4"></i>
+            </button>
+            <input id="chatInput" type="text" placeholder="Ask King AI anything..." class="flex-1 bg-slate-900 text-xs rounded-xl px-4 py-3 border border-slate-700 focus:outline-none focus:border-amber-500">
+            <button type="button" onclick="startVoiceInput()" class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:text-white">
+              <i data-lucide="mic" class="w-4 h-4"></i>
+            </button>
             <button type="submit" class="gold-gradient-bg text-slate-950 p-2.5 rounded-xl font-bold">
               <i data-lucide="send" class="w-4 h-4"></i>
             </button>
           </form>
+          <div class="text-center text-[10px] text-slate-400 mt-1.5 flex justify-between max-w-3xl mx-auto px-1">
+            <span>👑 <strong>Status:</strong> 50 Msgs & 3 Images/day • VIP Pass Available</span>
+            <span>Owner: <strong>Abdullah Waheed</strong></span>
+          </div>
         </div>
       </section>
 
@@ -163,21 +226,42 @@
     </main>
   </div>
 
+  <!-- VIP Pass Modal -->
+  <div id="vipModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+    <div class="bg-king-card border-2 border-emerald-400 rounded-2xl max-w-sm w-full p-5 space-y-4 relative">
+      <button onclick="closeVipModal()" class="absolute top-3 right-3 text-slate-400 hover:text-white">✕</button>
+      <h3 class="font-royal font-bold text-lg text-emerald-400">🎟️ VIP Pass Unlock</h3>
+      <input id="vipInput" type="password" placeholder="Enter VIP Password" class="w-full bg-slate-900 p-3 text-xs rounded-xl border border-slate-700">
+      <button onclick="submitVipPass()" class="w-full py-3 bg-emerald-500 text-slate-950 font-bold rounded-xl text-xs">Unlock VIP Access</button>
+    </div>
+  </div>
+
   <script>
     let isVip = sessionStorage.getItem('king_ai_vip') === 'true';
     let sessions = JSON.parse(localStorage.getItem('king_ai_sessions') || '[]');
     let currentSessionId = localStorage.getItem('king_ai_active_session') || null;
 
     function init() {
-      const savedKey = localStorage.getItem('king_ai_api_key');
-      if (savedKey) document.getElementById('apiKeyInput').value = savedKey;
-
+      updateUI();
       if (!currentSessionId || !sessions.find(s => s.id === currentSessionId)) {
         createNewChat(false);
       } else {
         loadSession(currentSessionId);
       }
       renderSessionList();
+    }
+
+    function updateUI() {
+      if (isVip) {
+        document.getElementById('msgCount').innerText = 'UNLIMITED';
+        document.getElementById('imgCount').innerText = 'UNLIMITED';
+        document.getElementById('tierLabel').innerText = 'VIP PASS ACTIVE';
+        document.getElementById('topVipText').innerText = 'VIP ACTIVE';
+      }
+      const savedKey = localStorage.getItem('king_ai_api_key');
+      if (savedKey) {
+        document.getElementById('apiKeyInput').value = savedKey;
+      }
     }
 
     function createNewChat(render = true) {
@@ -209,6 +293,25 @@
             <div>
               <h1 class="text-2xl font-royal font-bold">KING AI PRO</h1>
               <p class="text-xs text-amber-300 font-semibold">Created & Owned by Abdullah Waheed</p>
+              <p class="text-[11px] text-slate-400 mt-1">Direct paragraph answers, formal letters, applications, factual questions, code writing, and bullet-point summaries.</p>
+            </div>
+            <div id="promptCardsContainer" class="grid grid-cols-2 gap-2 text-left pt-2">
+              <button onclick="usePrompt('Write a letter to Principal asking for 2 days leave')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
+                <div class="font-bold text-amber-300">📄 Letter to Principal (2 Days Leave)</div>
+                <div class="text-[10px] text-slate-400">Get a full, ready-to-use formal application.</div>
+              </button>
+              <button onclick="usePrompt('What is the full form of DHA?')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
+                <div class="font-bold text-amber-300">❓ Full form of DHA</div>
+                <div class="text-[10px] text-slate-400">Accurate full explanation in clear paragraphs.</div>
+              </button>
+              <button onclick="usePrompt('Explain Solar Energy in points')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
+                <div class="font-bold text-amber-300">📑 Solar Energy in Points</div>
+                <div class="text-[10px] text-slate-400">Clean numbered points format.</div>
+              </button>
+              <button onclick="usePrompt('Write full code for Snake Game in HTML5')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
+                <div class="font-bold text-amber-300">💻 Snake Game in HTML5</div>
+                <div class="text-[10px] text-slate-400">Full working code ready to run in web.</div>
+              </button>
             </div>
           </div>`;
       } else {
@@ -219,21 +322,56 @@
 
     function renderSessionList() {
       const list = document.getElementById('chatHistoryList');
+      if (!list) return;
       list.innerHTML = '';
       sessions.forEach(s => {
         const btn = document.createElement('button');
         const isActive = s.id === currentSessionId;
-        btn.className = `w-full text-left p-2 rounded-xl text-xs truncate border ${isActive ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold' : 'text-slate-400 border-transparent hover:bg-slate-800'}`;
+        btn.className = `w-full text-left p-1.5 rounded-lg text-[11px] truncate border ${isActive ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold' : 'text-slate-400 border-transparent hover:bg-slate-800'}`;
         btn.innerText = s.title || 'Conversation';
         btn.onclick = () => loadSession(s.id);
         list.appendChild(btn);
       });
     }
 
-    function clearAllHistory() {
-      sessions = [];
-      localStorage.removeItem('king_ai_sessions');
-      createNewChat();
+    function switchTab(tab) {
+      document.getElementById('tab-chat').classList.toggle('hidden', tab !== 'chat');
+      document.getElementById('tab-settings').classList.toggle('hidden', tab !== 'settings');
+    }
+
+    function openVipModal() { document.getElementById('vipModal').classList.remove('hidden'); }
+    function closeVipModal() { document.getElementById('vipModal').classList.add('hidden'); }
+
+    function submitVipPass() {
+      const val = document.getElementById('vipInput').value.trim();
+      if (val.toLowerCase() === 'abdullah@hero123') {
+        isVip = true;
+        sessionStorage.setItem('king_ai_vip', 'true');
+        updateUI();
+        closeVipModal();
+      } else {
+        alert('Incorrect Password!');
+      }
+    }
+
+    function saveApiKey() {
+      const key = document.getElementById('apiKeyInput').value.trim();
+      localStorage.setItem('king_ai_api_key', key);
+      alert('API Key Saved!');
+    }
+
+    function usePrompt(text) {
+      document.getElementById('chatInput').value = text;
+      handleChatSubmit();
+    }
+
+    function startVoiceInput() {
+      if (!('webkitSpeechRecognition' in window)) return alert('Voice input not supported in browser.');
+      const rec = new webkitSpeechRecognition();
+      rec.onresult = (e) => {
+        document.getElementById('chatInput').value = e.results[0][0].transcript;
+      };
+      rec.start();
     }
 
     async function handleChatSubmit(e) {
@@ -244,19 +382,18 @@
 
       const apiKey = localStorage.getItem('king_ai_api_key');
       if (!apiKey) {
-        alert('Please save your API key in Settings (⚙️) first!');
+        alert('Please enter your Gemini API key in Settings (⚙️) first.');
         switchTab('settings');
         return;
       }
 
       const session = sessions.find(s => s.id === currentSessionId);
       if (session.messages.length === 0) {
-        session.title = text.substring(0, 25) + '...';
+        session.title = text.substring(0, 22) + '...';
         const welcome = document.getElementById('welcomeScreen');
         if (welcome) welcome.remove();
       }
 
-      // Add user message
       session.messages.push({ role: 'user', text });
       renderBubble('user', text);
       input.value = '';
@@ -264,9 +401,9 @@
       renderSessionList();
 
       const aiId = 'ai-' + Date.now();
-      renderBubble('ai', '⚡ Thinking...', aiId);
+      renderBubble('ai', '👑 Thinking...', aiId);
 
-      // Build compact context payload (Text only to avoid slowdowns)
+      // Fast payload construction: plain text only
       const payload = session.messages.map(m => ({
         role: m.role === 'user' ? 'user' : 'model',
         parts: [{ text: m.text }]
@@ -280,13 +417,17 @@
         });
 
         const data = await res.json();
+        if (!res.ok) {
+          document.getElementById(aiId).innerHTML = `<span class="text-red-400 font-bold">⚠️ API Error (${res.status}): ${data.error?.message || 'Invalid Request'}</span>`;
+          return;
+        }
+
         const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
-        
         document.getElementById(aiId).innerHTML = marked.parse(replyText);
         session.messages.push({ role: 'model', text: replyText });
         saveSessions();
       } catch (err) {
-        document.getElementById(aiId).innerHTML = '<span class="text-red-400 font-bold">⚠️ Connection Error.</span>';
+        document.getElementById(aiId).innerHTML = '<span class="text-red-400 font-bold">⚠️ Network Error. Check your internet connection or API Key.</span>';
       }
     }
 
@@ -298,17 +439,6 @@
       div.innerHTML = role === 'user' ? text : marked.parse(text);
       container.appendChild(div);
       container.scrollTop = container.scrollHeight;
-    }
-
-    function switchTab(tab) {
-      document.getElementById('tab-chat').classList.toggle('hidden', tab !== 'chat');
-      document.getElementById('tab-settings').classList.toggle('hidden', tab !== 'settings');
-    }
-
-    function saveApiKey() {
-      const key = document.getElementById('apiKeyInput').value.trim();
-      localStorage.setItem('king_ai_api_key', key);
-      alert('API Key Saved!');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
