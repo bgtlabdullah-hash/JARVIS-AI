@@ -17,13 +17,7 @@
       theme: {
         extend: {
           colors: {
-            king: {
-              gold: '#fbbf24',
-              navy: '#070b14',
-              slate: '#0d1527',
-              card: '#131e36',
-              border: '#223254'
-            }
+            king: { gold: '#fbbf24', navy: '#070b14', slate: '#0d1527', card: '#131e36', border: '#223254' }
           }
         }
       }
@@ -73,10 +67,9 @@
       <button onclick="openVipModal()" id="topVipBtn" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs">
         🎟️ <span id="topVipText">VIP Pass</span>
       </button>
-      <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-king-card border border-king-border text-xs">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span>Creator & Owner: <strong class="text-amber-400">Abdullah Waheed</strong></span>
-      </div>
+      <button onclick="createNewChat()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs">
+        + New Chat
+      </button>
       <button onclick="switchTab('settings')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700">
         <i data-lucide="settings" class="w-4 h-4"></i>
       </button>
@@ -85,10 +78,10 @@
 
   <div class="flex flex-1 h-[calc(100vh-57px)] overflow-hidden">
 
-    <!-- Sidebar -->
+    <!-- Sidebar with Chat Sessions History -->
     <aside class="w-64 bg-king-slate border-r border-king-border flex flex-col p-3 space-y-3 overflow-y-auto">
       
-      <!-- User Card -->
+      <!-- User Info -->
       <div class="p-3 rounded-xl bg-slate-900 border border-king-border flex items-center gap-2.5">
         <div class="w-8 h-8 rounded-lg gold-gradient-bg flex items-center justify-center text-slate-950 font-bold">👑</div>
         <div class="overflow-hidden">
@@ -100,42 +93,26 @@
       <!-- VIP Button -->
       <button onclick="openVipModal()" class="w-full p-2.5 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs text-left">
         <div>🎟️ VIP Pass Unlock</div>
-        <div class="text-[9px] text-slate-900 font-semibold">Unlimited Chat, 8K & Multi-Adder</div>
+        <div class="text-[9px] text-slate-900 font-semibold">Unlimited Fast Chat</div>
       </button>
 
-      <!-- Buy KING Pro -->
-      <a href="https://sandbox.api.getsafepay.com/io/quick-link?ql=link_4be624f5-369c-43b5-9e69-082072b78c79" target="_blank" class="w-full p-2.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs flex justify-between items-center">
-        <span>👑 Buy KING Pro</span>
-        <span class="px-1.5 py-0.5 bg-slate-950 text-amber-300 text-[9px] rounded">Rs. 1500</span>
-      </a>
+      <!-- Chat History Drawer -->
+      <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase pt-2">
+        <span>Recent Chats</span>
+        <button onclick="clearAllHistory()" class="text-red-400 hover:underline">Clear All</button>
+      </div>
+      <div id="chatHistoryList" class="space-y-1 max-h-48 overflow-y-auto">
+        <!-- Rendered dynamically -->
+      </div>
 
       <!-- Usage Limits -->
-      <div class="p-2.5 rounded-xl bg-slate-900 border border-king-border text-[10px] space-y-1">
+      <div class="p-2.5 rounded-xl bg-slate-900 border border-king-border text-[10px] space-y-1 mt-auto">
         <div class="flex justify-between text-slate-400 font-bold">
           <span id="tierLabel">FREE PLAN LIMIT</span>
           <span class="text-amber-400">24H RESET</span>
         </div>
         <div class="flex justify-between"><span>💬 Messages:</span><span id="msgCount" class="font-bold text-amber-300">0 / 50</span></div>
-        <div class="flex justify-between"><span>🎨 Image Creation:</span><span id="imgCount" class="font-bold text-purple-300">0 / 3</span></div>
       </div>
-
-      <!-- Intelligence Modes -->
-      <div class="text-[10px] font-bold text-slate-400 uppercase pt-2">Intelligence Modes</div>
-      <button onclick="switchTab('chat')" class="w-full text-left p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold flex justify-between items-center">
-        <span>💬 King AI Chat PRO</span>
-        <span class="text-[9px] bg-amber-500/20 px-1 rounded">Fast</span>
-      </button>
-      <button onclick="switchTab('image')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold flex justify-between items-center">
-        <span>🎨 8K Image Studio</span>
-        <span class="text-[9px] bg-purple-500/20 text-purple-300 px-1 rounded">Flux 8K</span>
-      </button>
-      <button onclick="alert('Monogram Studio Coming Soon!')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold">🛡️ Monogram & Shields</button>
-      <button onclick="alert('Cinema Studio Coming Soon!')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold">🎬 Cinema Studio Pro</button>
-      <button onclick="alert('AI Master Tools Coming Soon!')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold">🧰 AI Master Tools</button>
-      <button onclick="alert('Saved Creations Empty')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold flex justify-between">
-        <span>📁 Saved Creations</span>
-        <span class="text-[10px] bg-slate-800 px-1.5 rounded">0</span>
-      </button>
     </aside>
 
     <!-- Main Content -->
@@ -143,69 +120,33 @@
       
       <!-- TAB: CHAT -->
       <section id="tab-chat" class="flex-1 flex flex-col h-full">
-        <!-- Chat Topbar -->
+        <!-- Top Info Bar -->
         <div class="px-4 py-2 border-b border-king-border bg-king-slate flex justify-between items-center text-xs">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-            <span class="font-bold">Royal Intelligence</span>
-            <span class="bg-amber-500/10 text-amber-300 text-[10px] px-2 py-0.5 rounded-full border border-amber-500/30">PRO Paragraph & Points Mode</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="clearChat()" class="p-1 text-slate-400 hover:text-white" title="Clear Chat"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-            <button onclick="clearChat()" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[11px] font-bold">+ New Chat</button>
+            <span class="font-bold">Fast Engine: gemini-3.6-flash</span>
           </div>
         </div>
 
-        <!-- Chat Output -->
+        <!-- Chat Display -->
         <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-4">
           <div id="welcomeScreen" class="max-w-xl mx-auto text-center py-6 space-y-4">
             <div class="w-16 h-16 mx-auto rounded-2xl gold-gradient-bg flex items-center justify-center text-3xl">👑</div>
             <div>
               <h1 class="text-2xl font-royal font-bold">KING AI PRO</h1>
               <p class="text-xs text-amber-300 font-semibold">Created & Owned by Abdullah Waheed</p>
-              <p class="text-[11px] text-slate-400 mt-1">Direct paragraph answers, formal letters, applications, factual questions, code writing, and bullet-point summaries.</p>
-            </div>
-
-            <!-- Prompt Cards -->
-            <div id="promptCardsContainer" class="grid grid-cols-2 gap-2 text-left pt-2">
-              <button onclick="usePrompt('Write a letter to Principal asking for 2 days leave')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
-                <div class="font-bold text-amber-300">📄 Letter to Principal (2 Days Leave)</div>
-                <div class="text-[10px] text-slate-400">Get a full, ready-to-use formal application.</div>
-              </button>
-              <button onclick="usePrompt('What is the full form of DHA?')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
-                <div class="font-bold text-amber-300">❓ Full form of DHA</div>
-                <div class="text-[10px] text-slate-400">Accurate full explanation in clear paragraphs.</div>
-              </button>
-              <button onclick="usePrompt('Explain Solar Energy in points')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
-                <div class="font-bold text-amber-300">📑 Solar Energy in Points</div>
-                <div class="text-[10px] text-slate-400">Clean numbered points format.</div>
-              </button>
-              <button onclick="usePrompt('Write full code for Snake Game in HTML5')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
-                <div class="font-bold text-amber-300">💻 Snake Game in HTML5</div>
-                <div class="text-[10px] text-slate-400">Full working code ready to run in web.</div>
-              </button>
             </div>
           </div>
         </div>
 
-        <!-- Chat Input Bar -->
+        <!-- Input Bar -->
         <div class="p-3 border-t border-king-border bg-king-slate">
           <form onsubmit="handleChatSubmit(event)" class="max-w-3xl mx-auto flex items-center gap-2">
-            <button type="button" onclick="alert('Image upload ready')" class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-amber-400">
-              <i data-lucide="image-plus" class="w-4 h-4"></i>
-            </button>
-            <input id="chatInput" type="text" placeholder="Ask King AI anything..." class="flex-1 bg-slate-900 text-xs rounded-xl px-4 py-3 border border-slate-700 focus:outline-none focus:border-amber-500">
-            <button type="button" onclick="startVoiceInput()" class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:text-white">
-              <i data-lucide="mic" class="w-4 h-4"></i>
-            </button>
+            <input id="chatInput" type="text" placeholder="Ask King AI..." class="flex-1 bg-slate-900 text-xs rounded-xl px-4 py-3 border border-slate-700 focus:outline-none focus:border-amber-500">
             <button type="submit" class="gold-gradient-bg text-slate-950 p-2.5 rounded-xl font-bold">
               <i data-lucide="send" class="w-4 h-4"></i>
             </button>
           </form>
-          <div class="text-center text-[10px] text-slate-400 mt-1.5 flex justify-between max-w-3xl mx-auto px-1">
-            <span>👑 <strong>Status:</strong> 50 Msgs & 3 Images/day • VIP Pass Available</span>
-            <span>Owner: <strong>Abdullah Waheed</strong></span>
-          </div>
         </div>
       </section>
 
@@ -222,52 +163,146 @@
     </main>
   </div>
 
-  <!-- VIP Pass Modal -->
-  <div id="vipModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-    <div class="bg-king-card border-2 border-emerald-400 rounded-2xl max-w-sm w-full p-5 space-y-4 relative">
-      <button onclick="closeVipModal()" class="absolute top-3 right-3 text-slate-400 hover:text-white">✕</button>
-      <h3 class="font-royal font-bold text-lg text-emerald-400">🎟️ VIP Pass Unlock</h3>
-      <input id="vipInput" type="password" placeholder="Enter VIP Password" class="w-full bg-slate-900 p-3 text-xs rounded-xl border border-slate-700">
-      <button onclick="submitVipPass()" class="w-full py-3 bg-emerald-500 text-slate-950 font-bold rounded-xl text-xs">Unlock VIP Access</button>
-    </div>
-  </div>
-
   <script>
     let isVip = sessionStorage.getItem('king_ai_vip') === 'true';
-    let chatHistory = JSON.parse(localStorage.getItem('king_ai_chat_history') || '[]');
+    let sessions = JSON.parse(localStorage.getItem('king_ai_sessions') || '[]');
+    let currentSessionId = localStorage.getItem('king_ai_active_session') || null;
 
-    function updateUI() {
-      if (isVip) {
-        document.getElementById('msgCount').innerText = 'UNLIMITED';
-        document.getElementById('imgCount').innerText = 'UNLIMITED';
-        document.getElementById('tierLabel').innerText = 'VIP PASS ACTIVE';
-        document.getElementById('topVipText').innerText = 'VIP ACTIVE';
-      }
+    function init() {
       const savedKey = localStorage.getItem('king_ai_api_key');
-      if (savedKey) {
-        document.getElementById('apiKeyInput').value = savedKey;
+      if (savedKey) document.getElementById('apiKeyInput').value = savedKey;
+
+      if (!currentSessionId || !sessions.find(s => s.id === currentSessionId)) {
+        createNewChat(false);
+      } else {
+        loadSession(currentSessionId);
       }
-      loadChatHistory();
+      renderSessionList();
+    }
+
+    function createNewChat(render = true) {
+      currentSessionId = 'session_' + Date.now();
+      sessions.unshift({ id: currentSessionId, title: 'New Conversation', messages: [] });
+      saveSessions();
+      if (render) {
+        renderSessionList();
+        loadSession(currentSessionId);
+      }
+    }
+
+    function saveSessions() {
+      localStorage.setItem('king_ai_sessions', JSON.stringify(sessions));
+      localStorage.setItem('king_ai_active_session', currentSessionId);
+    }
+
+    function loadSession(id) {
+      currentSessionId = id;
+      localStorage.setItem('king_ai_active_session', id);
+      const session = sessions.find(s => s.id === id);
+      const container = document.getElementById('chatMessages');
+      container.innerHTML = '';
+
+      if (!session || session.messages.length === 0) {
+        container.innerHTML = `
+          <div id="welcomeScreen" class="max-w-xl mx-auto text-center py-6 space-y-4">
+            <div class="w-16 h-16 mx-auto rounded-2xl gold-gradient-bg flex items-center justify-center text-3xl">👑</div>
+            <div>
+              <h1 class="text-2xl font-royal font-bold">KING AI PRO</h1>
+              <p class="text-xs text-amber-300 font-semibold">Created & Owned by Abdullah Waheed</p>
+            </div>
+          </div>`;
+      } else {
+        session.messages.forEach(msg => renderBubble(msg.role, msg.text));
+      }
+      renderSessionList();
+    }
+
+    function renderSessionList() {
+      const list = document.getElementById('chatHistoryList');
+      list.innerHTML = '';
+      sessions.forEach(s => {
+        const btn = document.createElement('button');
+        const isActive = s.id === currentSessionId;
+        btn.className = `w-full text-left p-2 rounded-xl text-xs truncate border ${isActive ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold' : 'text-slate-400 border-transparent hover:bg-slate-800'}`;
+        btn.innerText = s.title || 'Conversation';
+        btn.onclick = () => loadSession(s.id);
+        list.appendChild(btn);
+      });
+    }
+
+    function clearAllHistory() {
+      sessions = [];
+      localStorage.removeItem('king_ai_sessions');
+      createNewChat();
+    }
+
+    async function handleChatSubmit(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const apiKey = localStorage.getItem('king_ai_api_key');
+      if (!apiKey) {
+        alert('Please save your API key in Settings (⚙️) first!');
+        switchTab('settings');
+        return;
+      }
+
+      const session = sessions.find(s => s.id === currentSessionId);
+      if (session.messages.length === 0) {
+        session.title = text.substring(0, 25) + '...';
+        const welcome = document.getElementById('welcomeScreen');
+        if (welcome) welcome.remove();
+      }
+
+      // Add user message
+      session.messages.push({ role: 'user', text });
+      renderBubble('user', text);
+      input.value = '';
+      saveSessions();
+      renderSessionList();
+
+      const aiId = 'ai-' + Date.now();
+      renderBubble('ai', '⚡ Thinking...', aiId);
+
+      // Build compact context payload (Text only to avoid slowdowns)
+      const payload = session.messages.map(m => ({
+        role: m.role === 'user' ? 'user' : 'model',
+        parts: [{ text: m.text }]
+      }));
+
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: payload })
+        });
+
+        const data = await res.json();
+        const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
+        
+        document.getElementById(aiId).innerHTML = marked.parse(replyText);
+        session.messages.push({ role: 'model', text: replyText });
+        saveSessions();
+      } catch (err) {
+        document.getElementById(aiId).innerHTML = '<span class="text-red-400 font-bold">⚠️ Connection Error.</span>';
+      }
+    }
+
+    function renderBubble(role, text, id = null) {
+      const container = document.getElementById('chatMessages');
+      const div = document.createElement('div');
+      div.className = role === 'user' ? 'chat-bubble-user p-3 rounded-xl text-xs max-w-lg ml-auto' : 'chat-bubble-ai p-3 rounded-xl text-xs max-w-lg mr-auto';
+      if (id) div.id = id;
+      div.innerHTML = role === 'user' ? text : marked.parse(text);
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
     }
 
     function switchTab(tab) {
       document.getElementById('tab-chat').classList.toggle('hidden', tab !== 'chat');
       document.getElementById('tab-settings').classList.toggle('hidden', tab !== 'settings');
-    }
-
-    function openVipModal() { document.getElementById('vipModal').classList.remove('hidden'); }
-    function closeVipModal() { document.getElementById('vipModal').classList.add('hidden'); }
-
-    function submitVipPass() {
-      const val = document.getElementById('vipInput').value.trim();
-      if (val.toLowerCase() === 'abdullah@hero123') {
-        isVip = true;
-        sessionStorage.setItem('king_ai_vip', 'true');
-        updateUI();
-        closeVipModal();
-      } else {
-        alert('Incorrect Password!');
-      }
     }
 
     function saveApiKey() {
@@ -276,117 +311,9 @@
       alert('API Key Saved!');
     }
 
-    function usePrompt(text) {
-      document.getElementById('chatInput').value = text;
-      handleChatSubmit();
-    }
-
-    function loadChatHistory() {
-      if (chatHistory.length > 0) {
-        const welcome = document.getElementById('welcomeScreen');
-        if (welcome) welcome.style.display = 'none';
-        chatHistory.forEach(msg => {
-          renderMsgBubble(msg.role, msg.text, msg.id);
-        });
-      }
-    }
-
-    function saveChatHistory() {
-      localStorage.setItem('king_ai_chat_history', JSON.stringify(chatHistory));
-    }
-
-    function clearChat() {
-      chatHistory = [];
-      localStorage.removeItem('king_ai_chat_history');
-      document.getElementById('chatMessages').innerHTML = `
-        <div id="welcomeScreen" class="max-w-xl mx-auto text-center py-6 space-y-4">
-          <div class="w-16 h-16 mx-auto rounded-2xl gold-gradient-bg flex items-center justify-center text-3xl">👑</div>
-          <div>
-            <h1 class="text-2xl font-royal font-bold">KING AI PRO</h1>
-            <p class="text-xs text-amber-300 font-semibold">Created & Owned by Abdullah Waheed</p>
-          </div>
-        </div>`;
-    }
-
-    function startVoiceInput() {
-      if (!('webkitSpeechRecognition' in window)) return alert('Voice input not supported in browser.');
-      const rec = new webkitSpeechRecognition();
-      rec.onresult = (e) => {
-        document.getElementById('chatInput').value = e.results[0][0].transcript;
-      };
-      rec.start();
-    }
-
-    async function handleChatSubmit(e) {
-      if (e) e.preventDefault();
-      const input = document.getElementById('chatInput');
-      const query = input.value.trim();
-      if (!query) return;
-
-      const apiKey = localStorage.getItem('king_ai_api_key');
-      if (!apiKey) {
-        alert('Please enter your Gemini API key in Settings (⚙️) first.');
-        switchTab('settings');
-        return;
-      }
-
-      const welcome = document.getElementById('welcomeScreen');
-      if (welcome) welcome.style.display = 'none';
-
-      // Store User Message
-      chatHistory.push({ role: 'user', text: query });
-      saveChatHistory();
-      renderMsgBubble('user', query);
-      input.value = '';
-
-      const aiId = 'ai-' + Date.now();
-      renderMsgBubble('ai', '👑 Thinking...', aiId);
-
-      try {
-        // Format previous turns into API contents array for conversation memory
-        const apiContents = chatHistory.map(item => ({
-          role: item.role === 'user' ? 'user' : 'model',
-          parts: [{ text: item.text }]
-        }));
-
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: apiContents })
-        });
-        
-        const data = await res.json();
-
-        if (!res.ok) {
-          document.getElementById(aiId).innerHTML = `<span class="text-red-400 font-bold">⚠️ API Error (${res.status}): ${data.error?.message || 'Invalid Request'}</span>`;
-          return;
-        }
-
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
-        const htmlContent = marked.parse(text);
-        document.getElementById(aiId).innerHTML = htmlContent;
-
-        // Store AI Response in history
-        chatHistory.push({ role: 'ai', text: htmlContent, id: aiId });
-        saveChatHistory();
-      } catch (err) {
-        document.getElementById(aiId).innerHTML = '<span class="text-red-400 font-bold">⚠️ Network Error. Check your internet connection or API Key.</span>';
-      }
-    }
-
-    function renderMsgBubble(role, text, id = null) {
-      const container = document.getElementById('chatMessages');
-      const div = document.createElement('div');
-      div.className = role === 'user' ? 'chat-bubble-user p-3 rounded-xl text-xs max-w-lg ml-auto' : 'chat-bubble-ai p-3 rounded-xl text-xs max-w-lg mr-auto';
-      if (id) div.id = id;
-      div.innerHTML = text;
-      container.appendChild(div);
-      container.scrollTop = container.scrollHeight;
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
       if (window.lucide) lucide.createIcons();
-      updateUI();
+      init();
     });
   </script>
 </body>
