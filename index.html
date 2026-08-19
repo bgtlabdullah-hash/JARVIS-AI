@@ -1,4 +1,300 @@
-<script>
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#070b14">
+  <meta name="description" content="KING AI PRO - Created & Owned by Abdullah Waheed.">
+  <title>King AI PRO — Owned by Abdullah Waheed</title>
+
+  <!-- Complete Favicon Fix (Stops 404 console error) -->
+  <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
+
+  <!-- Suppress Tailwind CDN Warning in Console -->
+  <script>
+    const origWarn = console.warn;
+    console.warn = function(...args) {
+      if (args[0] && typeof args[0] === 'string' && args[0].includes('tailwindcss.com')) return;
+      origWarn.apply(console, args);
+    };
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- MathJax Configuration -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            king: { gold: '#fbbf24', navy: '#070b14', slate: '#0d1527', card: '#131e36', border: '#223254' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Cinzel:wght@700;900&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-royal { font-family: 'Cinzel', serif; }
+    .gold-gradient-bg { background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); }
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #fffbeb 0%, #fbbf24 40%, #f59e0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .chat-bubble-ai { background: #111b33; border: 1px solid #223254; }
+    .chat-bubble-user { background: #223254; border: 1px solid #3b507d; }
+  </style>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('Service Worker registered:', reg.scope))
+          .catch((err) => console.error('Service Worker registration failed:', err));
+      });
+    }
+  </script>
+</head>
+<body class="bg-king-navy text-slate-100 min-h-screen flex flex-col antialiased">
+
+  <!-- Header -->
+  <header class="flex items-center justify-between px-4 py-3 bg-king-slate border-b border-king-border sticky top-0 z-40">
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 cursor-pointer" onclick="switchMode('chat')">
+        <div class="w-8 h-8 rounded-lg gold-gradient-bg flex items-center justify-center text-slate-950 font-black">👑</div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-royal font-black text-base gold-gradient-text">KING AI</span>
+            <span class="bg-emerald-500 text-slate-950 text-[10px] font-black px-1.5 py-0.5 rounded">VIP PRO</span>
+          </div>
+          <p class="text-[10px] text-amber-300">Owned by <strong class="text-amber-200">Abdullah Waheed</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button onclick="updateApiKeyPrompt()" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 font-bold text-xs flex items-center gap-1">
+        🔑 <span>Change Key</span>
+      </button>
+      <div class="px-3 py-1.5 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs">
+        🎟️ <span>VIP ACTIVE</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex flex-1 h-[calc(100vh-57px)] overflow-hidden">
+
+    <!-- Drawer Sidebar -->
+    <aside class="w-64 bg-king-slate border-r border-king-border flex flex-col p-3 space-y-3 overflow-y-auto">
+      
+      <!-- User Info -->
+      <div class="p-3 rounded-xl bg-slate-900 border border-king-border flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg gold-gradient-bg flex items-center justify-center text-slate-950 font-bold">👑</div>
+        <div class="overflow-hidden">
+          <h3 class="font-bold text-xs text-white truncate">Abdullah Waheed</h3>
+          <p class="text-[10px] text-amber-300">Official App Owner & Creator</p>
+        </div>
+      </div>
+
+      <!-- VIP Status -->
+      <div class="w-full p-2.5 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs">
+        <div>🎟️ VIP Pass Active</div>
+        <div class="text-[9px] text-slate-900 font-semibold">Gemini Engine</div>
+      </div>
+
+      <!-- Buy KING Pro Link -->
+      <a href="https://sandbox.api.getsafepay.com/io/quick-link?ql=link_4be624f5-369c-43b5-9e69-082072b78c79" target="_blank" class="w-full p-2.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs flex justify-between items-center">
+        <span>👑 Buy KING Pro</span>
+        <span class="px-1.5 py-0.5 bg-slate-950 text-amber-300 text-[9px] rounded">Rs. 1500</span>
+      </a>
+
+      <!-- Usage Limits -->
+      <div class="p-2.5 rounded-xl bg-slate-900 border border-king-border text-[10px] space-y-1">
+        <div class="flex justify-between text-slate-400 font-bold">
+          <span>VIP UNLIMITED</span>
+          <span class="text-amber-400">Gemini 3.6 Flash</span>
+        </div>
+        <div class="flex justify-between"><span>💬 Messages:</span><span class="font-bold text-amber-300">UNLIMITED</span></div>
+        <div class="flex justify-between"><span>🎨 Image Creation:</span><span class="font-bold text-purple-300">UNLIMITED</span></div>
+      </div>
+
+      <!-- Chat History Section -->
+      <div class="border-t border-king-border pt-2 space-y-1.5">
+        <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
+          <span>Recent Chats</span>
+          <div class="flex gap-2">
+            <button onclick="clearAllChats()" class="text-red-400 hover:text-red-300 transition">Clear History</button>
+            <button onclick="createNewChat()" class="text-amber-400 hover:underline">+ New</button>
+          </div>
+        </div>
+        <div id="chatHistoryList" class="space-y-1 max-h-36 overflow-y-auto pr-1"></div>
+      </div>
+
+      <!-- Intelligence Modes -->
+      <div class="text-[10px] font-bold text-slate-400 uppercase pt-2 border-t border-king-border">Intelligence Modes</div>
+      <button id="btn-mode-chat" onclick="switchMode('chat')" class="w-full text-left p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold flex justify-between items-center">
+        <span>💬 King AI Chat PRO</span>
+        <span class="text-[9px] bg-amber-500/20 px-1 rounded">3.6 Flash</span>
+      </button>
+      <button id="btn-mode-image" onclick="switchMode('image')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold flex justify-between items-center">
+        <span>🎨 8K Image Studio</span>
+        <span class="text-[9px] bg-purple-500/20 text-purple-300 px-1 rounded">Flux 8K</span>
+      </button>
+      <button id="btn-mode-monogram" onclick="switchMode('monogram')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold">🛡️ Monogram & Shields</button>
+      <button id="btn-mode-cinema" onclick="switchMode('cinema')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold">🎬 Cinema Studio Pro</button>
+      <button id="btn-mode-tools" onclick="switchMode('tools')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold">🧰 AI Master Tools</button>
+      <button id="btn-mode-saved" onclick="switchMode('saved')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold flex justify-between">
+        <span>📁 Saved Creations</span>
+        <span id="savedCount" class="text-[10px] bg-slate-800 px-1.5 rounded">0</span>
+      </button>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-full bg-king-navy relative">
+      
+      <!-- MODE 1: CHAT -->
+      <section id="mode-chat" class="flex-1 flex flex-col h-full">
+        <div class="px-4 py-2 border-b border-king-border bg-king-slate flex justify-between items-center text-xs">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span class="font-bold text-amber-300">Gemini 3.6 Flash Active</span>
+          </div>
+          <button onclick="createNewChat()" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded text-[11px] font-black">+ New Chat</button>
+        </div>
+
+        <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-4">
+          <div id="welcomeScreen" class="max-w-xl mx-auto text-center py-6 space-y-4">
+            <div class="w-16 h-16 mx-auto rounded-2xl gold-gradient-bg flex items-center justify-center text-3xl">👑</div>
+            <div>
+              <h1 class="text-2xl font-royal font-bold">KING AI PRO</h1>
+              <p class="text-xs text-amber-300 font-semibold">Created & Owned by Abdullah Waheed</p>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-left pt-2">
+              <button onclick="usePrompt('Simplify 2a+b/4a^2-b^2')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
+                <div class="font-bold text-amber-300">📐 Math Expression</div>
+                <div class="text-[10px] text-slate-400">Clean visual math equations.</div>
+              </button>
+              <button onclick="usePrompt('Write a letter to Principal asking for 2 days leave')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
+                <div class="font-bold text-amber-300">📄 Application Form</div>
+                <div class="text-[10px] text-slate-400">Ready-to-use leave application.</div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attached Image Preview Bar -->
+        <div id="imagePreviewContainer" class="hidden px-4 py-2 bg-slate-900 border-t border-king-border flex items-center gap-2">
+          <img id="attachedImagePreview" class="w-12 h-12 object-cover rounded-lg border border-amber-400" src="" alt="Preview">
+          <div class="flex-1 text-xs">
+            <p class="font-bold text-amber-300">Image Attached</p>
+            <p class="text-[10px] text-slate-400">Ready for visual analysis</p>
+          </div>
+          <button onclick="removeAttachedImage()" class="text-red-400 text-xs hover:underline font-bold">Remove</button>
+        </div>
+
+        <!-- Chat Input Form -->
+        <div class="p-3 border-t border-king-border bg-king-slate">
+          <form onsubmit="handleChatSubmit(event)" class="max-w-3xl mx-auto flex items-center gap-2">
+            <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageSelected(event)">
+            <button type="button" onclick="document.getElementById('imageInput').click()" class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-amber-400 hover:border-amber-500" title="Upload Image">
+              <i data-lucide="image-plus" class="w-4 h-4"></i>
+            </button>
+            <input id="chatInput" type="text" placeholder="Ask King AI anything..." class="flex-1 bg-slate-900 text-xs rounded-xl px-4 py-3 border border-slate-700 focus:outline-none focus:border-amber-500 text-white">
+            <button type="submit" class="gold-gradient-bg text-slate-950 p-2.5 rounded-xl font-bold">
+              <i data-lucide="send" class="w-4 h-4"></i>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- MODE 2: 8K IMAGE STUDIO -->
+      <section id="mode-image" class="hidden flex-1 p-6 space-y-4 overflow-y-auto">
+        <h2 class="text-xl font-bold text-amber-400 font-royal">🎨 8K Image Studio</h2>
+        <div class="bg-king-card border border-king-border p-4 rounded-xl space-y-3 max-w-xl">
+          <textarea id="imagePromptInput" placeholder="Describe the image you want to generate in detail..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs h-24 focus:outline-none focus:border-amber-500 text-white"></textarea>
+          <button id="generateImgBtn" onclick="generateImage()" class="w-full py-3 gold-gradient-bg text-slate-950 font-black rounded-xl text-xs flex items-center justify-center gap-2">
+            <span>Generate 8K Image</span>
+          </button>
+        </div>
+
+        <div id="imageStatusContainer" class="hidden space-y-3">
+          <div id="imageLoadingSpinner" class="flex items-center gap-3 p-4 bg-slate-900 border border-amber-500/30 rounded-xl text-amber-400 text-xs font-bold animate-pulse max-w-md">
+            <div class="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+            <span id="imageLoadingText">Connecting to High-Speed Image Engine...</span>
+          </div>
+
+          <div id="imageResultContainer" class="hidden space-y-2">
+            <h3 class="text-xs font-bold text-slate-300">Generated Result:</h3>
+            <img id="generatedImageDisplay" class="max-w-md rounded-xl border border-king-border shadow-2xl" src="" alt="Generated AI Image">
+          </div>
+
+          <div id="imageErrorNotice" class="hidden p-3 bg-red-950/60 border border-red-500/40 rounded-xl text-xs text-red-300 font-semibold max-w-md">
+            ⚠️ Rendering failed. Please check internet connection or click "Generate 8K Image" to retry.
+          </div>
+        </div>
+      </section>
+
+      <!-- MODE 3: MONOGRAM & SHIELDS -->
+      <section id="mode-monogram" class="hidden flex-1 p-6 space-y-4">
+        <h2 class="text-xl font-bold text-amber-400 font-royal">🛡️ Monogram & Shields Studio</h2>
+        <div class="p-6 bg-king-card border border-king-border rounded-xl text-xs space-y-3 max-w-md">
+          <p class="text-slate-300">Create custom royal shields and monogram designs.</p>
+          <input id="monogramTitle" type="text" placeholder="Enter Monogram Text (e.g. Abdullah)" class="w-full bg-slate-900 p-2.5 rounded-lg border border-slate-700 text-xs text-white">
+          <button onclick="generateMonogramImage()" class="w-full py-2.5 bg-amber-400 text-slate-950 font-bold rounded-lg">Generate Shield Emblem</button>
+        </div>
+      </section>
+
+      <!-- MODE 4: CINEMA STUDIO -->
+      <section id="mode-cinema" class="hidden flex-1 p-6 space-y-4">
+        <h2 class="text-xl font-bold text-amber-400 font-royal">🎬 Cinema Studio Pro</h2>
+        <div class="p-6 bg-king-card border border-king-border rounded-xl text-xs space-y-3 max-w-md">
+          <p class="text-slate-300">Generate cinematic video frame storyboards.</p>
+          <input id="cinemaPromptInput" type="text" placeholder="Describe Cinema Scene (e.g. Futuristic car driving in rain)..." class="w-full bg-slate-900 p-2.5 rounded-lg border border-slate-700 text-xs text-white">
+          <button onclick="generateCinemaScene()" class="w-full py-2.5 bg-amber-400 text-slate-950 font-bold rounded-lg">Generate Cinema Frame</button>
+        </div>
+      </section>
+
+      <!-- MODE 5: AI MASTER TOOLS -->
+      <section id="mode-tools" class="hidden flex-1 p-6 space-y-4">
+        <h2 class="text-xl font-bold text-amber-400 font-royal">🧰 AI Master Tools</h2>
+        <div class="grid grid-cols-2 gap-3 max-w-lg">
+          <button onclick="switchMode('chat')" class="p-3 bg-king-card border border-king-border rounded-xl text-left hover:border-amber-400">
+            <div class="font-bold text-amber-300 text-xs">💻 Code Debugger</div>
+            <div class="text-[10px] text-slate-400">Fix JS, HTML, Python code</div>
+          </button>
+          <button onclick="switchMode('chat')" class="p-3 bg-king-card border border-king-border rounded-xl text-left hover:border-amber-400">
+            <div class="font-bold text-amber-300 text-xs">✍️ Application Writer</div>
+            <div class="text-[10px] text-slate-400">Write formal letters & essays</div>
+          </button>
+        </div>
+      </section>
+
+      <!-- MODE 6: SAVED CREATIONS -->
+      <section id="mode-saved" class="hidden flex-1 p-6 space-y-4">
+        <h2 class="text-xl font-bold text-amber-400 font-royal">📁 Saved Creations</h2>
+        <div id="savedCreationsList" class="text-xs text-slate-400">No saved images or chats yet.</div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
     // Primary Gemini API Key
     const DEFAULT_GEMINI_KEY = "AQ.Ab8RN6LKKarswGw_v7LktEZCzKkQkj3Hn_uN1_-t7EA94PwSRw";
 
@@ -358,3 +654,5 @@
       init();
     });
   </script>
+</body>
+</html>
