@@ -115,7 +115,7 @@
       <!-- VIP Status -->
       <div class="w-full p-2.5 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs">
         <div>🎟️ VIP Pass Active</div>
-        <div class="text-[9px] text-slate-900 font-semibold">ChatGPT Engine</div>
+        <div class="text-[9px] text-slate-900 font-semibold">Gemini Engine</div>
       </div>
 
       <!-- Buy KING Pro Link -->
@@ -128,7 +128,7 @@
       <div class="p-2.5 rounded-xl bg-slate-900 border border-king-border text-[10px] space-y-1">
         <div class="flex justify-between text-slate-400 font-bold">
           <span>VIP UNLIMITED</span>
-          <span class="text-amber-400">GPT-4o</span>
+          <span class="text-amber-400">Gemini</span>
         </div>
         <div class="flex justify-between"><span>💬 Messages:</span><span class="font-bold text-amber-300">UNLIMITED</span></div>
         <div class="flex justify-between"><span>🎨 Image Creation:</span><span class="font-bold text-purple-300">UNLIMITED</span></div>
@@ -150,7 +150,7 @@
       <div class="text-[10px] font-bold text-slate-400 uppercase pt-2 border-t border-king-border">Intelligence Modes</div>
       <button id="btn-mode-chat" onclick="switchMode('chat')" class="w-full text-left p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold flex justify-between items-center">
         <span>💬 King AI Chat PRO</span>
-        <span class="text-[9px] bg-amber-500/20 px-1 rounded">ChatGPT</span>
+        <span class="text-[9px] bg-amber-500/20 px-1 rounded">Gemini</span>
       </button>
       <button id="btn-mode-image" onclick="switchMode('image')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold flex justify-between items-center">
         <span>🎨 8K Image Studio</span>
@@ -173,7 +173,7 @@
         <div class="px-4 py-2 border-b border-king-border bg-king-slate flex justify-between items-center text-xs">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            <span class="font-bold text-amber-300">ChatGPT Engine Active</span>
+            <span class="font-bold text-amber-300">Gemini Engine Active</span>
           </div>
           <button onclick="createNewChat()" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded text-[11px] font-black">+ New Chat</button>
         </div>
@@ -295,24 +295,24 @@
   </div>
 
   <script>
-    // Primary API Key provided
-    const DEFAULT_OPENAI_KEY = "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";
+    // Primary Gemini API Key
+    const DEFAULT_GEMINI_KEY = "AQ.Ab8RN6LKKarswGw_v7LktEZCzKkQkj3Hn_uN1_-t7EA94PwSRw";
 
     let attachedBase64Image = null;
     let sessions = [];
     let currentSessionId = null;
 
-    // Retrieve active API key (Fallback to hardcoded if local storage is empty)
+    // Retrieve active Gemini API key (Fallback to default if local storage is empty)
     function getActiveApiKey() {
-      return localStorage.getItem('king_ai_custom_key') || DEFAULT_OPENAI_KEY;
+      return localStorage.getItem('king_ai_gemini_key') || DEFAULT_GEMINI_KEY;
     }
 
     function updateApiKeyPrompt() {
       const current = getActiveApiKey();
-      const newKey = prompt("Enter your new OpenAI API Key:", current);
+      const newKey = prompt("Enter your new Gemini API Key:", current);
       if (newKey && newKey.trim().length > 0) {
-        localStorage.setItem('king_ai_custom_key', newKey.trim());
-        alert("API Key updated successfully!");
+        localStorage.setItem('king_ai_gemini_key', newKey.trim());
+        alert("Gemini API Key updated successfully!");
       }
     }
 
@@ -507,36 +507,38 @@
       const aiId = 'ai-' + Date.now();
       renderBubble('assistant', '👑 Thinking...', aiId);
 
-      // Build payload for API
-      const userContent = [];
+      // Build Gemini parts payload
+      const contentsParts = [];
       if (text) {
-        userContent.push({ type: "text", text: text });
+        contentsParts.push({ text: text });
       }
       if (currentImage) {
-        userContent.push({
-          type: "image_url",
-          image_url: { url: currentImage }
+        const base64Data = currentImage.split(',')[1];
+        const mimeType = currentImage.split(';')[0].split(':')[1];
+        contentsParts.push({
+          inline_data: {
+            mime_type: mimeType,
+            data: base64Data
+          }
         });
       }
 
-      const openAIMessages = [
-        { role: "system", content: "You are KING AI PRO, created and owned by Abdullah Waheed. Provide clear and accurate answers." },
-        { role: "user", content: userContent.length === 1 && userContent[0].type === "text" ? text : userContent }
-      ];
-
       const activeApiKey = getActiveApiKey();
-      const targetUrl = 'https://corsproxy.io/?https://api.openai.com/v1/chat/completions';
+      const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${activeApiKey}`;
 
       try {
         const res = await fetch(targetUrl, {
           method: 'POST',
           headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${activeApiKey}`
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: openAIMessages
+            system_instruction: {
+              parts: [{ text: "You are KING AI PRO, created and owned by Abdullah Waheed. Provide clear, concise, and accurate answers." }]
+            },
+            contents: [
+              { parts: contentsParts }
+            ]
           })
         });
 
@@ -546,7 +548,7 @@
           throw new Error(data.error?.message || `Status Code: ${res.status}`);
         }
 
-        const replyText = data.choices[0].message.content;
+        const replyText = data.candidates[0].content.parts[0].text;
 
         const aiBubble = document.getElementById(aiId);
         if (aiBubble) {
@@ -558,12 +560,12 @@
         if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
 
       } catch (err) {
-        console.error("OpenAI API Request Failed:", err);
+        console.error("Gemini API Request Failed:", err);
         const aiBubble = document.getElementById(aiId);
         if (aiBubble) {
           aiBubble.innerHTML = `<div class="space-y-1">
             <span class="text-red-400 font-bold">⚠️ Connection Error: ${err.message}</span>
-            <p class="text-[10px] text-slate-400">If your API key has been revoked by OpenAI, click <strong>"Change Key"</strong> at the top right to set a fresh key.</p>
+            <p class="text-[10px] text-slate-400">Please verify your Gemini API key by clicking <strong>"Change Key"</strong> at the top right.</p>
           </div>`;
         }
       }
