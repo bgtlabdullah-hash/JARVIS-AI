@@ -11,7 +11,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-  <!-- MathJax for rendering equations cleanly like Gemini -->
+  <!-- MathJax for rendering math equations -->
   <script>
     window.MathJax = {
       tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
@@ -100,7 +100,7 @@
       <!-- VIP Status -->
       <div class="w-full p-2.5 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs">
         <div>🎟️ VIP Pass Active</div>
-        <div class="text-[9px] text-slate-900 font-semibold">Unlimited High-Speed Access</div>
+        <div class="text-[9px] text-slate-900 font-semibold">Unlimited Ultra-Fast Access</div>
       </div>
 
       <!-- Buy KING Pro Link -->
@@ -113,7 +113,7 @@
       <div class="p-2.5 rounded-xl bg-slate-900 border border-king-border text-[10px] space-y-1">
         <div class="flex justify-between text-slate-400 font-bold">
           <span>VIP UNLIMITED</span>
-          <span class="text-amber-400">FAST ENGINE</span>
+          <span class="text-amber-400">STABLE ENGINE</span>
         </div>
         <div class="flex justify-between"><span>💬 Messages:</span><span class="font-bold text-amber-300">UNLIMITED</span></div>
         <div class="flex justify-between"><span>🎨 Image Creation:</span><span class="font-bold text-purple-300">UNLIMITED</span></div>
@@ -132,7 +132,7 @@
       <div class="text-[10px] font-bold text-slate-400 uppercase pt-2 border-t border-king-border">Intelligence Modes</div>
       <button id="btn-mode-chat" onclick="switchMode('chat')" class="w-full text-left p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold flex justify-between items-center">
         <span>💬 King AI Chat PRO</span>
-        <span class="text-[9px] bg-amber-500/20 px-1 rounded">Fast</span>
+        <span class="text-[9px] bg-amber-500/20 px-1 rounded">&lt;2s Fast</span>
       </button>
       <button id="btn-mode-image" onclick="switchMode('image')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold flex justify-between items-center">
         <span>🎨 8K Image Studio</span>
@@ -154,8 +154,8 @@
       <section id="mode-chat" class="flex-1 flex flex-col h-full">
         <div class="px-4 py-2 border-b border-king-border bg-king-slate flex justify-between items-center text-xs">
           <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-            <span class="font-bold">King AI Fast Engine</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span class="font-bold text-amber-300">King AI Instant Server (Active)</span>
           </div>
           <button onclick="createNewChat()" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded text-[11px] font-black">+ New Chat</button>
         </div>
@@ -170,7 +170,7 @@
             <div class="grid grid-cols-2 gap-2 text-left pt-2">
               <button onclick="usePrompt('Simplify 2a+b/4a^2-b^2')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
                 <div class="font-bold text-amber-300">📐 Math Expression</div>
-                <div class="text-[10px] text-slate-400">Clean visual equations.</div>
+                <div class="text-[10px] text-slate-400">Clean visual math equations.</div>
               </button>
               <button onclick="usePrompt('Write a letter to Principal asking for 2 days leave')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
                 <div class="font-bold text-amber-300">📄 Application Form</div>
@@ -197,7 +197,7 @@
             <button type="button" onclick="document.getElementById('imageInput').click()" class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-amber-400 hover:border-amber-500" title="Upload Image">
               <i data-lucide="image-plus" class="w-4 h-4"></i>
             </button>
-            <input id="chatInput" type="text" placeholder="Ask King AI anything..." class="flex-1 bg-slate-900 text-xs rounded-xl px-4 py-3 border border-slate-700 focus:outline-none focus:border-amber-500">
+            <input id="chatInput" type="text" placeholder="Ask King AI anything..." class="flex-1 bg-slate-900 text-xs rounded-xl px-4 py-3 border border-slate-700 focus:outline-none focus:border-amber-500 text-white">
             <button type="submit" class="gold-gradient-bg text-slate-950 p-2.5 rounded-xl font-bold">
               <i data-lucide="send" class="w-4 h-4"></i>
             </button>
@@ -209,22 +209,25 @@
       <section id="mode-image" class="hidden flex-1 p-6 space-y-4 overflow-y-auto">
         <h2 class="text-xl font-bold text-amber-400 font-royal">🎨 8K Image Studio</h2>
         <div class="bg-king-card border border-king-border p-4 rounded-xl space-y-3 max-w-xl">
-          <textarea id="imagePromptInput" placeholder="Describe the image you want to generate (e.g., A futuristic sports car in Lahore at night)..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs h-24 focus:outline-none focus:border-amber-500 text-white"></textarea>
+          <textarea id="imagePromptInput" placeholder="Describe the image you want to generate in detail..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs h-24 focus:outline-none focus:border-amber-500 text-white"></textarea>
           <button id="generateImgBtn" onclick="generateImage()" class="w-full py-3 gold-gradient-bg text-slate-950 font-black rounded-xl text-xs flex items-center justify-center gap-2">
             <span>Generate 8K Image</span>
           </button>
         </div>
 
-        <!-- Inline Loader and Display Container -->
         <div id="imageStatusContainer" class="hidden space-y-3">
           <div id="imageLoadingSpinner" class="flex items-center gap-3 p-4 bg-slate-900 border border-amber-500/30 rounded-xl text-amber-400 text-xs font-bold animate-pulse max-w-md">
             <div class="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-            <span>Generating 8K image directly... Please wait standard 2-3 seconds.</span>
+            <span>Generating high quality rendering... Please wait a few seconds.</span>
           </div>
 
           <div id="imageResultContainer" class="hidden space-y-2">
             <h3 class="text-xs font-bold text-slate-300">Generated Result:</h3>
             <img id="generatedImageDisplay" class="max-w-md rounded-xl border border-king-border shadow-2xl" src="" alt="Generated AI Image" onload="imageLoadedSuccessfully()" onerror="imageGenerationFailed()">
+          </div>
+
+          <div id="imageErrorNotice" class="hidden p-3 bg-red-950/60 border border-red-500/40 rounded-xl text-xs text-red-300 font-semibold max-w-md">
+            ⚠️ Image rendering took longer than expected or failed. Click "Generate 8K Image" again to retry.
           </div>
         </div>
       </section>
@@ -234,7 +237,7 @@
         <h2 class="text-xl font-bold text-amber-400 font-royal">🛡️ Monogram & Shields Studio</h2>
         <div class="p-6 bg-king-card border border-king-border rounded-xl text-xs space-y-3 max-w-md">
           <p class="text-slate-300">Create custom royal shields and monogram designs.</p>
-          <input id="monogramTitle" type="text" placeholder="Enter Monogram Text" class="w-full bg-slate-900 p-2.5 rounded-lg border border-slate-700 text-xs">
+          <input id="monogramTitle" type="text" placeholder="Enter Monogram Text (e.g. Abdullah)" class="w-full bg-slate-900 p-2.5 rounded-lg border border-slate-700 text-xs text-white">
           <button onclick="generateMonogramImage()" class="w-full py-2.5 bg-amber-400 text-slate-950 font-bold rounded-lg">Generate Shield Emblem</button>
         </div>
       </section>
@@ -243,9 +246,9 @@
       <section id="mode-cinema" class="hidden flex-1 p-6 space-y-4">
         <h2 class="text-xl font-bold text-amber-400 font-royal">🎬 Cinema Studio Pro</h2>
         <div class="p-6 bg-king-card border border-king-border rounded-xl text-xs space-y-3 max-w-md">
-          <p class="text-slate-300">Generates video animation concepts and storyboards.</p>
-          <input type="text" placeholder="Describe Video Scene Concept..." class="w-full bg-slate-900 p-2.5 rounded-lg border border-slate-700 text-xs">
-          <button onclick="switchMode('chat')" class="w-full py-2.5 bg-amber-400 text-slate-950 font-bold rounded-lg">Create Storyboard Script</button>
+          <p class="text-slate-300">Generate cinematic video frame storyboards.</p>
+          <input id="cinemaPromptInput" type="text" placeholder="Describe Cinema Scene (e.g. Futuristic car driving in rain)..." class="w-full bg-slate-900 p-2.5 rounded-lg border border-slate-700 text-xs text-white">
+          <button onclick="generateCinemaScene()" class="w-full py-2.5 bg-amber-400 text-slate-950 font-bold rounded-lg">Generate Cinema Frame</button>
         </div>
       </section>
 
@@ -274,8 +277,6 @@
   </div>
 
   <script>
-    const PERMANENT_OPENAI_KEY = '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';
-
     let attachedBase64Image = null;
     let sessions = JSON.parse(localStorage.getItem('king_ai_sessions') || '[]');
     let currentSessionId = localStorage.getItem('king_ai_active_session') || null;
@@ -402,50 +403,14 @@
       const aiId = 'ai-' + Date.now();
       renderBubble('assistant', '👑 Thinking...', aiId);
 
-      const messagesPayload = [
-        {
-          role: "system",
-          content: "You are KING AI PRO, owned by Abdullah Waheed. Provide clear answers. For math, always use standard LaTeX syntax ($...$ or $$...$$) so MathJax renders equations directly."
-        }
-      ];
-
-      session.messages.forEach(m => {
-        messagesPayload.push({
-          role: m.role === 'user' ? 'user' : 'assistant',
-          content: m.text
-        });
-      });
-
-      if (attachedBase64Image) {
-        messagesPayload[messagesPayload.length - 1].content = [
-          { type: "text", text: text || "Describe and analyze this image." },
-          { type: "image_url", image_url: { url: attachedBase64Image } }
-        ];
-        removeAttachedImage();
-      }
+      const systemPrompt = "You are KING AI PRO, created and owned by Abdullah Waheed. Give clean answers. For math, format equations clearly using LaTeX ($...$ or $$...$$) so MathJax renders them correctly.";
+      const combinedPrompt = `${systemPrompt}\nUser asked: ${text}`;
 
       try {
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${PERMANENT_OPENAI_KEY}`
-          },
-          body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: messagesPayload,
-            temperature: 0.5,
-            max_tokens: 1000
-          })
-        });
+        const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(combinedPrompt)}?model=openai`);
+        if (!res.ok) throw new Error('Network error');
 
-        const data = await res.json();
-        if (!res.ok) {
-          document.getElementById(aiId).innerHTML = `<span class="text-red-400 font-bold">⚠️ Error: ${data.error?.message || 'Invalid Request'}</span>`;
-          return;
-        }
-
-        const replyText = data.choices?.[0]?.message?.content || 'No response.';
+        const replyText = await res.text();
         document.getElementById(aiId).innerHTML = marked.parse(replyText);
         session.messages.push({ role: 'assistant', text: replyText });
         saveSessions();
@@ -453,44 +418,61 @@
         if (window.MathJax) MathJax.typesetPromise();
 
       } catch (err) {
-        document.getElementById(aiId).innerHTML = '<span class="text-red-400 font-bold">⚠️ Network Error. Connection timed out.</span>';
+        document.getElementById(aiId).innerHTML = '<span class="text-red-400 font-bold">⚠️ Connection error. Please try again.</span>';
       }
     }
 
-    // Direct, Pop-up Free 8K Image Generation (Pollinations Engine)
-    function generateImage() {
-      const prompt = document.getElementById('imagePromptInput').value.trim();
-      if (!prompt) return;
+    // Fixed Universal Image Generation Engine
+    function generateImage(customPrompt = null) {
+      const rawPrompt = customPrompt || document.getElementById('imagePromptInput').value.trim();
+      if (!rawPrompt) return;
+
+      // Clean prompt string to prevent broken URL parameters
+      const sanitizedPrompt = rawPrompt.replace(/[^a-zA-Z0-9\s,.-]/g, ' ').replace(/\s+/g, ' ').trim();
 
       const statusContainer = document.getElementById('imageStatusContainer');
       const spinner = document.getElementById('imageLoadingSpinner');
       const resultBox = document.getElementById('imageResultContainer');
+      const errorNotice = document.getElementById('imageErrorNotice');
       const imgDisplay = document.getElementById('generatedImageDisplay');
 
       statusContainer.classList.remove('hidden');
       spinner.classList.remove('hidden');
       resultBox.classList.add('hidden');
+      errorNotice.classList.add('hidden');
 
-      const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${Math.floor(Math.random() * 100000)}&nologo=true`;
-      
+      const randomSeed = Math.floor(Math.random() * 999999);
+      const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(sanitizedPrompt)}?width=1024&height=1024&seed=${randomSeed}&nologo=true`;
+
       imgDisplay.src = imageUrl;
     }
 
     function generateMonogramImage() {
-      const text = document.getElementById('monogramTitle').value.trim() || 'King AI';
+      const text = document.getElementById('monogramTitle').value.trim() || 'KING AI';
+      const prompt = `luxury royal gold emblem coat of arms monogram shield logo with letters ${text}, 8k render dark background`;
       switchMode('image');
-      document.getElementById('imagePromptInput').value = `A luxury gold royal emblem shield monogram with letters ${text}, 8K render, dark background`;
-      generateImage();
+      document.getElementById('imagePromptInput').value = prompt;
+      generateImage(prompt);
+    }
+
+    function generateCinemaScene() {
+      const text = document.getElementById('cinemaPromptInput').value.trim() || 'futuristic luxury sports car';
+      const prompt = `cinematic movie frame wide shot of ${text}, photorealistic 8k octane render detailed lighting`;
+      switchMode('image');
+      document.getElementById('imagePromptInput').value = prompt;
+      generateImage(prompt);
     }
 
     function imageLoadedSuccessfully() {
       document.getElementById('imageLoadingSpinner').classList.add('hidden');
+      document.getElementById('imageErrorNotice').classList.add('hidden');
       document.getElementById('imageResultContainer').classList.remove('hidden');
     }
 
     function imageGenerationFailed() {
       document.getElementById('imageLoadingSpinner').classList.add('hidden');
-      alert('Failed to load image. Please try another prompt.');
+      document.getElementById('imageResultContainer').classList.add('hidden');
+      document.getElementById('imageErrorNotice').classList.remove('hidden');
     }
 
     function renderBubble(role, text, id = null) {
