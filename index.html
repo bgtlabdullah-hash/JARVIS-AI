@@ -155,7 +155,7 @@
         <div class="px-4 py-2 border-b border-king-border bg-king-slate flex justify-between items-center text-xs">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            <span class="font-bold text-amber-300">King AI Instant Server (Active)</span>
+            <span class="font-bold text-amber-300">King AI Instant Server (Gemini Engine)</span>
           </div>
           <button onclick="createNewChat()" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded text-[11px] font-black">+ New Chat</button>
         </div>
@@ -277,6 +277,9 @@
   </div>
 
   <script>
+    // Configured Google Gemini API Key
+    const GEMINI_API_KEY = "AQ.Ab8RN6KVf00Jf_fUC-gzXpEUnkJQMJwW0cQq7dCHO-Ts_C2Q7Q";
+
     let attachedBase64Image = null;
     let sessions = JSON.parse(localStorage.getItem('king_ai_sessions') || '[]');
     let currentSessionId = localStorage.getItem('king_ai_active_session') || null;
@@ -396,6 +399,9 @@
 
       session.messages.push({ role: 'user', text });
       renderBubble('user', text);
+      
+      const currentImage = attachedBase64Image;
+      removeAttachedImage(); // Reset preview bar
       input.value = '';
       saveSessions();
       renderSessionList();
@@ -403,14 +409,44 @@
       const aiId = 'ai-' + Date.now();
       renderBubble('assistant', '👑 Thinking...', aiId);
 
-      const systemPrompt = "You are KING AI PRO, created and owned by Abdullah Waheed. Give clean answers. For math, format equations clearly using LaTeX ($...$ or $$...$$) so MathJax renders them correctly.";
-      const combinedPrompt = `${systemPrompt}\nUser asked: ${text}`;
+      // Build Gemini API Parts Payload
+      const parts = [];
+      
+      // Add System Instructions Context
+      parts.push({ text: "You are KING AI PRO, created and owned by Abdullah Waheed. Provide clear and accurate answers. For mathematical equations, format using LaTeX ($...$ or $$...$$) so MathJax renders them correctly." });
+
+      // Handle attached image payload for Gemini Multimodal
+      if (currentImage) {
+        const mimeType = currentImage.split(';')[0].split(':')[1];
+        const base64Data = currentImage.split(',')[1];
+        parts.push({
+          inline_data: {
+            mime_type: mimeType,
+            data: base64Data
+          }
+        });
+      }
+
+      if (text) {
+        parts.push({ text: text });
+      }
 
       try {
-        const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(combinedPrompt)}?model=openai`);
-        if (!res.ok) throw new Error('Network error');
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts }] })
+        });
 
-        const replyText = await res.text();
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error?.message || `Server Status ${res.status}`);
+        }
+
+        const data = await res.json();
+        const replyText = data.candidates[0].content.parts[0].text;
+
         document.getElementById(aiId).innerHTML = marked.parse(replyText);
         session.messages.push({ role: 'assistant', text: replyText });
         saveSessions();
@@ -418,7 +454,8 @@
         if (window.MathJax) MathJax.typesetPromise();
 
       } catch (err) {
-        document.getElementById(aiId).innerHTML = '<span class="text-red-400 font-bold">⚠️ Connection error. Please try again.</span>';
+        console.error("Gemini API Request Failed:", err);
+        document.getElementById(aiId).innerHTML = `<span class="text-red-400 font-bold">⚠️ Connection error: ${err.message}. Please try again.</span>`;
       }
     }
 
@@ -457,7 +494,6 @@
         resultBox.classList.remove('hidden');
 
       } catch (err) {
-        // Fallback to Turbo Model if main engine times out
         loadingText.innerText = "Switching to ultra-fast backup engine...";
         try {
           const fallbackUrl = `https://image.pollinations.ai/prompt/${sanitizedPrompt}?width=800&height=800&seed=${seed}&model=turbo&nologo=true`;
