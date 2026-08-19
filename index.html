@@ -11,7 +11,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-  <!-- MathJax for rendering math equations -->
+  <!-- MathJax Configuration -->
   <script>
     window.MathJax = {
       tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
@@ -47,10 +47,13 @@
     .chat-bubble-user { background: #223254; border: 1px solid #3b507d; }
   </style>
 
+  <!-- Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(reg => reg.update()).catch(err => console.log('SW:', err));
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('Service Worker registered:', reg.scope))
+          .catch((err) => console.error('Service Worker registration failed:', err));
       });
     }
   </script>
@@ -119,7 +122,7 @@
         <div class="flex justify-between"><span>🎨 Image Creation:</span><span class="font-bold text-purple-300">UNLIMITED</span></div>
       </div>
 
-      <!-- Chat History Section with Clear All Button -->
+      <!-- Chat History Section -->
       <div class="border-t border-king-border pt-2 space-y-1.5">
         <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
           <span>Recent Chats</span>
@@ -280,8 +283,8 @@
   </div>
 
   <script>
-    // Paste your Google AI Studio API key here (begins with AIzaSy...)
-    const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
+    // Configured API Key
+    const GEMINI_API_KEY = "AQ.Ab8RN6Ii6pVII6A92waXNBziPpGewMOoykIG4dVQ0aTdMDUNEw";
 
     let attachedBase64Image = null;
     let sessions = [];
@@ -498,11 +501,14 @@
       }
 
       try {
-        // Updated endpoint to Gemini 3.6 Flash
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`;
+        // Target Gemini 3.6 Flash model with X-goog-api-key header
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent`;
         const res = await fetch(url, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-goog-api-key': GEMINI_API_KEY
+          },
           body: JSON.stringify({ contents: [{ parts }] })
         });
 
@@ -527,7 +533,7 @@
         console.error("Gemini API Request Failed:", err);
         const aiBubble = document.getElementById(aiId);
         if (aiBubble) {
-          aiBubble.innerHTML = `<span class="text-red-400 font-bold">⚠️ Connection error: ${err.message}. Please verify your API key in Google AI Studio.</span>`;
+          aiBubble.innerHTML = `<span class="text-red-400 font-bold">⚠️ Connection error: ${err.message}</span>`;
         }
       }
     }
