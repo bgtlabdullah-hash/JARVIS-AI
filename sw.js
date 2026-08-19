@@ -1,65 +1,360 @@
-const CACHE_NAME = 'king-ai-v9';
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './manifest.json'
-];
+<script>
+    // Primary Gemini API Key provided
+    const DEFAULT_GEMINI_KEY = "AQ.Ab8RN6LKKarswGw_v7LktEZCzKkQkj3Hn_uN1_-t7EA94PwSRw";
 
-// Install Event - Pre-cache essential app shell assets
-self.addEventListener('install', (event) => {
-  self.skipWaiting(); // Force active state immediately
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
-});
+    let attachedBase64Image = null;
+    let sessions = [];
+    let currentSessionId = null;
 
-// Activate Event - Clear old caches (v8, v7, etc.) immediately
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-      );
-    }).then(() => self.clients.claim())
-  );
-});
+    // Retrieve active Gemini API key (Fallback to default if local storage is empty)
+    function getActiveApiKey() {
+      return localStorage.getItem('king_ai_gemini_key') || DEFAULT_GEMINI_KEY;
+    }
 
-// Fetch Event - Network-first strategy with API call bypass
-self.addEventListener('fetch', (event) => {
-  const requestUrl = new URL(event.request.url);
+    function updateApiKeyPrompt() {
+      const current = getActiveApiKey();
+      const newKey = prompt("Enter your new Gemini API Key:", current);
+      if (newKey && newKey.trim().length > 0) {
+        localStorage.setItem('king_ai_gemini_key', newKey.trim());
+        alert("Gemini API Key updated successfully!");
+      }
+    }
 
-  // 1. Completely BYPASS Service Worker for non-GET requests (e.g. POST to OpenAI)
-  if (event.request.method !== 'GET') {
-    return;
-  }
+    try {
+      sessions = JSON.parse(localStorage.getItem('king_ai_sessions') || '[]');
+      currentSessionId = localStorage.getItem('king_ai_active_session') || null;
+    } catch (e) {
+      sessions = [];
+      currentSessionId = null;
+    }
 
-  // 2. BYPASS Service Worker for external APIs (OpenAI, Pollinations, CORS proxies)
-  if (
-    requestUrl.hostname.includes('openai.com') ||
-    requestUrl.hostname.includes('corsproxy.io') ||
-    requestUrl.hostname.includes('pollinations.ai')
-  ) {
-    return;
-  }
+    function init() {
+      if (!currentSessionId || !sessions.find(s => s.id === currentSessionId)) {
+        createNewChat(false);
+      } else {
+        loadSession(currentSessionId);
+      }
+      renderSessionList();
+    }
 
-  // 3. For local static assets (Network-First, fallback to Cache)
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // If network request succeeds, clone and update cache dynamically
-        if (response && response.status === 200 && response.type === 'basic') {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+    function switchMode(mode) {
+      const modes = ['chat', 'image', 'monogram', 'cinema', 'tools', 'saved'];
+      modes.forEach(m => {
+        const el = document.getElementById(`mode-${m}`);
+        if (el) el.classList.toggle('hidden', m !== mode);
+        const btn = document.getElementById(`btn-mode-${m}`);
+        if (btn) {
+          if (m === mode) {
+            btn.className = 'w-full text-left p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold flex justify-between items-center';
+          } else {
+            btn.className = 'w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold flex justify-between items-center';
+          }
         }
-        return response;
-      })
-      .catch(() => {
-        // Fallback to cache if offline
-        return caches.match(event.request);
-      })
-  );
-});
+      });
+    }
+
+    function handleImageSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        attachedBase64Image = e.target.result;
+        document.getElementById('attachedImagePreview').src = attachedBase64Image;
+        document.getElementById('imagePreviewContainer').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeAttachedImage() {
+      attachedBase64Image = null;
+      document.getElementById('imageInput').value = '';
+      document.getElementById('imagePreviewContainer').classList.add('hidden');
+    }
+
+    function createNewChat(render = true) {
+      currentSessionId = 'session_' + Date.now();
+      sessions.unshift({ id: currentSessionId, title: 'New Conversation', messages: [] });
+      saveSessions();
+      if (render) {
+        renderSessionList();
+        loadSession(currentSessionId);
+      }
+    }
+
+    function deleteSession(id, event) {
+      if (event) event.stopPropagation();
+      sessions = sessions.filter(s => s.id !== id);
+      if (currentSessionId === id) {
+        if (sessions.length > 0) {
+          currentSessionId = sessions[0].id;
+        } else {
+          createNewChat(false);
+        }
+      }
+      saveSessions();
+      renderSessionList();
+      loadSession(currentSessionId);
+    }
+
+    function clearAllChats() {
+      if (confirm("Are you sure you want to delete all chat history?")) {
+        sessions = [];
+        localStorage.removeItem('king_ai_sessions');
+        localStorage.removeItem('king_ai_active_session');
+        createNewChat(false);
+        renderSessionList();
+        loadSession(currentSessionId);
+      }
+    }
+
+    function saveSessions() {
+      localStorage.setItem('king_ai_sessions', JSON.stringify(sessions));
+      localStorage.setItem('king_ai_active_session', currentSessionId);
+    }
+
+    function loadSession(id) {
+      currentSessionId = id;
+      localStorage.setItem('king_ai_active_session', id);
+      const session = sessions.find(s => s.id === id);
+      const container = document.getElementById('chatMessages');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (!session || session.messages.length === 0) {
+        container.innerHTML = `
+          <div id="welcomeScreen" class="max-w-xl mx-auto text-center py-6 space-y-4">
+            <div class="w-16 h-16 mx-auto rounded-2xl gold-gradient-bg flex items-center justify-center text-3xl">👑</div>
+            <div>
+              <h1 class="text-2xl font-royal font-bold">KING AI PRO</h1>
+              <p class="text-xs text-amber-300 font-semibold">Created & Owned by Abdullah Waheed</p>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-left pt-2">
+              <button onclick="usePrompt('Simplify 2a+b/4a^2-b^2')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
+                <div class="font-bold text-amber-300">📐 Math Expression</div>
+                <div class="text-[10px] text-slate-400">Clean visual math equations.</div>
+              </button>
+              <button onclick="usePrompt('Write a letter to Principal asking for 2 days leave')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
+                <div class="font-bold text-amber-300">📄 Application Form</div>
+                <div class="text-[10px] text-slate-400">Ready-to-use leave application.</div>
+              </button>
+            </div>
+          </div>`;
+      } else {
+        session.messages.forEach(msg => renderBubble(msg.role, msg.text));
+        if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
+      }
+      renderSessionList();
+    }
+
+    function renderSessionList() {
+      const list = document.getElementById('chatHistoryList');
+      if (!list) return;
+      list.innerHTML = '';
+      
+      const validSessions = sessions.filter(s => s.messages && s.messages.length > 0);
+
+      if (validSessions.length === 0) {
+        list.innerHTML = `<div class="text-[10px] text-slate-500 italic px-1">No chats saved.</div>`;
+        return;
+      }
+
+      validSessions.forEach(s => {
+        const item = document.createElement('div');
+        const isActive = s.id === currentSessionId;
+        item.className = `flex items-center justify-between p-1.5 rounded-lg text-[11px] border gap-1 cursor-pointer transition ${isActive ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold' : 'text-slate-400 border-transparent hover:bg-slate-800'}`;
+        
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'truncate flex-1';
+        titleSpan.innerText = s.title || 'Conversation';
+        titleSpan.onclick = () => loadSession(s.id);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'text-slate-500 hover:text-red-400 px-1 font-bold';
+        deleteBtn.innerHTML = '✕';
+        deleteBtn.title = 'Delete Chat';
+        deleteBtn.onclick = (e) => deleteSession(s.id, e);
+
+        item.appendChild(titleSpan);
+        item.appendChild(deleteBtn);
+        list.appendChild(item);
+      });
+    }
+
+    function usePrompt(text) {
+      document.getElementById('chatInput').value = text;
+      handleChatSubmit();
+    }
+
+    async function handleChatSubmit(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text && !attachedBase64Image) return;
+
+      const session = sessions.find(s => s.id === currentSessionId);
+      if (session && session.messages.length === 0) {
+        session.title = (text || 'Image Request').substring(0, 22) + '...';
+        const welcome = document.getElementById('welcomeScreen');
+        if (welcome) welcome.remove();
+      }
+
+      if (session) session.messages.push({ role: 'user', text });
+      renderBubble('user', text);
+      
+      const currentImage = attachedBase64Image;
+      removeAttachedImage();
+      input.value = '';
+      saveSessions();
+      renderSessionList();
+
+      const aiId = 'ai-' + Date.now();
+      renderBubble('assistant', '👑 Thinking...', aiId);
+
+      // Build Gemini parts payload
+      const contentsParts = [];
+      if (text) {
+        contentsParts.push({ text: text });
+      }
+      if (currentImage) {
+        const base64Data = currentImage.split(',')[1];
+        const mimeType = currentImage.split(';')[0].split(':')[1];
+        contentsParts.push({
+          inline_data: {
+            mime_type: mimeType,
+            data: base64Data
+          }
+        });
+      }
+
+      const activeApiKey = getActiveApiKey();
+      const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${activeApiKey}`;
+
+      try {
+        const res = await fetch(targetUrl, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            system_instruction: {
+              parts: [{ text: "You are KING AI PRO, created and owned by Abdullah Waheed. Provide clear, concise, and accurate answers." }]
+            },
+            contents: [
+              { parts: contentsParts }
+            ]
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error?.message || `Status Code: ${res.status}`);
+        }
+
+        const replyText = data.candidates[0].content.parts[0].text;
+
+        const aiBubble = document.getElementById(aiId);
+        if (aiBubble) {
+          aiBubble.innerHTML = window.marked ? marked.parse(replyText) : replyText;
+        }
+        if (session) session.messages.push({ role: 'assistant', text: replyText });
+        saveSessions();
+
+        if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
+
+      } catch (err) {
+        console.error("Gemini API Request Failed:", err);
+        const aiBubble = document.getElementById(aiId);
+        if (aiBubble) {
+          aiBubble.innerHTML = `<div class="space-y-1">
+            <span class="text-red-400 font-bold">⚠️ Connection Error: ${err.message}</span>
+            <p class="text-[10px] text-slate-400">Please verify your Gemini API key by clicking <strong>"Change Key"</strong> at the top right.</p>
+          </div>`;
+        }
+      }
+    }
+
+    async function generateImage(customPrompt = null) {
+      const rawPrompt = customPrompt || document.getElementById('imagePromptInput').value.trim();
+      if (!rawPrompt) return;
+
+      const sanitizedPrompt = encodeURIComponent(rawPrompt);
+
+      const statusContainer = document.getElementById('imageStatusContainer');
+      const spinner = document.getElementById('imageLoadingSpinner');
+      const loadingText = document.getElementById('imageLoadingText');
+      const resultBox = document.getElementById('imageResultContainer');
+      const errorNotice = document.getElementById('imageErrorNotice');
+      const imgDisplay = document.getElementById('generatedImageDisplay');
+
+      statusContainer.classList.remove('hidden');
+      spinner.classList.remove('hidden');
+      resultBox.classList.add('hidden');
+      errorNotice.classList.add('hidden');
+      loadingText.innerText = "Rendering high quality image...";
+
+      const seed = Math.floor(Math.random() * 99999);
+      const primaryUrl = `https://image.pollinations.ai/prompt/${sanitizedPrompt}?width=800&height=800&seed=${seed}&nologo=true`;
+
+      try {
+        const response = await fetch(primaryUrl);
+        if (!response.ok) throw new Error('Primary engine failed');
+
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+
+        imgDisplay.src = objectUrl;
+        spinner.classList.add('hidden');
+        resultBox.classList.remove('hidden');
+
+      } catch (err) {
+        loadingText.innerText = "Switching to backup engine...";
+        try {
+          const fallbackUrl = `https://image.pollinations.ai/prompt/${sanitizedPrompt}?width=800&height=800&seed=${seed}&model=turbo&nologo=true`;
+          const fallbackResponse = await fetch(fallbackUrl);
+          if (!fallbackResponse.ok) throw new Error('Fallback failed');
+
+          const fallbackBlob = await fallbackResponse.blob();
+          imgDisplay.src = URL.createObjectURL(fallbackBlob);
+          spinner.classList.add('hidden');
+          resultBox.classList.remove('hidden');
+        } catch (fallbackErr) {
+          spinner.classList.add('hidden');
+          errorNotice.classList.remove('hidden');
+        }
+      }
+    }
+
+    function generateMonogramImage() {
+      const text = document.getElementById('monogramTitle').value.trim() || 'KING AI';
+      const prompt = `luxury royal gold emblem coat of arms monogram shield logo with letters ${text}, 8k render dark background`;
+      switchMode('image');
+      document.getElementById('imagePromptInput').value = prompt;
+      generateImage(prompt);
+    }
+
+    function generateCinemaScene() {
+      const text = document.getElementById('cinemaPromptInput').value.trim() || 'futuristic luxury sports car';
+      const prompt = `cinematic movie frame wide shot of ${text}, photorealistic 8k detailed lighting`;
+      switchMode('image');
+      document.getElementById('imagePromptInput').value = prompt;
+      generateImage(prompt);
+    }
+
+    function renderBubble(role, text, id = null) {
+      const container = document.getElementById('chatMessages');
+      if (!container) return;
+      const div = document.createElement('div');
+      div.className = role === 'user' ? 'chat-bubble-user p-3 rounded-xl text-xs max-w-lg ml-auto' : 'chat-bubble-ai p-3 rounded-xl text-xs max-w-lg mr-auto';
+      if (id) div.id = id;
+      div.innerHTML = role === 'user' ? text : (window.marked ? marked.parse(text) : text);
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) lucide.createIcons();
+      init();
+    });
+  </script>
