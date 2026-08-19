@@ -120,12 +120,15 @@
       </div>
 
       <!-- Chat History Section -->
-      <div class="border-t border-king-border pt-2 space-y-1">
+      <div class="border-t border-king-border pt-2 space-y-1.5">
         <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
           <span>Recent Chats</span>
-          <button onclick="createNewChat()" class="text-amber-400 hover:underline">+ New</button>
+          <div class="flex gap-2">
+            <button onclick="clearAllChats()" class="text-red-400 hover:underline">Clear All</button>
+            <button onclick="createNewChat()" class="text-amber-400 hover:underline">+ New</button>
+          </div>
         </div>
-        <div id="chatHistoryList" class="space-y-1 max-h-32 overflow-y-auto"></div>
+        <div id="chatHistoryList" class="space-y-1 max-h-36 overflow-y-auto pr-1"></div>
       </div>
 
       <!-- Intelligence Modes -->
@@ -278,7 +281,7 @@
 
   <script>
     // Insert your active Gemini API key from Google AI Studio here
-    const GEMINI_API_KEY = "AQ.Ab8RN6KzR5I8wlsL5SQvHm3xlS3FMHCwkPV0H2jiejXRoNLdQQ";
+    const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
 
     let attachedBase64Image = null;
     let sessions = JSON.parse(localStorage.getItem('king_ai_sessions') || '[]');
@@ -337,6 +340,31 @@
       }
     }
 
+    function deleteSession(id, event) {
+      if (event) event.stopPropagation();
+      sessions = sessions.filter(s => s.id !== id);
+      if (currentSessionId === id) {
+        if (sessions.length > 0) {
+          currentSessionId = sessions[0].id;
+        } else {
+          createNewChat(false);
+        }
+      }
+      saveSessions();
+      renderSessionList();
+      loadSession(currentSessionId);
+    }
+
+    function clearAllChats() {
+      if (confirm("Are you sure you want to delete all chat history?")) {
+        sessions = [];
+        createNewChat(false);
+        saveSessions();
+        renderSessionList();
+        loadSession(currentSessionId);
+      }
+    }
+
     function saveSessions() {
       localStorage.setItem('king_ai_sessions', JSON.stringify(sessions));
       localStorage.setItem('king_ai_active_session', currentSessionId);
@@ -369,13 +397,31 @@
       const list = document.getElementById('chatHistoryList');
       if (!list) return;
       list.innerHTML = '';
+      
+      if (sessions.length === 0) {
+        list.innerHTML = `<div class="text-[10px] text-slate-500 italic px-1">No chats saved.</div>`;
+        return;
+      }
+
       sessions.forEach(s => {
-        const btn = document.createElement('button');
+        const item = document.createElement('div');
         const isActive = s.id === currentSessionId;
-        btn.className = `w-full text-left p-1.5 rounded-lg text-[11px] truncate border ${isActive ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold' : 'text-slate-400 border-transparent hover:bg-slate-800'}`;
-        btn.innerText = s.title || 'Conversation';
-        btn.onclick = () => loadSession(s.id);
-        list.appendChild(btn);
+        item.className = `flex items-center justify-between p-1.5 rounded-lg text-[11px] border gap-1 cursor-pointer transition ${isActive ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold' : 'text-slate-400 border-transparent hover:bg-slate-800'}`;
+        
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'truncate flex-1';
+        titleSpan.innerText = s.title || 'Conversation';
+        titleSpan.onclick = () => loadSession(s.id);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'text-slate-500 hover:text-red-400 px-1 font-bold';
+        deleteBtn.innerHTML = '✕';
+        deleteBtn.title = 'Delete Chat';
+        deleteBtn.onclick = (e) => deleteSession(s.id, e);
+
+        item.appendChild(titleSpan);
+        item.appendChild(deleteBtn);
+        list.appendChild(item);
       });
     }
 
@@ -431,7 +477,6 @@
       }
 
       try {
-        // Upgraded endpoint to Gemini 3.6 Flash
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`;
         const res = await fetch(url, {
           method: 'POST',
