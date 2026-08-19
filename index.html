@@ -277,8 +277,8 @@
   </div>
 
   <script>
-    // Configured Google Gemini API Key
-    const GEMINI_API_KEY = "AQ.Ab8RN6KVf00Jf_fUC-gzXpEUnkJQMJwW0cQq7dCHO-Ts_C2Q7Q";
+    // Embedded Gemini API Key
+    const GEMINI_API_KEY = "AQ.Ab8RN6KzR5I8wlsL5SQvHm3xlS3FMHCwkPV0H2jiejXRoNLdQQ";
 
     let attachedBase64Image = null;
     let sessions = JSON.parse(localStorage.getItem('king_ai_sessions') || '[]');
@@ -410,10 +410,9 @@
       renderBubble('assistant', '👑 Thinking...', aiId);
 
       // Build Gemini API Parts Payload
-      const parts = [];
-      
-      // Add System Instructions Context
-      parts.push({ text: "You are KING AI PRO, created and owned by Abdullah Waheed. Provide clear and accurate answers. For mathematical equations, format using LaTeX ($...$ or $$...$$) so MathJax renders them correctly." });
+      const parts = [
+        { text: "You are KING AI PRO, created and owned by Abdullah Waheed. Provide clear and accurate answers. For mathematical equations, format using LaTeX ($...$ or $$...$$) so MathJax renders them correctly." }
+      ];
 
       // Handle attached image payload for Gemini Multimodal
       if (currentImage) {
@@ -432,19 +431,19 @@
       }
 
       try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
         const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contents: [{ parts }] })
         });
 
+        const data = await res.json();
+
         if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error?.message || `Server Status ${res.status}`);
+          throw new Error(data.error?.message || `Server Status ${res.status}`);
         }
 
-        const data = await res.json();
         const replyText = data.candidates[0].content.parts[0].text;
 
         document.getElementById(aiId).innerHTML = marked.parse(replyText);
@@ -455,7 +454,7 @@
 
       } catch (err) {
         console.error("Gemini API Request Failed:", err);
-        document.getElementById(aiId).innerHTML = `<span class="text-red-400 font-bold">⚠️ Connection error: ${err.message}. Please try again.</span>`;
+        document.getElementById(aiId).innerHTML = `<span class="text-red-400 font-bold">⚠️ Connection error: ${err.message}. Please check your API key and try again.</span>`;
       }
     }
 
@@ -494,7 +493,7 @@
         resultBox.classList.remove('hidden');
 
       } catch (err) {
-        loadingText.innerText = "Switching to ultra-fast backup engine...";
+        loadingText.innerText = "Switching to backup engine...";
         try {
           const fallbackUrl = `https://image.pollinations.ai/prompt/${sanitizedPrompt}?width=800&height=800&seed=${seed}&model=turbo&nologo=true`;
           const fallbackResponse = await fetch(fallbackUrl);
