@@ -89,12 +89,11 @@
     </div>
 
     <div class="flex items-center gap-2">
+      <button onclick="updateApiKeyPrompt()" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 font-bold text-xs flex items-center gap-1">
+        🔑 <span>Change Key</span>
+      </button>
       <div class="px-3 py-1.5 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs">
         🎟️ <span>VIP ACTIVE</span>
-      </div>
-      <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-king-card border border-king-border text-xs">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span>Creator & Owner: <strong class="text-amber-400">Abdullah Waheed</strong></span>
       </div>
     </div>
   </header>
@@ -296,12 +295,26 @@
   </div>
 
   <script>
-    // Configured OpenAI Key String
-    const OPENAI_API_KEY = "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";
+    // Primary API Key provided
+    const DEFAULT_OPENAI_KEY = "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";
 
     let attachedBase64Image = null;
     let sessions = [];
     let currentSessionId = null;
+
+    // Retrieve active API key (Fallback to hardcoded if local storage is empty)
+    function getActiveApiKey() {
+      return localStorage.getItem('king_ai_custom_key') || DEFAULT_OPENAI_KEY;
+    }
+
+    function updateApiKeyPrompt() {
+      const current = getActiveApiKey();
+      const newKey = prompt("Enter your new OpenAI API Key:", current);
+      if (newKey && newKey.trim().length > 0) {
+        localStorage.setItem('king_ai_custom_key', newKey.trim());
+        alert("API Key updated successfully!");
+      }
+    }
 
     try {
       sessions = JSON.parse(localStorage.getItem('king_ai_sessions') || '[]');
@@ -494,7 +507,7 @@
       const aiId = 'ai-' + Date.now();
       renderBubble('assistant', '👑 Thinking...', aiId);
 
-      // Build message payload for OpenAI API
+      // Build payload for API
       const userContent = [];
       if (text) {
         userContent.push({ type: "text", text: text });
@@ -511,7 +524,7 @@
         { role: "user", content: userContent.length === 1 && userContent[0].type === "text" ? text : userContent }
       ];
 
-      // Route through CORS Proxy to bypass browser origin blocking
+      const activeApiKey = getActiveApiKey();
       const targetUrl = 'https://corsproxy.io/?https://api.openai.com/v1/chat/completions';
 
       try {
@@ -519,7 +532,7 @@
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OPENAI_API_KEY}`
+            'Authorization': `Bearer ${activeApiKey}`
           },
           body: JSON.stringify({
             model: "gpt-4o-mini",
@@ -548,7 +561,10 @@
         console.error("OpenAI API Request Failed:", err);
         const aiBubble = document.getElementById(aiId);
         if (aiBubble) {
-          aiBubble.innerHTML = `<span class="text-red-400 font-bold">⚠️ Connection error: ${err.message}</span>`;
+          aiBubble.innerHTML = `<div class="space-y-1">
+            <span class="text-red-400 font-bold">⚠️ Connection Error: ${err.message}</span>
+            <p class="text-[10px] text-slate-400">If your API key has been revoked by OpenAI, click <strong>"Change Key"</strong> at the top right to set a fresh key.</p>
+          </div>`;
         }
       }
     }
