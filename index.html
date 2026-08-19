@@ -113,7 +113,7 @@
       <div class="p-2.5 rounded-xl bg-slate-900 border border-king-border text-[10px] space-y-1">
         <div class="flex justify-between text-slate-400 font-bold">
           <span>VIP UNLIMITED</span>
-          <span class="text-amber-400">STABLE ENGINE</span>
+          <span class="text-amber-400">GEMINI 3.6</span>
         </div>
         <div class="flex justify-between"><span>💬 Messages:</span><span class="font-bold text-amber-300">UNLIMITED</span></div>
         <div class="flex justify-between"><span>🎨 Image Creation:</span><span class="font-bold text-purple-300">UNLIMITED</span></div>
@@ -132,7 +132,7 @@
       <div class="text-[10px] font-bold text-slate-400 uppercase pt-2 border-t border-king-border">Intelligence Modes</div>
       <button id="btn-mode-chat" onclick="switchMode('chat')" class="w-full text-left p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold flex justify-between items-center">
         <span>💬 King AI Chat PRO</span>
-        <span class="text-[9px] bg-amber-500/20 px-1 rounded">&lt;2s Fast</span>
+        <span class="text-[9px] bg-amber-500/20 px-1 rounded">3.6 Flash</span>
       </button>
       <button id="btn-mode-image" onclick="switchMode('image')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold flex justify-between items-center">
         <span>🎨 8K Image Studio</span>
@@ -155,7 +155,7 @@
         <div class="px-4 py-2 border-b border-king-border bg-king-slate flex justify-between items-center text-xs">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            <span class="font-bold text-amber-300">King AI Instant Server (Gemini Engine)</span>
+            <span class="font-bold text-amber-300">King AI Instant Server (Gemini 3.6 Engine)</span>
           </div>
           <button onclick="createNewChat()" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded text-[11px] font-black">+ New Chat</button>
         </div>
@@ -277,8 +277,8 @@
   </div>
 
   <script>
-    // Embedded Gemini API Key
-    const GEMINI_API_KEY = "AQ.Ab8RN6KzR5I8wlsL5SQvHm3xlS3FMHCwkPV0H2jiejXRoNLdQQ";
+    // Insert your active Gemini API key from Google AI Studio here
+    const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
 
     let attachedBase64Image = null;
     let sessions = JSON.parse(localStorage.getItem('king_ai_sessions') || '[]');
@@ -431,7 +431,8 @@
       }
 
       try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        // Upgraded endpoint to Gemini 3.6 Flash
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`;
         const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
