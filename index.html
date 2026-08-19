@@ -7,15 +7,16 @@
   <meta name="description" content="KING AI PRO - Created & Owned by Abdullah Waheed.">
   <title>King AI PRO — Owned by Abdullah Waheed</title>
 
-  <!-- Favicon Fix -->
+  <!-- Complete Favicon Fix (Stops 404 console error) -->
+  <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
 
   <!-- Suppress Tailwind CDN Warning in Console -->
   <script>
-    const originalWarn = console.warn;
+    const origWarn = console.warn;
     console.warn = function(...args) {
-      if (typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
-      originalWarn.apply(console, args);
+      if (args[0] && typeof args[0] === 'string' && args[0].includes('tailwindcss.com')) return;
+      origWarn.apply(console, args);
     };
   </script>
 
