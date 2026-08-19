@@ -11,7 +11,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-  <!-- MathJax for clean KaTeX/LaTeX math formatting (Matches Gemini math UI) -->
+  <!-- MathJax for rendering equations cleanly like Gemini -->
   <script>
     window.MathJax = {
       tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
@@ -73,9 +73,9 @@
     </div>
 
     <div class="flex items-center gap-2">
-      <button onclick="openVipModal()" id="topVipBtn" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs">
-        🎟️ <span id="topVipText">VIP ACTIVE</span>
-      </button>
+      <div class="px-3 py-1.5 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs">
+        🎟️ <span>VIP ACTIVE</span>
+      </div>
       <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-king-card border border-king-border text-xs">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
         <span>Creator & Owner: <strong class="text-amber-400">Abdullah Waheed</strong></span>
@@ -109,17 +109,17 @@
         <span class="px-1.5 py-0.5 bg-slate-950 text-amber-300 text-[9px] rounded">Rs. 1500</span>
       </a>
 
-      <!-- Limits -->
+      <!-- Usage Limits -->
       <div class="p-2.5 rounded-xl bg-slate-900 border border-king-border text-[10px] space-y-1">
         <div class="flex justify-between text-slate-400 font-bold">
           <span>VIP UNLIMITED</span>
-          <span class="text-amber-400">FAST API</span>
+          <span class="text-amber-400">FAST ENGINE</span>
         </div>
         <div class="flex justify-between"><span>💬 Messages:</span><span class="font-bold text-amber-300">UNLIMITED</span></div>
         <div class="flex justify-between"><span>🎨 Image Creation:</span><span class="font-bold text-purple-300">UNLIMITED</span></div>
       </div>
 
-      <!-- Chat History Drawer Section -->
+      <!-- Chat History Section -->
       <div class="border-t border-king-border pt-2 space-y-1">
         <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
           <span>Recent Chats</span>
@@ -136,7 +136,7 @@
       </button>
       <button id="btn-mode-image" onclick="switchMode('image')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold flex justify-between items-center">
         <span>🎨 8K Image Studio</span>
-        <span class="text-[9px] bg-purple-500/20 text-purple-300 px-1 rounded">DALL-E 3</span>
+        <span class="text-[9px] bg-purple-500/20 text-purple-300 px-1 rounded">Flux 8K</span>
       </button>
       <button id="btn-mode-monogram" onclick="switchMode('monogram')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold">🛡️ Monogram & Shields</button>
       <button id="btn-mode-cinema" onclick="switchMode('cinema')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold">🎬 Cinema Studio Pro</button>
@@ -155,7 +155,7 @@
         <div class="px-4 py-2 border-b border-king-border bg-king-slate flex justify-between items-center text-xs">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-            <span class="font-bold">King ChatGPT Turbo Engine (&lt;3s Response)</span>
+            <span class="font-bold">King AI Fast Engine</span>
           </div>
           <button onclick="createNewChat()" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded text-[11px] font-black">+ New Chat</button>
         </div>
@@ -170,11 +170,11 @@
             <div class="grid grid-cols-2 gap-2 text-left pt-2">
               <button onclick="usePrompt('Simplify 2a+b/4a^2-b^2')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
                 <div class="font-bold text-amber-300">📐 Math Expression</div>
-                <div class="text-[10px] text-slate-400">Clean visual LaTeX math equations.</div>
+                <div class="text-[10px] text-slate-400">Clean visual equations.</div>
               </button>
               <button onclick="usePrompt('Write a letter to Principal asking for 2 days leave')" class="p-2.5 rounded-xl bg-king-card border border-king-border hover:border-amber-500/50 text-xs">
                 <div class="font-bold text-amber-300">📄 Application Form</div>
-                <div class="text-[10px] text-slate-400">Ready-to-use school leave application.</div>
+                <div class="text-[10px] text-slate-400">Ready-to-use leave application.</div>
               </button>
             </div>
           </div>
@@ -207,14 +207,25 @@
 
       <!-- MODE 2: 8K IMAGE STUDIO -->
       <section id="mode-image" class="hidden flex-1 p-6 space-y-4 overflow-y-auto">
-        <h2 class="text-xl font-bold text-amber-400 font-royal">🎨 8K Image Studio (DALL-E 3 Engine)</h2>
+        <h2 class="text-xl font-bold text-amber-400 font-royal">🎨 8K Image Studio</h2>
         <div class="bg-king-card border border-king-border p-4 rounded-xl space-y-3 max-w-xl">
-          <textarea id="imagePromptInput" placeholder="Describe the image you want to generate in detail..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs h-24 focus:outline-none focus:border-amber-500"></textarea>
-          <button onclick="generateImage()" class="w-full py-3 gold-gradient-bg text-slate-950 font-black rounded-xl text-xs">Generate 8K Image</button>
+          <textarea id="imagePromptInput" placeholder="Describe the image you want to generate (e.g., A futuristic sports car in Lahore at night)..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs h-24 focus:outline-none focus:border-amber-500 text-white"></textarea>
+          <button id="generateImgBtn" onclick="generateImage()" class="w-full py-3 gold-gradient-bg text-slate-950 font-black rounded-xl text-xs flex items-center justify-center gap-2">
+            <span>Generate 8K Image</span>
+          </button>
         </div>
-        <div id="imageResultContainer" class="hidden space-y-2">
-          <h3 class="text-xs font-bold text-slate-300">Generated Result:</h3>
-          <img id="generatedImageDisplay" class="max-w-md rounded-xl border border-king-border shadow-2xl" src="" alt="Generated AI Image">
+
+        <!-- Inline Loader and Display Container -->
+        <div id="imageStatusContainer" class="hidden space-y-3">
+          <div id="imageLoadingSpinner" class="flex items-center gap-3 p-4 bg-slate-900 border border-amber-500/30 rounded-xl text-amber-400 text-xs font-bold animate-pulse max-w-md">
+            <div class="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+            <span>Generating 8K image directly... Please wait standard 2-3 seconds.</span>
+          </div>
+
+          <div id="imageResultContainer" class="hidden space-y-2">
+            <h3 class="text-xs font-bold text-slate-300">Generated Result:</h3>
+            <img id="generatedImageDisplay" class="max-w-md rounded-xl border border-king-border shadow-2xl" src="" alt="Generated AI Image" onload="imageLoadedSuccessfully()" onerror="imageGenerationFailed()">
+          </div>
         </div>
       </section>
 
@@ -222,9 +233,9 @@
       <section id="mode-monogram" class="hidden flex-1 p-6 space-y-4">
         <h2 class="text-xl font-bold text-amber-400 font-royal">🛡️ Monogram & Shields Studio</h2>
         <div class="p-6 bg-king-card border border-king-border rounded-xl text-xs space-y-3 max-w-md">
-          <p class="text-slate-300">Create custom royal shields, school logos, and emblem designs instantly.</p>
-          <input id="monogramTitle" type="text" placeholder="Enter Logo Name / Letters (e.g., King AI)" class="w-full bg-slate-900 p-2.5 rounded-lg border border-slate-700 text-xs">
-          <button onclick="alert('Designing emblem logo...')" class="w-full py-2.5 bg-amber-400 text-slate-950 font-bold rounded-lg">Generate Monogram</button>
+          <p class="text-slate-300">Create custom royal shields and monogram designs.</p>
+          <input id="monogramTitle" type="text" placeholder="Enter Monogram Text" class="w-full bg-slate-900 p-2.5 rounded-lg border border-slate-700 text-xs">
+          <button onclick="generateMonogramImage()" class="w-full py-2.5 bg-amber-400 text-slate-950 font-bold rounded-lg">Generate Shield Emblem</button>
         </div>
       </section>
 
@@ -232,9 +243,9 @@
       <section id="mode-cinema" class="hidden flex-1 p-6 space-y-4">
         <h2 class="text-xl font-bold text-amber-400 font-royal">🎬 Cinema Studio Pro</h2>
         <div class="p-6 bg-king-card border border-king-border rounded-xl text-xs space-y-3 max-w-md">
-          <p class="text-slate-300">Generates video animation concepts and cinematic storyboards.</p>
+          <p class="text-slate-300">Generates video animation concepts and storyboards.</p>
           <input type="text" placeholder="Describe Video Scene Concept..." class="w-full bg-slate-900 p-2.5 rounded-lg border border-slate-700 text-xs">
-          <button onclick="alert('Generating Cinematic Sequence...')" class="w-full py-2.5 bg-amber-400 text-slate-950 font-bold rounded-lg">Render Scene Storyboard</button>
+          <button onclick="switchMode('chat')" class="w-full py-2.5 bg-amber-400 text-slate-950 font-bold rounded-lg">Create Storyboard Script</button>
         </div>
       </section>
 
@@ -242,13 +253,13 @@
       <section id="mode-tools" class="hidden flex-1 p-6 space-y-4">
         <h2 class="text-xl font-bold text-amber-400 font-royal">🧰 AI Master Tools</h2>
         <div class="grid grid-cols-2 gap-3 max-w-lg">
-          <button onclick="alert('Code Converter Active')" class="p-3 bg-king-card border border-king-border rounded-xl text-left hover:border-amber-400">
+          <button onclick="switchMode('chat')" class="p-3 bg-king-card border border-king-border rounded-xl text-left hover:border-amber-400">
             <div class="font-bold text-amber-300 text-xs">💻 Code Debugger</div>
-            <div class="text-[10px] text-slate-400">Fix JS, HTML, Python code instantly</div>
+            <div class="text-[10px] text-slate-400">Fix JS, HTML, Python code</div>
           </button>
-          <button onclick="alert('Grammar Corrector Active')" class="p-3 bg-king-card border border-king-border rounded-xl text-left hover:border-amber-400">
-            <div class="font-bold text-amber-300 text-xs">✍️ Application & Essay Writer</div>
-            <div class="text-[10px] text-slate-400">Write high-grade essays</div>
+          <button onclick="switchMode('chat')" class="p-3 bg-king-card border border-king-border rounded-xl text-left hover:border-amber-400">
+            <div class="font-bold text-amber-300 text-xs">✍️ Application Writer</div>
+            <div class="text-[10px] text-slate-400">Write formal letters & essays</div>
           </button>
         </div>
       </section>
@@ -263,7 +274,6 @@
   </div>
 
   <script>
-    // PERMANENT OPENAI KEY HARDCODED
     const PERMANENT_OPENAI_KEY = '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';
 
     let attachedBase64Image = null;
@@ -392,7 +402,6 @@
       const aiId = 'ai-' + Date.now();
       renderBubble('assistant', '👑 Thinking...', aiId);
 
-      // Construct OpenAI Compatible Payload
       const messagesPayload = [
         {
           role: "system",
@@ -407,7 +416,6 @@
         });
       });
 
-      // Attach vision data if present
       if (attachedBase64Image) {
         messagesPayload[messagesPayload.length - 1].content = [
           { type: "text", text: text || "Describe and analyze this image." },
@@ -442,7 +450,6 @@
         session.messages.push({ role: 'assistant', text: replyText });
         saveSessions();
 
-        // Render mathematical formulas automatically
         if (window.MathJax) MathJax.typesetPromise();
 
       } catch (err) {
@@ -450,36 +457,40 @@
       }
     }
 
-    async function generateImage() {
+    // Direct, Pop-up Free 8K Image Generation (Pollinations Engine)
+    function generateImage() {
       const prompt = document.getElementById('imagePromptInput').value.trim();
-      if (!prompt) return alert('Please enter a prompt for the image.');
+      if (!prompt) return;
 
-      alert('Generating 8K image via OpenAI DALL-E 3...');
-      try {
-        const res = await fetch('https://api.openai.com/v1/images/generations', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${PERMANENT_OPENAI_KEY}`
-          },
-          body: JSON.stringify({
-            model: "dall-e-3",
-            prompt: prompt,
-            n: 1,
-            size: "1024x1024"
-          })
-        });
+      const statusContainer = document.getElementById('imageStatusContainer');
+      const spinner = document.getElementById('imageLoadingSpinner');
+      const resultBox = document.getElementById('imageResultContainer');
+      const imgDisplay = document.getElementById('generatedImageDisplay');
 
-        const data = await res.json();
-        if (data.data && data.data[0].url) {
-          document.getElementById('generatedImageDisplay').src = data.data[0].url;
-          document.getElementById('imageResultContainer').classList.remove('hidden');
-        } else {
-          alert('Failed to generate image: ' + (data.error?.message || 'Unknown error'));
-        }
-      } catch (err) {
-        alert('Network error while generating image.');
-      }
+      statusContainer.classList.remove('hidden');
+      spinner.classList.remove('hidden');
+      resultBox.classList.add('hidden');
+
+      const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${Math.floor(Math.random() * 100000)}&nologo=true`;
+      
+      imgDisplay.src = imageUrl;
+    }
+
+    function generateMonogramImage() {
+      const text = document.getElementById('monogramTitle').value.trim() || 'King AI';
+      switchMode('image');
+      document.getElementById('imagePromptInput').value = `A luxury gold royal emblem shield monogram with letters ${text}, 8K render, dark background`;
+      generateImage();
+    }
+
+    function imageLoadedSuccessfully() {
+      document.getElementById('imageLoadingSpinner').classList.add('hidden');
+      document.getElementById('imageResultContainer').classList.remove('hidden');
+    }
+
+    function imageGenerationFailed() {
+      document.getElementById('imageLoadingSpinner').classList.add('hidden');
+      alert('Failed to load image. Please try another prompt.');
     }
 
     function renderBubble(role, text, id = null) {
