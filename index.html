@@ -218,16 +218,16 @@
         <div id="imageStatusContainer" class="hidden space-y-3">
           <div id="imageLoadingSpinner" class="flex items-center gap-3 p-4 bg-slate-900 border border-amber-500/30 rounded-xl text-amber-400 text-xs font-bold animate-pulse max-w-md">
             <div class="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-            <span>Generating high quality rendering... Please wait a few seconds.</span>
+            <span id="imageLoadingText">Connecting to High-Speed Image Engine...</span>
           </div>
 
           <div id="imageResultContainer" class="hidden space-y-2">
             <h3 class="text-xs font-bold text-slate-300">Generated Result:</h3>
-            <img id="generatedImageDisplay" class="max-w-md rounded-xl border border-king-border shadow-2xl" src="" alt="Generated AI Image" onload="imageLoadedSuccessfully()" onerror="imageGenerationFailed()">
+            <img id="generatedImageDisplay" class="max-w-md rounded-xl border border-king-border shadow-2xl" src="" alt="Generated AI Image">
           </div>
 
           <div id="imageErrorNotice" class="hidden p-3 bg-red-950/60 border border-red-500/40 rounded-xl text-xs text-red-300 font-semibold max-w-md">
-            ⚠️ Image rendering took longer than expected or failed. Click "Generate 8K Image" again to retry.
+            ⚠️ Rendering failed. Please check internet connection or click "Generate 8K Image" to retry.
           </div>
         </div>
       </section>
@@ -422,16 +422,16 @@
       }
     }
 
-    // Fixed Universal Image Generation Engine
-    function generateImage(customPrompt = null) {
+    // Direct Blob Fetch Image Engine
+    async function generateImage(customPrompt = null) {
       const rawPrompt = customPrompt || document.getElementById('imagePromptInput').value.trim();
       if (!rawPrompt) return;
 
-      // Clean prompt string to prevent broken URL parameters
-      const sanitizedPrompt = rawPrompt.replace(/[^a-zA-Z0-9\s,.-]/g, ' ').replace(/\s+/g, ' ').trim();
+      const sanitizedPrompt = encodeURIComponent(rawPrompt);
 
       const statusContainer = document.getElementById('imageStatusContainer');
       const spinner = document.getElementById('imageLoadingSpinner');
+      const loadingText = document.getElementById('imageLoadingText');
       const resultBox = document.getElementById('imageResultContainer');
       const errorNotice = document.getElementById('imageErrorNotice');
       const imgDisplay = document.getElementById('generatedImageDisplay');
@@ -440,11 +440,39 @@
       spinner.classList.remove('hidden');
       resultBox.classList.add('hidden');
       errorNotice.classList.add('hidden');
+      loadingText.innerText = "Rendering high quality image...";
 
-      const randomSeed = Math.floor(Math.random() * 999999);
-      const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(sanitizedPrompt)}?width=1024&height=1024&seed=${randomSeed}&nologo=true`;
+      const seed = Math.floor(Math.random() * 99999);
+      const primaryUrl = `https://image.pollinations.ai/prompt/${sanitizedPrompt}?width=800&height=800&seed=${seed}&nologo=true`;
 
-      imgDisplay.src = imageUrl;
+      try {
+        const response = await fetch(primaryUrl);
+        if (!response.ok) throw new Error('Primary engine failed');
+
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+
+        imgDisplay.src = objectUrl;
+        spinner.classList.add('hidden');
+        resultBox.classList.remove('hidden');
+
+      } catch (err) {
+        // Fallback to Turbo Model if main engine times out
+        loadingText.innerText = "Switching to ultra-fast backup engine...";
+        try {
+          const fallbackUrl = `https://image.pollinations.ai/prompt/${sanitizedPrompt}?width=800&height=800&seed=${seed}&model=turbo&nologo=true`;
+          const fallbackResponse = await fetch(fallbackUrl);
+          if (!fallbackResponse.ok) throw new Error('Fallback failed');
+
+          const fallbackBlob = await fallbackResponse.blob();
+          imgDisplay.src = URL.createObjectURL(fallbackBlob);
+          spinner.classList.add('hidden');
+          resultBox.classList.remove('hidden');
+        } catch (fallbackErr) {
+          spinner.classList.add('hidden');
+          errorNotice.classList.remove('hidden');
+        }
+      }
     }
 
     function generateMonogramImage() {
@@ -457,22 +485,10 @@
 
     function generateCinemaScene() {
       const text = document.getElementById('cinemaPromptInput').value.trim() || 'futuristic luxury sports car';
-      const prompt = `cinematic movie frame wide shot of ${text}, photorealistic 8k octane render detailed lighting`;
+      const prompt = `cinematic movie frame wide shot of ${text}, photorealistic 8k detailed lighting`;
       switchMode('image');
       document.getElementById('imagePromptInput').value = prompt;
       generateImage(prompt);
-    }
-
-    function imageLoadedSuccessfully() {
-      document.getElementById('imageLoadingSpinner').classList.add('hidden');
-      document.getElementById('imageErrorNotice').classList.add('hidden');
-      document.getElementById('imageResultContainer').classList.remove('hidden');
-    }
-
-    function imageGenerationFailed() {
-      document.getElementById('imageLoadingSpinner').classList.add('hidden');
-      document.getElementById('imageResultContainer').classList.add('hidden');
-      document.getElementById('imageErrorNotice').classList.remove('hidden');
     }
 
     function renderBubble(role, text, id = null) {
