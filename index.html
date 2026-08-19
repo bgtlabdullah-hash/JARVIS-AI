@@ -7,6 +7,18 @@
   <meta name="description" content="KING AI PRO - Created & Owned by Abdullah Waheed.">
   <title>King AI PRO — Owned by Abdullah Waheed</title>
 
+  <!-- Favicon Fix -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
+
+  <!-- Suppress Tailwind CDN Warning in Console -->
+  <script>
+    const originalWarn = console.warn;
+    console.warn = function(...args) {
+      if (typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+      originalWarn.apply(console, args);
+    };
+  </script>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -498,8 +510,11 @@
         { role: "user", content: userContent.length === 1 && userContent[0].type === "text" ? text : userContent }
       ];
 
+      // Route through CORS Proxy to bypass browser origin blocking
+      const targetUrl = 'https://corsproxy.io/?https://api.openai.com/v1/chat/completions';
+
       try {
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        const res = await fetch(targetUrl, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
