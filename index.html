@@ -149,9 +149,12 @@
     </main>
   </div>
 
+  <!-- COMPLETE EMBEDDED JAVASCRIPT ENGINE -->
   <script>
+    // Secret VIP Password Configuration
     const SECRET_VIP_PASSWORD = "KINGVIP2026";
 
+    // Firebase Configuration Credentials
     const firebaseConfig = {
       apiKey: "YOUR_FIREBASE_PUBLIC_CLIENT_KEY",
       authDomain: "your-app.firebaseapp.com",
@@ -161,16 +164,18 @@
       appId: "1:123456789:web:abcdef"
     };
 
+    // Initialize Firebase Services
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
     const functions = firebase.functions();
 
+    // Global Application State Variables
     let currentUser = null;
     let activeChatId = null;
     let isVipUser = false;
 
-    // Monitor Auth State & Restore Sync Data
+    // Monitor Auth State & Auto-Restore User Cloud Session
     auth.onAuthStateChanged(async user => {
       if (user) {
         currentUser = user;
@@ -187,15 +192,18 @@
       }
     });
 
+    // Google Sign-In Function
     function loginWithGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider).catch(err => alert("Sign-in failed: " + err.message));
     }
 
+    // Sign Out Function
     function logout() {
       auth.signOut();
     }
 
+    // Fetch and Sync User VIP Status from Firestore
     async function loadUserProfile(user) {
       const userRef = db.collection('users').doc(user.uid);
       const doc = await userRef.get();
@@ -213,9 +221,10 @@
       }
     }
 
+    // Prompt VIP Password Engine
     async function promptVipPassword() {
       if (isVipUser) {
-        alert("✨ Lifetime VIP Pass is active on your account!");
+        alert("✨ Lifetime VIP Pass is active on your account across all tabs!");
         return;
       }
 
@@ -253,6 +262,7 @@
       tag.innerText = "Standard Member";
     }
 
+    // Tab Navigation Switcher
     function switchTab(tabName) {
       const tabs = ['tabChat', 'tabImageGen', 'tabMonogram'];
       const navs = ['navChat', 'navImageGen', 'navMonogram'];
@@ -272,6 +282,7 @@
       }
     }
 
+    // Real-time Cloud Chat History Sync
     function syncCloudData() {
       db.collection('users').doc(currentUser.uid).collection('chats')
         .orderBy('updatedAt', 'desc')
@@ -289,6 +300,7 @@
         });
     }
 
+    // AI Chat Engine Form Handler
     async function handleChatSubmit(e) {
       e.preventDefault();
       const input = document.getElementById('chatInput');
@@ -311,6 +323,7 @@
       }
     }
 
+    // Save Messages directly to Firestore Cloud Database
     function saveMessageToCloud(userMsg, aiMsg) {
       if (!activeChatId) {
         activeChatId = db.collection('users').doc(currentUser.uid).collection('chats').doc().id;
@@ -328,11 +341,13 @@
       }, { merge: true });
     }
 
+    // Start New Chat Instance
     function createNewChat() {
       activeChatId = null;
       document.getElementById('chatMessages').innerHTML = '';
     }
 
+    // Load Chat History Session from Cloud
     function loadCloudChat(id, messages) {
       activeChatId = id;
       const container = document.getElementById('chatMessages');
@@ -345,6 +360,7 @@
       });
     }
 
+    // 8K Image Generator Studio Engine
     function generate8KImage() {
       const prompt = document.getElementById('imgPrompt').value;
       if (!prompt) return alert('Please enter a description!');
@@ -352,6 +368,7 @@
       output.innerHTML = `<p class="text-xs text-amber-400 font-bold animate-pulse">Rendering 8K Ultra-HD Visuals for "${prompt}"...</p>`;
     }
 
+    // Monogram Design Studio Engine
     function generateMonogram() {
       const initials = document.getElementById('monogramInitials').value;
       if (!initials) return alert('Please enter initials!');
