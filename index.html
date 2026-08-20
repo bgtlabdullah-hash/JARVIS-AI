@@ -24,10 +24,6 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .vip-badge {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
-    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
@@ -40,9 +36,9 @@
         <h1 class="text-2xl font-royal font-bold text-white">KING AI PRO</h1>
         <p class="text-xs text-amber-300 font-semibold mt-1">Created & Owned by Abdullah Waheed</p>
       </div>
-      <p class="text-xs text-slate-400">Sign in to claim your Lifetime VIP Pass and access synchronized chat history across all devices.</p>
-      <button onclick="loginWithGoogle()" class="w-full py-3 gold-gradient-bg text-slate-950 font-black rounded-xl text-xs flex items-center justify-center gap-2 hover:opacity-90 transition">
-        <span>Sign In & Activate VIP</span>
+      <p class="text-xs text-slate-400">Sign in to access your synchronized chat history, VIP pass, and saved creations across all devices.</p>
+      <button onclick="loginWithGoogle()" class="w-full py-3 gold-gradient-bg text-slate-950 font-black rounded-xl text-xs flex items-center justify-center gap-2">
+        <span>Sign In with Google</span>
       </button>
     </div>
   </div>
@@ -57,10 +53,7 @@
       </div>
     </div>
     <div class="flex items-center gap-3">
-      <!-- Dynamic VIP Badge -->
-      <div id="vipStatusBadge" class="px-3 py-1.5 rounded-xl vip-badge text-slate-950 font-black text-xs flex items-center gap-1">
-        <span>🎟️ VIP ACCESS UNLOCKED</span>
-      </div>
+      <div class="px-3 py-1.5 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs">🎟️ VIP ACTIVE</div>
       <button onclick="logout()" class="text-xs text-slate-400 hover:text-red-400 font-bold">Logout</button>
     </div>
   </header>
@@ -70,16 +63,16 @@
     <!-- Sidebar -->
     <aside class="w-64 bg-slate-900 border-r border-slate-800 p-3 space-y-4 flex flex-col">
       <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-3">
-        <img id="userAvatar" class="w-8 h-8 rounded-full border border-amber-400" src="" alt="User">
+        <img id="userAvatar" class="w-8 h-8 rounded-full" src="" alt="User">
         <div class="overflow-hidden">
           <h3 id="userName" class="font-bold text-xs text-white truncate">User</h3>
-          <p id="userVipText" class="text-[10px] text-amber-400 font-bold">🌟 Lifetime VIP Member</p>
+          <p id="userStatus" class="text-[10px] text-emerald-400 font-semibold">Cloud Synced</p>
         </div>
       </div>
 
       <div class="flex-1 space-y-2 overflow-y-auto">
         <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
-          <span>Cloud Saved Chats</span>
+          <span>Cloud Chats</span>
           <button onclick="createNewChat()" class="text-amber-400 hover:underline">+ New</button>
         </div>
         <div id="cloudChatList" class="space-y-1"></div>
@@ -92,15 +85,15 @@
       
       <div class="p-3 border-t border-slate-800 bg-slate-900">
         <form onsubmit="handleChatSubmit(event)" class="max-w-3xl mx-auto flex gap-2">
-          <input id="chatInput" type="text" placeholder="Ask King AI anything with unlimited VIP access..." class="flex-1 bg-slate-950 text-xs rounded-xl px-4 py-3 border border-slate-800 text-white focus:outline-none focus:border-amber-500">
-          <button type="submit" class="gold-gradient-bg text-slate-950 px-5 py-3 rounded-xl font-bold text-xs hover:opacity-90">Send</button>
+          <input id="chatInput" type="text" placeholder="Ask King AI anything..." class="flex-1 bg-slate-950 text-xs rounded-xl px-4 py-3 border border-slate-800 text-white focus:outline-none focus:border-amber-500">
+          <button type="submit" class="gold-gradient-bg text-slate-950 px-5 py-3 rounded-xl font-bold text-xs">Send</button>
         </form>
       </div>
     </main>
   </div>
 
   <script>
-    // Firebase Configuration
+    // 1. Firebase Configuration (Replace with your Firebase Project Config)
     const firebaseConfig = {
       apiKey: "YOUR_FIREBASE_PUBLIC_CLIENT_KEY",
       authDomain: "your-app.firebaseapp.com",
@@ -118,35 +111,20 @@
     let currentUser = null;
     let activeChatId = null;
 
-    // Authentication State
-    auth.onAuthStateChanged(async user => {
+    // Auth State Observer
+    auth.onAuthStateChanged(user => {
       if (user) {
         currentUser = user;
         document.getElementById('authScreen').classList.add('hidden');
         document.getElementById('appContainer').classList.remove('hidden');
         document.getElementById('userName').innerText = user.displayName;
         document.getElementById('userAvatar').src = user.photoURL;
-
-        // Auto-assign VIP Status in Cloud Database
-        await setupUserProfile(user);
         syncCloudData();
       } else {
         document.getElementById('authScreen').classList.remove('hidden');
         document.getElementById('appContainer').classList.add('hidden');
       }
     });
-
-    // Save VIP Pass to User Document
-    async function setupUserProfile(user) {
-      const userRef = db.collection('users').doc(user.uid);
-      await userRef.set({
-        name: user.displayName,
-        email: user.email,
-        vipPass: true,
-        vipTier: "Lifetime VIP",
-        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
-    }
 
     function loginWithGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
@@ -157,7 +135,7 @@
       auth.signOut();
     }
 
-    // Sync Chats Across Devices
+    // Cloud Database Sync
     function syncCloudData() {
       db.collection('users').doc(currentUser.uid).collection('chats')
         .orderBy('updatedAt', 'desc')
@@ -167,8 +145,8 @@
           snapshot.forEach(doc => {
             const chat = doc.data();
             const btn = document.createElement('button');
-            btn.className = 'w-full text-left p-2 rounded-lg text-xs truncate bg-slate-800 hover:bg-slate-700 text-slate-200 mb-1 flex items-center justify-between';
-            btn.innerHTML = `<span>${chat.title || 'Conversation'}</span> <span class="text-[9px] text-amber-400">VIP</span>`;
+            btn.className = 'w-full text-left p-2 rounded-lg text-xs truncate bg-slate-800 hover:bg-slate-700 text-slate-200 mb-1';
+            btn.innerText = chat.title || 'Conversation';
             btn.onclick = () => loadCloudChat(doc.id, chat.messages);
             chatList.appendChild(btn);
           });
@@ -183,11 +161,12 @@
 
       input.value = '';
       
+      // Call Backend Secure Function
       const callGemini = functions.httpsCallable('geminiProxy');
       
       try {
         const result = await callGemini({
-          systemInstruction: { parts: [{ text: "You are KING AI PRO, created and owned by Abdullah Waheed. Provide VIP tier answers." }] },
+          systemInstruction: { parts: [{ text: "You are KING AI PRO, owned by Abdullah Waheed." }] },
           contents: [{ parts: [{ text: text }] }]
         });
 
