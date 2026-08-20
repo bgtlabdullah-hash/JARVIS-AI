@@ -10,11 +10,11 @@
   
   <title>King AI PRO — Owned by Abdullah Waheed</title>
 
-  <!-- Complete Favicon Fix (Stops 404 console error) -->
+  <!-- Favicon -->
   <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
 
-  <!-- Google WebApplication Structured Data (Schema.org) for Google Search Ranking -->
+  <!-- Google WebApplication Structured Data (Schema.org) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -42,7 +42,7 @@
   }
   </script>
 
-  <!-- Suppress Tailwind CDN Warning in Console -->
+  <!-- Suppress Tailwind CDN Warning -->
   <script>
     const origWarn = console.warn;
     console.warn = function(...args) {
@@ -131,7 +131,7 @@
 
   <div class="flex flex-1 h-[calc(100vh-57px)] overflow-hidden">
 
-    <!-- Drawer Sidebar -->
+    <!-- Sidebar -->
     <aside class="w-64 bg-king-slate border-r border-king-border flex flex-col p-3 space-y-3 overflow-y-auto">
       
       <!-- User Info -->
@@ -190,9 +190,9 @@
       <button id="btn-mode-monogram" onclick="switchMode('monogram')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold">🛡️ Monogram & Shields</button>
       <button id="btn-mode-cinema" onclick="switchMode('cinema')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold">🎬 Cinema Studio Pro</button>
       <button id="btn-mode-tools" onclick="switchMode('tools')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold">🧰 AI Master Tools</button>
-      <button id="btn-mode-saved" onclick="switchMode('saved')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold flex justify-between">
+      <button id="btn-mode-saved" onclick="switchMode('saved')" class="w-full text-left p-2 rounded-xl text-slate-300 hover:bg-slate-800 text-xs font-bold flex justify-between items-center">
         <span>📁 Saved Creations</span>
-        <span id="savedCount" class="text-[10px] bg-slate-800 px-1.5 rounded">0</span>
+        <span id="savedCount" class="text-[10px] bg-amber-500 text-slate-950 font-black px-1.5 rounded-full">0</span>
       </button>
     </aside>
 
@@ -270,9 +270,19 @@
             <span id="imageLoadingText">Connecting to High-Speed Image Engine...</span>
           </div>
 
-          <div id="imageResultContainer" class="hidden space-y-2">
+          <!-- Image Result & Action Buttons -->
+          <div id="imageResultContainer" class="hidden space-y-3 max-w-md">
             <h3 class="text-xs font-bold text-slate-300">Generated Result:</h3>
-            <img id="generatedImageDisplay" class="max-w-md rounded-xl border border-king-border shadow-2xl" src="" alt="Generated AI Image">
+            <img id="generatedImageDisplay" class="w-full rounded-xl border border-king-border shadow-2xl" src="" alt="Generated AI Image">
+            
+            <div class="flex gap-2">
+              <button onclick="saveCurrentImage()" class="flex-1 py-2 px-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs flex items-center justify-center gap-1 transition">
+                💾 <span>Save to Gallery</span>
+              </button>
+              <a id="downloadImgLink" download="king-ai-creation.jpg" target="_blank" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 font-bold rounded-lg text-xs flex items-center justify-center gap-1 transition">
+                ⬇️ <span>Download</span>
+              </a>
+            </div>
           </div>
 
           <div id="imageErrorNotice" class="hidden p-3 bg-red-950/60 border border-red-500/40 rounded-xl text-xs text-red-300 font-semibold max-w-md">
@@ -317,7 +327,7 @@
       </section>
 
       <!-- MODE 6: SAVED CREATIONS -->
-      <section id="mode-saved" class="hidden flex-1 p-6 space-y-4">
+      <section id="mode-saved" class="hidden flex-1 p-6 space-y-4 overflow-y-auto">
         <h2 class="text-xl font-bold text-amber-400 font-royal">📁 Saved Creations</h2>
         <div id="savedCreationsList" class="text-xs text-slate-400">No saved images or chats yet.</div>
       </section>
@@ -332,8 +342,8 @@
     let attachedBase64Image = null;
     let sessions = [];
     let currentSessionId = null;
+    let savedCreations = JSON.parse(localStorage.getItem('king_ai_saved_creations') || '[]');
 
-    // Retrieve active Gemini API key (Fallback to default if local storage is empty)
     function getActiveApiKey() {
       return localStorage.getItem('king_ai_gemini_key') || DEFAULT_GEMINI_KEY;
     }
@@ -362,6 +372,8 @@
         loadSession(currentSessionId);
       }
       renderSessionList();
+      updateSavedCount();
+      renderSavedCreations();
     }
 
     function switchMode(mode) {
@@ -538,19 +550,13 @@
       const aiId = 'ai-' + Date.now();
       renderBubble('assistant', '👑 Thinking...', aiId);
 
-      // Build Gemini parts payload
       const contentsParts = [];
-      if (text) {
-        contentsParts.push({ text: text });
-      }
+      if (text) contentsParts.push({ text: text });
       if (currentImage) {
         const base64Data = currentImage.split(',')[1];
         const mimeType = currentImage.split(';')[0].split(':')[1];
         contentsParts.push({
-          inline_data: {
-            mime_type: mimeType,
-            data: base64Data
-          }
+          inline_data: { mime_type: mimeType, data: base64Data }
         });
       }
 
@@ -560,27 +566,19 @@
       try {
         const res = await fetch(targetUrl, {
           method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             system_instruction: {
               parts: [{ text: "You are KING AI PRO, created and owned by Abdullah Waheed. Provide clear, concise, and accurate answers." }]
             },
-            contents: [
-              { parts: contentsParts }
-            ]
+            contents: [{ parts: contentsParts }]
           })
         });
 
         const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error?.message || `Status Code: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(data.error?.message || `Status Code: ${res.status}`);
 
         const replyText = data.candidates[0].content.parts[0].text;
-
         const aiBubble = document.getElementById(aiId);
         if (aiBubble) {
           aiBubble.innerHTML = window.marked ? marked.parse(replyText) : replyText;
@@ -614,6 +612,7 @@
       const resultBox = document.getElementById('imageResultContainer');
       const errorNotice = document.getElementById('imageErrorNotice');
       const imgDisplay = document.getElementById('generatedImageDisplay');
+      const downloadLink = document.getElementById('downloadImgLink');
 
       statusContainer.classList.remove('hidden');
       spinner.classList.remove('hidden');
@@ -632,6 +631,7 @@
         const objectUrl = URL.createObjectURL(blob);
 
         imgDisplay.src = objectUrl;
+        if (downloadLink) downloadLink.href = objectUrl;
         spinner.classList.add('hidden');
         resultBox.classList.remove('hidden');
 
@@ -643,7 +643,10 @@
           if (!fallbackResponse.ok) throw new Error('Fallback failed');
 
           const fallbackBlob = await fallbackResponse.blob();
-          imgDisplay.src = URL.createObjectURL(fallbackBlob);
+          const fallbackObjectUrl = URL.createObjectURL(fallbackBlob);
+
+          imgDisplay.src = fallbackObjectUrl;
+          if (downloadLink) downloadLink.href = fallbackObjectUrl;
           spinner.classList.add('hidden');
           resultBox.classList.remove('hidden');
         } catch (fallbackErr) {
@@ -651,6 +654,63 @@
           errorNotice.classList.remove('hidden');
         }
       }
+    }
+
+    // Saved Creations Functions
+    function saveCurrentImage() {
+      const imgDisplay = document.getElementById('generatedImageDisplay');
+      const promptInput = document.getElementById('imagePromptInput').value.trim();
+
+      if (!imgDisplay.src) return;
+
+      const newItem = {
+        id: 'creation_' + Date.now(),
+        url: imgDisplay.src,
+        prompt: promptInput || 'Generated Image',
+        date: new Date().toLocaleDateString()
+      };
+
+      savedCreations.unshift(newItem);
+      localStorage.setItem('king_ai_saved_creations', JSON.stringify(savedCreations));
+      
+      updateSavedCount();
+      renderSavedCreations();
+      alert("✨ Saved to your Creations folder!");
+    }
+
+    function renderSavedCreations() {
+      const container = document.getElementById('savedCreationsList');
+      if (!container) return;
+
+      if (savedCreations.length === 0) {
+        container.className = "text-xs text-slate-400";
+        container.innerHTML = `No saved images or chats yet.`;
+        return;
+      }
+
+      container.className = "grid grid-cols-2 md:grid-cols-3 gap-3";
+      container.innerHTML = savedCreations.map(item => `
+        <div class="bg-king-card border border-king-border p-2 rounded-xl space-y-2">
+          <img src="${item.url}" class="w-full h-32 object-cover rounded-lg border border-slate-700">
+          <p class="text-[10px] text-slate-300 truncate font-semibold">${item.prompt}</p>
+          <div class="flex justify-between items-center text-[9px] text-slate-400">
+            <span>${item.date}</span>
+            <button onclick="deleteSavedCreation('${item.id}')" class="text-red-400 hover:underline font-bold">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function deleteSavedCreation(id) {
+      savedCreations = savedCreations.filter(item => item.id !== id);
+      localStorage.setItem('king_ai_saved_creations', JSON.stringify(savedCreations));
+      updateSavedCount();
+      renderSavedCreations();
+    }
+
+    function updateSavedCount() {
+      const badge = document.getElementById('savedCount');
+      if (badge) badge.innerText = savedCreations.length;
     }
 
     function generateMonogramImage() {
