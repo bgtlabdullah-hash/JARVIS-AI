@@ -2,7 +2,7 @@
 // 1. CONFIGURATION SETTINGS
 // ==========================================
 
-// Change your secret VIP Pass password here:
+// Change your VIP Pass password here:
 const SECRET_VIP_PASSWORD = "KING.AI@2026";
 
 // Replace with your actual Firebase Project Configuration:
@@ -31,25 +31,34 @@ let isVipUser = false;
 // 3. AUTHENTICATION & PROFILE MANAGEMENT
 // ==========================================
 
-// Monitor login state across tabs and devices
+// Monitor Auth state without blocking guest app usage
 auth.onAuthStateChanged(async user => {
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+
   if (user) {
     currentUser = user;
-    document.getElementById('authScreen').classList.add('hidden');
-    document.getElementById('appContainer').classList.remove('hidden');
+    if (loginBtn) loginBtn.classList.add('hidden');
+    if (logoutBtn) logoutBtn.classList.remove('hidden');
+    
     document.getElementById('userName').innerText = user.displayName;
-    document.getElementById('userAvatar').src = user.photoURL;
+    document.getElementById('userAvatarContainer').innerHTML = `<img class="w-full h-full rounded-full" src="${user.photoURL}" alt="User">`;
 
-    // Load user account and check VIP status in cloud
+    // Load cloud account and sync data
     await loadUserProfile(user);
     syncCloudData();
   } else {
-    document.getElementById('authScreen').classList.remove('hidden');
-    document.getElementById('appContainer').classList.add('hidden');
+    currentUser = null;
+    if (loginBtn) loginBtn.classList.remove('hidden');
+    if (logoutBtn) logoutBtn.classList.add('hidden');
+    
+    document.getElementById('userName').innerText = "Guest User";
+    document.getElementById('userAvatarContainer').innerHTML = "👤";
+    disableVipUI();
   }
 });
 
-// Load account profile from Firestore
+// Load user account from Firestore
 async function loadUserProfile(user) {
   const userRef = db.collection('users').doc(user.uid);
   const doc = await userRef.get();
@@ -57,7 +66,6 @@ async function loadUserProfile(user) {
   if (doc.exists && doc.data().vipPass === true) {
     enableVipUI();
   } else {
-    // Save new user profile if first time
     await userRef.set({
       name: user.displayName,
       email: user.email,
@@ -71,7 +79,7 @@ async function loadUserProfile(user) {
 // VIP Password Unlock Function
 async function promptVipPassword() {
   if (isVipUser) {
-    alert("✨ Your account already has Lifetime VIP Pass active on all devices!");
+    alert("✨ Your account already has Lifetime VIP Pass active!");
     return;
   }
 
@@ -79,16 +87,16 @@ async function promptVipPassword() {
   if (!inputPass) return;
 
   if (inputPass.trim() === SECRET_VIP_PASSWORD) {
-    // Save VIP Pass directly to user's Cloud account
-    await db.collection('users').doc(currentUser.uid).set({
-      vipPass: true,
-      vipUnlockedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
-
+    if (currentUser) {
+      await db.collection('users').doc(currentUser.uid).set({
+        vipPass: true,
+        vipUnlockedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    }
     enableVipUI();
-    alert("🎉 VIP Pass Unlocked! It is now permanently saved to your account across all devices.");
+    alert("🎉 VIP Pass Unlocked!");
   } else {
-    alert("❌ Incorrect VIP Password. Access denied.");
+    alert("❌ Incorrect VIP Password.");
   }
 }
 
@@ -116,7 +124,7 @@ function disableVipUI() {
   if (badgeText) badgeText.innerText = "🎟️ Unlock VIP Pass";
   if (tag) {
     tag.className = "text-[10px] text-slate-400 font-semibold";
-    tag.innerText = "Standard Member";
+    tag.innerText = currentUser ? "Standard Member" : "Sign in to sync cloud";
   }
 }
 
@@ -130,17 +138,20 @@ function logout() {
 }
 
 // ==========================================
-// 4. CHAT & IMAGE CLOUD SYNC
+// 4. CHAT HANDLING & CLOUD SYNC
 // ==========================================
 
-// Real-time synchronization for chats and image creations
+// Real-time Firestore sync for signed-in users
 function syncCloudData() {
+  if (!currentUser) return;
+  
   db.collection('users').doc(currentUser.uid).collection('chats')
     .orderBy('updatedAt', 'desc')
     .onSnapshot(snapshot => {
       const chatList = document.getElementById('cloudChatList');
       if (!chatList) return;
       chatList.innerHTML = '';
+      
       snapshot.forEach(doc => {
         const chat = doc.data();
         const btn = document.createElement('button');
@@ -152,7 +163,7 @@ function syncCloudData() {
     });
 }
 
-// Handle Form Submission (Triggers backend proxy)
+// Handle message submission
 async function handleChatSubmit(e) {
   e.preventDefault();
   const input = document.getElementById('chatInput');
@@ -170,36 +181,48 @@ async function handleChatSubmit(e) {
     });
 
     const reply = result.data.candidates[0].content.parts[0].text;
-    saveMessageToCloud(text, reply);
+    
+    if (currentUser) {
+      saveMessageToCloud(text, reply);
+    } else {
+      renderGuestMessage(text, reply);
+    }
 
   } catch (error) {
     console.error("Backend request failed:", error);
   }
 }
 
-// Save messages and image URLs to cloud
-function saveMessageToCloud(userMsg, aiMsg, imageUrl = null) {
+// Render message UI locally for guest users
+function renderGuestMessage(userMsg, aiMsg) {
+  const container = document.getElementById('chatMessages');
+  
+  const userDiv = document.createElement('div');
+  userDiv.className = 'p-3 rounded-xl bg-slate-800 text-xs ml-auto max-w-md';
+  userDiv.innerText = userMsg;
+  
+  const aiDiv = document.createElement('div');
+  aiDiv.className = 'p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-amber-300 mr-auto max-w-md';
+  aiDiv.innerText = aiMsg;
+
+  container.appendChild(userDiv);
+  container.appendChild(aiDiv);
+}
+
+// Save messages into Firestore cloud storage
+function saveMessageToCloud(userMsg, aiMsg) {
   if (!activeChatId) {
     activeChatId = db.collection('users').doc(currentUser.uid).collection('chats').doc().id;
   }
 
   const chatRef = db.collection('users').doc(currentUser.uid).collection('chats').doc(activeChatId);
   
-  const payload = {
-    role: 'assistant',
-    text: aiMsg
-  };
-
-  if (imageUrl) {
-    payload.image = imageUrl; // Saves image link into cloud chat history
-  }
-
   chatRef.set({
     title: userMsg.substring(0, 20) + '...',
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     messages: firebase.firestore.FieldValue.arrayUnion(
       { role: 'user', text: userMsg },
-      payload
+      { role: 'assistant', text: aiMsg }
     )
   }, { merge: true });
 }
@@ -214,19 +237,11 @@ function loadCloudChat(id, messages) {
   const container = document.getElementById('chatMessages');
   if (!container) return;
   container.innerHTML = '';
+  
   messages.forEach(m => {
     const div = document.createElement('div');
     div.className = m.role === 'user' ? 'p-3 rounded-xl bg-slate-800 text-xs ml-auto max-w-md' : 'p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-amber-300 mr-auto max-w-md';
     div.innerText = m.text;
-    
-    // Render stored images if present
-    if (m.image) {
-      const img = document.createElement('img');
-      img.src = m.image;
-      img.className = 'mt-2 rounded-lg max-w-full border border-slate-700';
-      div.appendChild(img);
-    }
-
     container.appendChild(div);
   });
 }
