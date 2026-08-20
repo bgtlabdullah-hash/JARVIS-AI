@@ -36,23 +36,6 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
-  <!-- AUTH SCREEN (Only Google Login) -->
-  <div id="authScreen" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl max-w-md w-full text-center space-y-6 shadow-2xl">
-      <div class="w-16 h-16 mx-auto rounded-2xl gold-gradient-bg flex items-center justify-center text-3xl">👑</div>
-      <div>
-        <h1 class="text-2xl font-royal font-bold text-white">KING AI PRO</h1>
-        <p class="text-xs text-amber-300 font-semibold mt-1">Created & Owned by Abdullah Waheed</p>
-      </div>
-      <p class="text-xs text-slate-400">Sign in with Google to sync your VIP status, active chats, 8K image gallery, and Monogram designs across all devices.</p>
-      
-      <button onclick="loginWithGoogle()" class="w-full py-3 gold-gradient-bg text-slate-950 font-black rounded-xl text-xs flex items-center justify-center gap-2 hover:opacity-90 transition shadow-lg">
-        <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1H12v3.8h5.4c-.2 1.2-.9 2.3-2 3.1v2.5h3.2c1.9-1.7 3-4.3 3-7.4 0-.5 0-1-.1-1.4z"/><path fill="currentColor" d="M12 21c2.7 0 5-1 6.6-2.6l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.2H3.1v2.6C4.7 18.5 8.1 21 12 21z"/><path fill="currentColor" d="M6.4 12.7c-.2-.6-.3-1.3-.3-2.7s.1-2.1.3-2.7V4.7H3.1C2.4 6.1 2 7.7 2 9.5s.4 3.4 1.1 4.8l3.3-2.6z"/><path fill="currentColor" d="M12 5.8c1.5 0 2.8.5 3.8 1.5l2.8-2.8C16.9 2.9 14.6 2 12 2 8.1 2 4.7 4.5 3.1 7.7l3.3 2.6c.8-2.4 3-4.5 5.6-4.5z"/></svg>
-        <span>Sign In with Google</span>
-      </button>
-    </div>
-  </div>
-
   <!-- HEADER -->
   <header class="flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-800">
     <div class="flex items-center gap-2">
@@ -64,26 +47,38 @@
     </div>
     
     <div class="flex items-center gap-3">
+      <!-- VIP PASS UNLOCK BUTTON -->
       <button id="vipBadgeBtn" onclick="promptVipPassword()" class="px-3 py-1.5 rounded-xl vip-badge-locked text-slate-300 font-bold text-xs flex items-center gap-1 hover:border-amber-400 transition">
         <span id="vipBadgeText">🎟️ Unlock VIP Pass</span>
       </button>
-      <button onclick="logout()" class="text-xs text-slate-400 hover:text-red-400 font-bold">Logout</button>
+
+      <!-- IN-APP AUTH BUTTONS -->
+      <div id="authHeaderContainer">
+        <button id="signInBtn" onclick="loginWithGoogle()" class="gold-gradient-bg text-slate-950 px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 hover:opacity-90 transition">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1H12v3.8h5.4c-.2 1.2-.9 2.3-2 3.1v2.5h3.2c1.9-1.7 3-4.3 3-7.4 0-.5 0-1-.1-1.4z"/><path fill="currentColor" d="M12 21c2.7 0 5-1 6.6-2.6l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.2H3.1v2.6C4.7 18.5 8.1 21 12 21z"/><path fill="currentColor" d="M6.4 12.7c-.2-.6-.3-1.3-.3-2.7s.1-2.1.3-2.7V4.7H3.1C2.4 6.1 2 7.7 2 9.5s.4 3.4 1.1 4.8l3.3-2.6z"/><path fill="currentColor" d="M12 5.8c1.5 0 2.8.5 3.8 1.5l2.8-2.8C16.9 2.9 14.6 2 12 2 8.1 2 4.7 4.5 3.1 7.7l3.3 2.6c.8-2.4 3-4.5 5.6-4.5z"/></svg>
+          <span>Sign In</span>
+        </button>
+        <button id="signOutBtn" onclick="logout()" class="hidden text-xs text-slate-400 hover:text-red-400 font-bold px-2 py-1">
+          Logout
+        </button>
+      </div>
     </div>
   </header>
 
-  <!-- APP INTERFACE -->
-  <div id="appContainer" class="hidden flex-1 flex h-[calc(100vh-57px)]">
+  <!-- MAIN APP INTERFACE (Loads Directly) -->
+  <div id="appContainer" class="flex-1 flex h-[calc(100vh-57px)]">
     <!-- SIDEBAR -->
     <aside class="w-64 bg-slate-900 border-r border-slate-800 p-3 space-y-4 flex flex-col">
+      <!-- USER PROFILE BADGE -->
       <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-3">
-        <img id="userAvatar" class="w-8 h-8 rounded-full border border-slate-700" src="" alt="User">
+        <img id="userAvatar" class="w-8 h-8 rounded-full border border-slate-700 object-cover" src="https://via.placeholder.com/40?text=👑" alt="User Avatar">
         <div class="overflow-hidden">
-          <h3 id="userName" class="font-bold text-xs text-white truncate">User</h3>
-          <p id="userVipTag" class="text-[10px] text-slate-400 font-semibold">Standard Member</p>
+          <h3 id="userName" class="font-bold text-xs text-white truncate">Guest User</h3>
+          <p id="userVipTag" class="text-[10px] text-slate-400 font-semibold">Standard Access</p>
         </div>
       </div>
 
-      <!-- Feature Navigation -->
+      <!-- NAVIGATION TABS -->
       <div class="space-y-1">
         <button onclick="switchTab('chat')" id="navChat" class="w-full text-left p-2.5 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-2">
           💬 AI Chat Engine
@@ -98,13 +93,15 @@
 
       <hr class="border-slate-800">
 
-      <!-- Cloud Chat History -->
+      <!-- SAVED CLOUD CHATS -->
       <div class="flex-1 space-y-2 overflow-y-auto">
         <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
           <span>Saved Cloud Chats</span>
           <button onclick="createNewChat()" class="text-amber-400 hover:underline">+ New</button>
         </div>
-        <div id="cloudChatList" class="space-y-1"></div>
+        <div id="cloudChatList" class="space-y-1">
+          <p id="guestNotice" class="text-[10px] text-slate-500 italic p-1">Sign in with Google to enable cloud chat saving across devices.</p>
+        </div>
       </div>
     </aside>
 
@@ -113,7 +110,11 @@
       
       <!-- TAB 1: AI CHAT -->
       <div id="tabChat" class="flex-1 flex flex-col h-full">
-        <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
+        <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-4">
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 text-xs text-amber-300 max-w-xl">
+            👑 Welcome to KING AI PRO! Ask any question or sign in using the top-right button to automatically sync your cloud chat history.
+          </div>
+        </div>
         <div class="p-3 border-t border-slate-800 bg-slate-900">
           <form onsubmit="handleChatSubmit(event)" class="max-w-3xl mx-auto flex gap-2">
             <input id="chatInput" type="text" placeholder="Ask King AI anything..." class="flex-1 bg-slate-950 text-xs rounded-xl px-4 py-3 border border-slate-800 text-white focus:outline-none focus:border-amber-500">
@@ -149,232 +150,6 @@
     </main>
   </div>
 
-  <!-- COMPLETE EMBEDDED JAVASCRIPT ENGINE -->
-  <script>
-    // Secret VIP Password Configuration
-    const SECRET_VIP_PASSWORD = "KINGVIP2026";
-
-    // Firebase Configuration Credentials
-    const firebaseConfig = {
-      apiKey: "YOUR_FIREBASE_PUBLIC_CLIENT_KEY",
-      authDomain: "your-app.firebaseapp.com",
-      projectId: "your-app-id",
-      storageBucket: "your-app.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:abcdef"
-    };
-
-    // Initialize Firebase Services
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const functions = firebase.functions();
-
-    // Global Application State Variables
-    let currentUser = null;
-    let activeChatId = null;
-    let isVipUser = false;
-
-    // Monitor Auth State & Auto-Restore User Cloud Session
-    auth.onAuthStateChanged(async user => {
-      if (user) {
-        currentUser = user;
-        document.getElementById('authScreen').classList.add('hidden');
-        document.getElementById('appContainer').classList.remove('hidden');
-        document.getElementById('userName').innerText = user.displayName;
-        document.getElementById('userAvatar').src = user.photoURL;
-
-        await loadUserProfile(user);
-        syncCloudData();
-      } else {
-        document.getElementById('authScreen').classList.remove('hidden');
-        document.getElementById('appContainer').classList.add('hidden');
-      }
-    });
-
-    // Google Sign-In Function
-    function loginWithGoogle() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch(err => alert("Sign-in failed: " + err.message));
-    }
-
-    // Sign Out Function
-    function logout() {
-      auth.signOut();
-    }
-
-    // Fetch and Sync User VIP Status from Firestore
-    async function loadUserProfile(user) {
-      const userRef = db.collection('users').doc(user.uid);
-      const doc = await userRef.get();
-
-      if (doc.exists && doc.data().vipPass === true) {
-        enableVipUI();
-      } else {
-        await userRef.set({
-          name: user.displayName,
-          email: user.email,
-          vipPass: false,
-          lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-        disableVipUI();
-      }
-    }
-
-    // Prompt VIP Password Engine
-    async function promptVipPassword() {
-      if (isVipUser) {
-        alert("✨ Lifetime VIP Pass is active on your account across all tabs!");
-        return;
-      }
-
-      const inputPass = prompt("🔑 Enter the secret VIP Pass Password:");
-      if (!inputPass) return;
-
-      if (inputPass.trim() === SECRET_VIP_PASSWORD) {
-        await db.collection('users').doc(currentUser.uid).set({
-          vipPass: true,
-          vipUnlockedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-
-        enableVipUI();
-        alert("🎉 VIP Pass Unlocked permanently!");
-      } else {
-        alert("❌ Incorrect VIP Password.");
-      }
-    }
-
-    function enableVipUI() {
-      isVipUser = true;
-      document.getElementById('vipBadgeBtn').className = "px-3 py-1.5 rounded-xl vip-badge-active text-slate-950 font-black text-xs flex items-center gap-1";
-      document.getElementById('vipBadgeText').innerText = "🎟️ VIP ACTIVE";
-      const tag = document.getElementById('userVipTag');
-      tag.className = "text-[10px] text-emerald-400 font-bold";
-      tag.innerText = "🌟 Lifetime VIP Pass";
-    }
-
-    function disableVipUI() {
-      isVipUser = false;
-      document.getElementById('vipBadgeBtn').className = "px-3 py-1.5 rounded-xl vip-badge-locked text-slate-300 font-bold text-xs flex items-center gap-1 hover:border-amber-400 transition";
-      document.getElementById('vipBadgeText').innerText = "🎟️ Unlock VIP Pass";
-      const tag = document.getElementById('userVipTag');
-      tag.className = "text-[10px] text-slate-400 font-semibold";
-      tag.innerText = "Standard Member";
-    }
-
-    // Tab Navigation Switcher
-    function switchTab(tabName) {
-      const tabs = ['tabChat', 'tabImageGen', 'tabMonogram'];
-      const navs = ['navChat', 'navImageGen', 'navMonogram'];
-
-      tabs.forEach(t => document.getElementById(t).classList.add('hidden'));
-      navs.forEach(n => document.getElementById(n).className = "w-full text-left p-2.5 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 flex items-center gap-2");
-
-      if (tabName === 'chat') {
-        document.getElementById('tabChat').classList.remove('hidden');
-        document.getElementById('navChat').className = "w-full text-left p-2.5 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-2";
-      } else if (tabName === 'imageGen') {
-        document.getElementById('tabImageGen').classList.remove('hidden');
-        document.getElementById('navImageGen').className = "w-full text-left p-2.5 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-2";
-      } else if (tabName === 'monogram') {
-        document.getElementById('tabMonogram').classList.remove('hidden');
-        document.getElementById('navMonogram').className = "w-full text-left p-2.5 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-2";
-      }
-    }
-
-    // Real-time Cloud Chat History Sync
-    function syncCloudData() {
-      db.collection('users').doc(currentUser.uid).collection('chats')
-        .orderBy('updatedAt', 'desc')
-        .onSnapshot(snapshot => {
-          const chatList = document.getElementById('cloudChatList');
-          chatList.innerHTML = '';
-          snapshot.forEach(doc => {
-            const chat = doc.data();
-            const btn = document.createElement('button');
-            btn.className = 'w-full text-left p-2 rounded-lg text-xs truncate bg-slate-800 hover:bg-slate-700 text-slate-200 mb-1 flex items-center justify-between';
-            btn.innerHTML = `<span>${chat.title || 'Conversation'}</span>`;
-            btn.onclick = () => loadCloudChat(doc.id, chat.messages);
-            chatList.appendChild(btn);
-          });
-        });
-    }
-
-    // AI Chat Engine Form Handler
-    async function handleChatSubmit(e) {
-      e.preventDefault();
-      const input = document.getElementById('chatInput');
-      const text = input.value.trim();
-      if (!text) return;
-
-      input.value = '';
-      const callGemini = functions.httpsCallable('geminiProxy');
-      
-      try {
-        const result = await callGemini({
-          systemInstruction: { parts: [{ text: isVipUser ? "You are KING AI PRO VIP Engine, owned by Abdullah Waheed." : "You are KING AI PRO Standard Engine, owned by Abdullah Waheed." }] },
-          contents: [{ parts: [{ text: text }] }]
-        });
-
-        const reply = result.data.candidates[0].content.parts[0].text;
-        saveMessageToCloud(text, reply);
-      } catch (error) {
-        console.error("Backend request failed:", error);
-      }
-    }
-
-    // Save Messages directly to Firestore Cloud Database
-    function saveMessageToCloud(userMsg, aiMsg) {
-      if (!activeChatId) {
-        activeChatId = db.collection('users').doc(currentUser.uid).collection('chats').doc().id;
-      }
-
-      const chatRef = db.collection('users').doc(currentUser.uid).collection('chats').doc(activeChatId);
-      
-      chatRef.set({
-        title: userMsg.substring(0, 20) + '...',
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        messages: firebase.firestore.FieldValue.arrayUnion(
-          { role: 'user', text: userMsg },
-          { role: 'assistant', text: aiMsg }
-        )
-      }, { merge: true });
-    }
-
-    // Start New Chat Instance
-    function createNewChat() {
-      activeChatId = null;
-      document.getElementById('chatMessages').innerHTML = '';
-    }
-
-    // Load Chat History Session from Cloud
-    function loadCloudChat(id, messages) {
-      activeChatId = id;
-      const container = document.getElementById('chatMessages');
-      container.innerHTML = '';
-      messages.forEach(m => {
-        const div = document.createElement('div');
-        div.className = m.role === 'user' ? 'p-3 rounded-xl bg-slate-800 text-xs ml-auto max-w-md' : 'p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-amber-300 mr-auto max-w-md';
-        div.innerText = m.text;
-        container.appendChild(div);
-      });
-    }
-
-    // 8K Image Generator Studio Engine
-    function generate8KImage() {
-      const prompt = document.getElementById('imgPrompt').value;
-      if (!prompt) return alert('Please enter a description!');
-      const output = document.getElementById('imageOutput');
-      output.innerHTML = `<p class="text-xs text-amber-400 font-bold animate-pulse">Rendering 8K Ultra-HD Visuals for "${prompt}"...</p>`;
-    }
-
-    // Monogram Design Studio Engine
-    function generateMonogram() {
-      const initials = document.getElementById('monogramInitials').value;
-      if (!initials) return alert('Please enter initials!');
-      const output = document.getElementById('monogramOutput');
-      output.innerHTML = `<div class="w-32 h-32 rounded-full border-4 border-amber-400 flex items-center justify-center bg-slate-900 gold-gradient-text font-royal text-3xl font-black shadow-lg">${initials.toUpperCase()}</div>`;
-    }
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
