@@ -3,7 +3,7 @@
 // ==========================================
 
 // Change your secret VIP Pass password here:
-const SECRET_VIP_PASSWORD = "KINGVIP2026";
+const SECRET_VIP_PASSWORD = "KING.AI@2026";
 
 // Replace with your actual Firebase Project Configuration:
 const firebaseConfig = {
