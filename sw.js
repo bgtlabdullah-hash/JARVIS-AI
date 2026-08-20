@@ -1,11 +1,8 @@
 // ==========================================
-// 1. CONFIGURATION SETTINGS
+// 1. CONFIGURATION & STATE
 // ==========================================
+const SECRET_VIP_PASSWORD = "KINGVIP2026"; // Change VIP password on line 4
 
-// Change your VIP Pass password here:
-const SECRET_VIP_PASSWORD = "KING.AI@2026";
-
-// Replace with your actual Firebase Project Configuration:
 const firebaseConfig = {
   apiKey: "YOUR_FIREBASE_PUBLIC_CLIENT_KEY",
   authDomain: "your-app.firebaseapp.com",
@@ -15,9 +12,6 @@ const firebaseConfig = {
   appId: "1:123456789:web:abcdef"
 };
 
-// ==========================================
-// 2. INITIALIZE FIREBASE SERVICES
-// ==========================================
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -26,12 +20,11 @@ const functions = firebase.functions();
 let currentUser = null;
 let activeChatId = null;
 let isVipUser = false;
+let isSignUpMode = false;
 
 // ==========================================
-// 3. AUTHENTICATION & PROFILE MANAGEMENT
+// 2. AUTHENTICATION & MODAL LOGIC
 // ==========================================
-
-// Monitor Auth state without blocking guest app usage
 auth.onAuthStateChanged(async user => {
   const loginBtn = document.getElementById('loginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
@@ -41,10 +34,10 @@ auth.onAuthStateChanged(async user => {
     if (loginBtn) loginBtn.classList.add('hidden');
     if (logoutBtn) logoutBtn.classList.remove('hidden');
     
-    document.getElementById('userName').innerText = user.displayName;
-    document.getElementById('userAvatarContainer').innerHTML = `<img class="w-full h-full rounded-full" src="${user.photoURL}" alt="User">`;
+    document.getElementById('userName').innerText = user.email.split('@')[0];
+    document.getElementById('userAvatarContainer').innerHTML = "👑";
 
-    // Load cloud account and sync data
+    toggleAuthModal(false);
     await loadUserProfile(user);
     syncCloudData();
   } else {
@@ -58,7 +51,75 @@ auth.onAuthStateChanged(async user => {
   }
 });
 
-// Load user account from Firestore
+function toggleAuthModal(show) {
+  const modal = document.getElementById('authModal');
+  if (show) modal.classList.remove('hidden');
+  else modal.classList.add('hidden');
+}
+
+function toggleAuthMode() {
+  isSignUpMode = !isSignUpMode;
+  const submitBtn = document.getElementById('authSubmitBtn');
+  const togglePrompt = document.getElementById('authTogglePrompt');
+  const toggleBtn = document.getElementById('authToggleBtn');
+
+  if (isSignUpMode) {
+    submitBtn.innerText = "Create Account";
+    togglePrompt.innerText = "Already have an account?";
+    toggleBtn.innerText = "Sign In";
+  } else {
+    submitBtn.innerText = "Sign In";
+    togglePrompt.innerText = "Don't have an account?";
+    toggleBtn.innerText = "Sign Up";
+  }
+}
+
+async function handleAuthSubmit(e) {
+  e.preventDefault();
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+
+  try {
+    if (isSignUpMode) {
+      await auth.createUserWithEmailAndPassword(email, password);
+      alert("🎉 Account created successfully!");
+    } else {
+      await auth.signInWithEmailAndPassword(email, password);
+    }
+  } catch (error) {
+    alert("❌ Error: " + error.message);
+  }
+}
+
+function logout() {
+  auth.signOut();
+}
+
+// ==========================================
+// 3. TAB NAVIGATION CONTROLS
+// ==========================================
+function switchTab(tabName) {
+  const tabs = ['tabChat', 'tabImageGen', 'tabMonogram'];
+  const navs = ['navChat', 'navImageGen', 'navMonogram'];
+
+  tabs.forEach(t => document.getElementById(t).classList.add('hidden'));
+  navs.forEach(n => document.getElementById(n).className = "w-full text-left p-2.5 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 flex items-center gap-2");
+
+  if (tabName === 'chat') {
+    document.getElementById('tabChat').classList.remove('hidden');
+    document.getElementById('navChat').className = "w-full text-left p-2.5 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-2";
+  } else if (tabName === 'imageGen') {
+    document.getElementById('tabImageGen').classList.remove('hidden');
+    document.getElementById('navImageGen').className = "w-full text-left p-2.5 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-2";
+  } else if (tabName === 'monogram') {
+    document.getElementById('tabMonogram').classList.remove('hidden');
+    document.getElementById('navMonogram').className = "w-full text-left p-2.5 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-2";
+  }
+}
+
+// ==========================================
+// 4. VIP PASS LOGIC
+// ==========================================
 async function loadUserProfile(user) {
   const userRef = db.collection('users').doc(user.uid);
   const doc = await userRef.get();
@@ -67,7 +128,6 @@ async function loadUserProfile(user) {
     enableVipUI();
   } else {
     await userRef.set({
-      name: user.displayName,
       email: user.email,
       vipPass: false,
       lastLogin: firebase.firestore.FieldValue.serverTimestamp()
@@ -76,7 +136,6 @@ async function loadUserProfile(user) {
   }
 }
 
-// VIP Password Unlock Function
 async function promptVipPassword() {
   if (isVipUser) {
     alert("✨ Your account already has Lifetime VIP Pass active!");
@@ -128,20 +187,9 @@ function disableVipUI() {
   }
 }
 
-function loginWithGoogle() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider);
-}
-
-function logout() {
-  auth.signOut();
-}
-
 // ==========================================
-// 4. CHAT HANDLING & CLOUD SYNC
+// 5. CHAT, 8K IMAGE & MONOGRAM LOGIC
 // ==========================================
-
-// Real-time Firestore sync for signed-in users
 function syncCloudData() {
   if (!currentUser) return;
   
@@ -163,7 +211,6 @@ function syncCloudData() {
     });
 }
 
-// Handle message submission
 async function handleChatSubmit(e) {
   e.preventDefault();
   const input = document.getElementById('chatInput');
@@ -193,7 +240,6 @@ async function handleChatSubmit(e) {
   }
 }
 
-// Render message UI locally for guest users
 function renderGuestMessage(userMsg, aiMsg) {
   const container = document.getElementById('chatMessages');
   
@@ -209,7 +255,6 @@ function renderGuestMessage(userMsg, aiMsg) {
   container.appendChild(aiDiv);
 }
 
-// Save messages into Firestore cloud storage
 function saveMessageToCloud(userMsg, aiMsg) {
   if (!activeChatId) {
     activeChatId = db.collection('users').doc(currentUser.uid).collection('chats').doc().id;
@@ -244,4 +289,18 @@ function loadCloudChat(id, messages) {
     div.innerText = m.text;
     container.appendChild(div);
   });
+}
+
+function generate8KImage() {
+  const prompt = document.getElementById('imgPrompt').value;
+  if (!prompt) return alert('Please enter a description!');
+  const output = document.getElementById('imageOutput');
+  output.innerHTML = `<p class="text-xs text-amber-400 font-bold animate-pulse">Generating 8K Ultra-HD Visuals for "${prompt}"...</p>`;
+}
+
+function generateMonogram() {
+  const initials = document.getElementById('monogramInitials').value;
+  if (!initials) return alert('Please enter initials!');
+  const output = document.getElementById('monogramOutput');
+  output.innerHTML = `<div class="w-32 h-32 rounded-full border-4 border-amber-400 flex items-center justify-center bg-slate-900 gold-gradient-text font-royal text-3xl font-black shadow-lg">${initials.toUpperCase()}</div>`;
 }
