@@ -15,7 +15,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // Active Google AI Studio Key
-const GEMINI_API_KEY = "AIzaSyOR-A0Sld70PJ2vjVYadg1bQccNWmOcY2A";
+const GEMINI_API_KEY = "AIzaSyD_AqRf3875g0oaJdy2Ymp6867RUp8riCo";
 
 let currentUser = null;
 let activeChatId = null;
@@ -153,7 +153,7 @@ function renderGuestHistory() {
   });
 }
 
-// Native Gemini API Direct Handler using Google AI Quickstart Routing
+// Native Gemini API Direct Handler using Quickstart Routing
 async function handleChatSubmit(e) {
   e.preventDefault();
   const input = document.getElementById('chatInput');
