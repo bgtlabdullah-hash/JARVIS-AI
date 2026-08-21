@@ -14,7 +14,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Active Google AI Studio Key
+// Active Google AI Key
 const GEMINI_API_KEY = "AIzaSyD_AqRf3875g0oaJdy2Ymp6867RUp8riCo";
 
 let currentUser = null;
@@ -153,7 +153,7 @@ function renderGuestHistory() {
   });
 }
 
-// Native Gemini API Direct Handler using Quickstart Routing
+// Native Gemini API Direct Handler
 async function handleChatSubmit(e) {
   e.preventDefault();
   const input = document.getElementById('chatInput');
@@ -164,11 +164,10 @@ async function handleChatSubmit(e) {
   appendMessage('user', text);
 
   try {
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent", {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'X-goog-api-key': GEMINI_API_KEY
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         contents: [
