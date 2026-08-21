@@ -13,15 +13,59 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-const functions = firebase.functions();
 
 let currentUser = null;
 let activeChatId = null;
-
 let guestChats = [];
-let guestSavedCount = 0;
+let isProUnlocked = localStorage.getItem('king_pro_unlocked') === 'true';
 
-// Authentication State Observer
+// Initialize PRO UI state on load
+document.addEventListener('DOMContentLoaded', () => {
+  updateProUI();
+});
+
+// Password Activation Logic
+function unlockProMode() {
+  if (isProUnlocked) {
+    alert("King AI PRO is already activated!");
+    return;
+  }
+
+  const inputPass = prompt("Enter the King AI PRO Activation Password:");
+  if (inputPass === "KingAIPro@2026") {
+    isProUnlocked = true;
+    localStorage.setItem('king_pro_unlocked', 'true');
+    updateProUI();
+    alert("🎉 King AI PRO successfully activated!");
+  } else if (inputPass !== null) {
+    alert("❌ Invalid Activation Password!");
+  }
+}
+
+function updateProUI() {
+  const btn = document.getElementById('proStatusBtn');
+  const badge = document.getElementById('vipBadgeText');
+
+  if (isProUnlocked) {
+    if (btn) {
+      btn.className = "bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-lg";
+      btn.innerHTML = "📺 VIP ACTIVE";
+    }
+    if (badge) {
+      badge.innerText = "🎟️ VIP Pass Active";
+    }
+  } else {
+    if (btn) {
+      btn.className = "bg-amber-500/20 border border-amber-500/50 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-amber-500/30 transition";
+      btn.innerHTML = "🔒 Activate PRO";
+    }
+    if (badge) {
+      badge.innerText = "🔒 Free Tier (Enter Password)";
+    }
+  }
+}
+
+// Authentication Listener
 auth.onAuthStateChanged(async (user) => {
   const signInBtn = document.getElementById('signInBtn');
   const signOutBtn = document.getElementById('signOutBtn');
@@ -33,7 +77,6 @@ auth.onAuthStateChanged(async (user) => {
 
     document.getElementById('userNameDisplay').innerText = user.displayName || "Abdullah Waheed";
     document.getElementById('userEmailDisplay').innerText = user.email || "Official User";
-    document.getElementById('userAvatarImg').src = user.photoURL || "https://via.placeholder.com/40";
 
     const userDocRef = db.collection('users').doc(user.uid);
     const doc = await userDocRef.get();
@@ -51,23 +94,21 @@ auth.onAuthStateChanged(async (user) => {
 
     document.getElementById('userNameDisplay').innerText = "Abdullah Waheed";
     document.getElementById('userEmailDisplay').innerText = "Official App Owner & Creator";
-    document.getElementById('userAvatarImg').src = "https://via.placeholder.com/40?text=👑";
 
     renderGuestHistory();
   }
 });
 
-// Authentication Handlers
 function loginWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(err => alert("Google Sign-In Failed: " + err.message));
+  auth.signInWithPopup(provider).catch(err => alert("Google Sign-In Error: " + err.message));
 }
 
 function logout() {
   auth.signOut();
 }
 
-// Sync Firestore Data
+// Data Syncing
 function syncUserData() {
   if (!currentUser) return;
 
@@ -89,7 +130,9 @@ function syncUserData() {
         chatList.appendChild(div);
       });
 
-      document.getElementById('savedCreationsCount').innerText = count;
+      if (document.getElementById('savedCreationsCount')) {
+        document.getElementById('savedCreationsCount').innerText = count;
+      }
     });
 }
 
@@ -98,69 +141,16 @@ function renderGuestHistory() {
   if (!chatList) return;
   chatList.innerHTML = '';
 
-  if (guestChats.length === 0) {
-    document.getElementById('savedCreationsCount').innerText = "0";
-  } else {
-    guestChats.forEach((chat, idx) => {
-      const div = document.createElement('div');
-      div.className = "p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex justify-between items-center cursor-pointer mb-1";
-      div.innerHTML = `<span class="truncate">${chat.title}</span><span onclick="deleteGuestChat(${idx}, event)" class="text-slate-500 hover:text-red-400 text-[10px]">✕</span>`;
-      div.onclick = () => loadGuestChat(idx);
-      chatList.appendChild(div);
-    });
-    document.getElementById('savedCreationsCount').innerText = guestSavedCount;
-  }
+  guestChats.forEach((chat, idx) => {
+    const div = document.createElement('div');
+    div.className = "p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex justify-between items-center cursor-pointer mb-1";
+    div.innerHTML = `<span class="truncate">${chat.title}</span><span onclick="deleteGuestChat(${idx}, event)" class="text-slate-500 hover:text-red-400 text-[10px]">✕</span>`;
+    div.onclick = () => loadGuestChat(idx);
+    chatList.appendChild(div);
+  });
 }
 
-// UI Navigation / View Switching
-function switchMode(mode) {
-  const imgView = document.getElementById('imageStudioView');
-  const chatView = document.getElementById('chatStudioView');
-  const navImg = document.getElementById('navImageBtn');
-  const navChat = document.getElementById('navChatBtn');
-
-  if (mode === 'image') {
-    imgView.classList.remove('hidden');
-    chatView.classList.add('hidden');
-    navImg.className = "w-full p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between font-semibold shadow-inner";
-    navChat.className = "w-full p-2.5 rounded-xl bg-[#0d1626] hover:bg-slate-800 text-slate-300 text-xs flex items-center justify-between border border-slate-800 transition";
-  } else {
-    imgView.classList.add('hidden');
-    chatView.classList.remove('hidden');
-    navChat.className = "w-full p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between font-semibold shadow-inner";
-    navImg.className = "w-full p-2.5 rounded-xl bg-[#0d1626] hover:bg-slate-800 text-slate-300 text-xs flex items-center justify-between border border-slate-800 transition";
-  }
-}
-
-// Image Generation
-async function generateImage() {
-  const prompt = document.getElementById('imagePrompt').value.trim();
-  if (!prompt) return;
-
-  const overlay = document.getElementById('loadingOverlay');
-  const img = document.getElementById('generatedImage');
-  overlay.classList.remove('hidden');
-
-  try {
-    const callProxy = functions.httpsCallable('geminiProxy');
-    const res = await callProxy({ mode: "image", prompt: prompt });
-    if (res.data && res.data.imageUrl) {
-      img.src = res.data.imageUrl;
-    }
-  } catch (err) {
-    const encoded = encodeURIComponent(prompt);
-    img.src = `https://image.pollinations.ai/prompt/${encoded}?width=800&height=800&nologo=true&seed=${Math.floor(Math.random()*1000000)}`;
-  } finally {
-    img.onload = () => overlay.classList.add('hidden');
-  }
-
-  if (!currentUser) {
-    guestSavedCount++;
-    document.getElementById('savedCreationsCount').innerText = guestSavedCount;
-  }
-}
-
-// Chat Handling
+// Chat Functionality
 async function handleChatSubmit(e) {
   e.preventDefault();
   const input = document.getElementById('chatInput');
@@ -171,14 +161,9 @@ async function handleChatSubmit(e) {
   appendMessage('user', text);
 
   try {
-    const callProxy = functions.httpsCallable('geminiProxy');
-    const res = await callProxy({
-      mode: "text",
-      systemInstruction: { parts: [{ text: "You are KING AI PRO, owned by Abdullah Waheed." }] },
-      contents: [{ parts: [{ text: text }] }]
-    });
+    const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?system=You%20are%20KING%20AI%20PRO%20owned%20by%20Abdullah%20Waheed`);
+    const reply = await response.text();
 
-    const reply = res.data.candidates[0].content.parts[0].text;
     appendMessage('assistant', reply);
 
     if (currentUser) {
@@ -187,28 +172,60 @@ async function handleChatSubmit(e) {
       saveGuestChat(text, reply);
     }
   } catch (err) {
-    appendMessage('assistant', "⚠️ Error executing request.");
+    appendMessage('assistant', "⚠️ Error generating response. Please try again.");
   }
 }
 
 function appendMessage(role, text) {
   const container = document.getElementById('chatMessages');
+  if (!container) return;
   const div = document.createElement('div');
   div.className = role === 'user' 
     ? "p-3 bg-slate-800 rounded-xl text-white ml-auto max-w-md shadow" 
-    : "p-3 bg-[#0d1626] border border-slate-800 rounded-xl text-amber-300 mr-auto max-w-md shadow";
+    : "p-3 bg-[#0d1628] border border-slate-800 rounded-xl text-amber-300 mr-auto max-w-md shadow";
   div.innerText = text;
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
 }
 
+// Image Generation
+async function generateImage() {
+  const promptInput = document.getElementById('imagePrompt');
+  if (!promptInput) return;
+  const prompt = promptInput.value.trim();
+  if (!prompt) return;
+
+  const overlay = document.getElementById('loadingOverlay');
+  const img = document.getElementById('generatedImage');
+  if (overlay) overlay.classList.remove('hidden');
+
+  const seed = Math.floor(Math.random() * 1000000);
+  const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1280&height=720&nologo=true&seed=${seed}`;
+  
+  img.src = imageUrl;
+  img.onload = () => {
+    if (overlay) overlay.classList.add('hidden');
+  };
+}
+
+function switchMode(mode) {
+  const imgView = document.getElementById('imageStudioView');
+  const chatView = document.getElementById('chatStudioView');
+
+  if (mode === 'image') {
+    if (imgView) imgView.classList.remove('hidden');
+    if (chatView) chatView.classList.add('hidden');
+  } else {
+    if (imgView) imgView.classList.add('hidden');
+    if (chatView) chatView.classList.remove('hidden');
+  }
+}
+
 function saveMessageToCloud(userMsg, aiMsg) {
   if (!currentUser) return;
-
   if (!activeChatId) {
     activeChatId = db.collection('users').doc(currentUser.uid).collection('chats').doc().id;
   }
-
   const chatRef = db.collection('users').doc(currentUser.uid).collection('chats').doc(activeChatId);
   chatRef.set({
     title: userMsg.substring(0, 18) + '...',
@@ -221,14 +238,14 @@ function saveMessageToCloud(userMsg, aiMsg) {
 }
 
 function saveGuestChat(userMsg, aiMsg) {
-  const title = userMsg.substring(0, 18) + '...';
-  guestChats.push({ title, messages: [{ role: 'user', text: userMsg }, { role: 'assistant', text: aiMsg }] });
+  guestChats.push({ title: userMsg.substring(0, 18) + '...', messages: [{ role: 'user', text: userMsg }, { role: 'assistant', text: aiMsg }] });
   renderGuestHistory();
 }
 
 function loadCloudChat(id, messages) {
   activeChatId = id;
   const container = document.getElementById('chatMessages');
+  if (!container) return;
   container.innerHTML = '';
   if (Array.isArray(messages)) {
     messages.forEach(m => appendMessage(m.role, m.text));
@@ -238,6 +255,7 @@ function loadCloudChat(id, messages) {
 
 function loadGuestChat(idx) {
   const container = document.getElementById('chatMessages');
+  if (!container) return;
   container.innerHTML = '';
   if (guestChats[idx] && guestChats[idx].messages) {
     guestChats[idx].messages.forEach(m => appendMessage(m.role, m.text));
@@ -247,7 +265,8 @@ function loadGuestChat(idx) {
 
 function createNewChat() {
   activeChatId = null;
-  document.getElementById('chatMessages').innerHTML = '<div class="p-3 bg-[#0d1626] rounded-xl text-amber-300">👑 New Session Started</div>';
+  const container = document.getElementById('chatMessages');
+  if (container) container.innerHTML = '<div class="p-4 bg-[#0d1628] border border-slate-800 rounded-2xl text-amber-300 max-w-xl shadow-lg">👑 New Session Started</div>';
   switchMode('chat');
 }
 
@@ -270,7 +289,6 @@ function clearHistory() {
     });
   } else {
     guestChats = [];
-    guestSavedCount = 0;
     renderGuestHistory();
   }
   createNewChat();
