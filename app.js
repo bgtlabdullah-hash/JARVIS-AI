@@ -153,7 +153,7 @@ function renderGuestHistory() {
   });
 }
 
-// Native Gemini API Direct Handler
+// Direct Chat Handler
 async function handleChatSubmit(e) {
   e.preventDefault();
   const input = document.getElementById('chatInput');
@@ -163,12 +163,25 @@ async function handleChatSubmit(e) {
   input.value = '';
   appendMessage('user', text);
 
+  // Auto-detect image requests inside text chat
+  if (text.toLowerCase().startsWith("generate image") || text.toLowerCase().startsWith("make image") || text.toLowerCase().startsWith("draw")) {
+    const prompt = text.replace(/(generate image|make image|draw)/i, '').trim();
+    appendMessage('assistant', `🎨 Generating image for: "${prompt}"...`);
+    generateImageFromText(prompt);
+    return;
+  }
+
+  // Auto-detect location/navigation requests inside text chat
+  if (text.toLowerCase().includes("route") || text.toLowerCase().includes("map") || text.toLowerCase().includes("directions to")) {
+    appendLocationCard(text);
+  }
+
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [
           {
@@ -184,7 +197,7 @@ async function handleChatSubmit(e) {
 
     const data = await response.json();
     
-    if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
+    if (response.ok && data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
       const reply = data.candidates[0].content.parts[0].text;
       appendMessage('assistant', reply);
 
@@ -194,10 +207,11 @@ async function handleChatSubmit(e) {
         saveGuestChat(text, reply);
       }
     } else {
-      appendMessage('assistant', "👑 King AI: Engine authorization error. Please check your API key.");
+      const errDetail = data.error ? data.error.message : "Engine authorization error. Check API key restrictions.";
+      appendMessage('assistant', `👑 King AI Error: ${errDetail}`);
     }
   } catch (err) {
-    appendMessage('assistant', "👑 King AI: Connection error. Please check your internet connection.");
+    appendMessage('assistant', "👑 King AI: Connection error. Please check your network connection.");
   }
 }
 
@@ -213,7 +227,56 @@ function appendMessage(role, text) {
   container.scrollTop = container.scrollHeight;
 }
 
-// Image Generation
+// Multi-Modal Location Router Component
+function appendLocationCard(queryText) {
+  const container = document.getElementById('chatMessages');
+  if (!container) return;
+
+  const destination = encodeURIComponent(queryText.replace(/(route to|map|directions to|location)/gi, '').trim());
+  
+  const div = document.createElement('div');
+  div.className = "p-4 bg-[#0a1120] border border-amber-500/30 rounded-2xl text-slate-200 mr-auto max-w-lg shadow-xl my-2";
+  
+  div.innerHTML = `
+    <div class="font-bold text-amber-400 mb-2 flex items-center gap-2">📍 Navigation Router</div>
+    <p class="text-xs text-slate-300 mb-3">View live routes and options for: <strong>${decodeURIComponent(destination)}</strong></p>
+    
+    <div class="grid grid-cols-4 gap-2 mb-3">
+      <a href="https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving" target="_blank" class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-center text-amber-300 text-xs font-semibold hover:bg-amber-500/20">🚗 Drive</a>
+      <a href="https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=bicycling" target="_blank" class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-center text-amber-300 text-xs font-semibold hover:bg-amber-500/20">🏍️ Bike</a>
+      <a href="https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=walking" target="_blank" class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-center text-amber-300 text-xs font-semibold hover:bg-amber-500/20">🚶 Walk</a>
+      <a href="https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=transit" target="_blank" class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-center text-amber-300 text-xs font-semibold hover:bg-amber-500/20">✈️ Transit</a>
+    </div>
+
+    <iframe 
+      width="100%" 
+      height="200" 
+      style="border:0; border-radius: 12px;" 
+      loading="lazy" 
+      allowfullscreen 
+      src="https://maps.google.com/maps?q=${destination}&t=&z=13&ie=UTF8&iwloc=&output=embed">
+    </iframe>
+  `;
+
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+// Image Generation Engines
+async function generateImageFromText(promptText) {
+  const seed = Math.floor(Math.random() * 1000000);
+  const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?width=1280&height=720&nologo=true&seed=${seed}`;
+  
+  const container = document.getElementById('chatMessages');
+  if (!container) return;
+
+  const div = document.createElement('div');
+  div.className = "p-3 bg-[#0d1628] border border-slate-800 rounded-xl text-amber-300 mr-auto max-w-md shadow";
+  div.innerHTML = `<img src="${imageUrl}" class="w-full h-auto rounded-lg shadow-md mb-2" alt="Generated Image"><p class="text-xs text-amber-400/80">✨ ${promptText}</p>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
 async function generateImage() {
   const promptInput = document.getElementById('imagePrompt');
   if (!promptInput) return;
