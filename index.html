@@ -1,196 +1,109 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KING AI VIP PRO — Owned by Abdullah Waheed</title>
+  <title>King AI Pro</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
-
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cinzel:wght@700;900&display=swap');
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #030712; }
-    .font-royal { font-family: 'Cinzel', serif; }
-    .gold-gradient-bg { background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); }
-    .gold-gradient-text {
-      background: linear-gradient(135deg, #fffbeb 0%, #fbbf24 40%, #f59e0b 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-  </style>
+  <!-- Firebase App & Services (v8) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script>
 </head>
-<body class="bg-[#050b14] text-slate-100 min-h-screen flex flex-col font-sans">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
 
-  <!-- Header -->
-  <header class="flex items-center justify-between px-6 py-3 bg-[#08101d] border-b border-slate-800/80">
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-lg gold-gradient-bg flex items-center justify-center text-slate-950 font-black text-sm shadow-md">👑</div>
-      <div>
-        <div class="flex items-center gap-2">
-          <span class="font-royal font-black text-base gold-gradient-text tracking-wide">KING AI</span>
-          <span class="bg-emerald-500 text-slate-950 text-[9px] font-black px-1.5 py-0.5 rounded">VIP PRO</span>
-        </div>
-        <p class="text-[10px] text-amber-300/80 font-medium">Owned by <span class="font-bold text-amber-300">Abdullah Waheed</span></p>
-      </div>
-    </div>
-    
-    <!-- Top Right Controls -->
+  <!-- Navigation Bar -->
+  <header class="w-full bg-[#0d1626] border-b border-slate-800 p-4 flex justify-between items-center">
     <div class="flex items-center gap-3">
-      <!-- VIP Badge -->
-      <div id="vipBadge" class="px-3 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs flex items-center gap-1">
-        🎟️ VIP ACTIVE
+      <span class="text-2xl">👑</span>
+      <h1 class="text-xl font-bold text-amber-400">King AI Pro</h1>
+    </div>
+
+    <!-- User Profile & Auth Buttons -->
+    <div class="flex items-center gap-4">
+      <div id="userProfile" class="flex items-center gap-2">
+        <img id="userAvatarImg" src="https://via.placeholder.com/40?text=👑" alt="User Avatar" class="w-8 h-8 rounded-full border border-amber-500">
+        <div class="text-left hidden sm:block">
+          <p id="userNameDisplay" class="text-xs font-semibold text-amber-300">Abdullah Waheed</p>
+          <p id="userEmailDisplay" class="text-[10px] text-slate-400">Official App Owner & Creator</p>
+        </div>
       </div>
-
-      <!-- Optional Google Auth Controls -->
-      <button id="signInBtn" onclick="loginWithGoogle()" class="gold-gradient-bg text-slate-950 px-3.5 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5 hover:opacity-90 shadow-md transition">
-        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1H12v3.8h5.4c-.2 1.2-.9 2.3-2 3.1v2.5h3.2c1.9-1.7 3-4.3 3-7.4 0-.5 0-1-.1-1.4z"/><path fill="currentColor" d="M12 21c2.7 0 5-1 6.6-2.6l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.2H3.1v2.6C4.7 18.5 8.1 21 12 21z"/><path fill="currentColor" d="M6.4 12.7c-.2-.6-.3-1.3-.3-2.7s.1-2.1.3-2.7V4.7H3.1C2.4 6.1 2 7.7 2 9.5s.4 3.4 1.1 4.8l3.3-2.6z"/><path fill="currentColor" d="M12 5.8c1.5 0 2.8.5 3.8 1.5l2.8-2.8C16.9 2.9 14.6 2 12 2 8.1 2 4.7 4.5 3.1 7.7l3.3 2.6c.8-2.4 3-4.5 5.6-4.5z"/></svg>
-        <span>Sign In</span>
-      </button>
-
-      <button id="signOutBtn" onclick="logout()" class="hidden text-xs text-slate-400 hover:text-red-400 font-bold px-2 py-1 transition">
-        Logout
-      </button>
+      <button id="signInBtn" onclick="loginWithGoogle()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded-lg transition">Sign In</button>
+      <button id="signOutBtn" onclick="logout()" class="px-3 py-1.5 bg-slate-800 hover:bg-red-900/50 text-slate-300 text-xs font-semibold rounded-lg border border-slate-700 transition hidden">Sign Out</button>
     </div>
   </header>
 
-  <!-- App Layout -->
-  <div class="flex-1 flex overflow-hidden">
+  <!-- Main Container -->
+  <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
 
     <!-- Sidebar -->
-    <aside class="w-72 bg-[#08101d] border-r border-slate-800/80 p-4 space-y-4 flex flex-col overflow-y-auto">
-      
-      <!-- User Card -->
-      <div class="p-3 rounded-xl bg-[#0d1626] border border-slate-800 flex items-center gap-3 shadow-inner">
-        <img id="userAvatarImg" src="https://via.placeholder.com/40?text=👑" alt="User Avatar" class="w-10 h-10 rounded-xl border border-amber-500/30 object-cover">
-        <div class="overflow-hidden">
-          <h3 id="userNameDisplay" class="font-bold text-xs text-white truncate">Abdullah Waheed</h3>
-          <p id="userEmailDisplay" class="text-[9px] text-slate-400 font-semibold truncate">Official App Owner & Creator</p>
-        </div>
-      </div>
-
-      <!-- VIP Pass Status Card -->
-      <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-        <div class="flex items-center gap-1.5 font-bold text-xs">
-          <span>🎟️</span> VIP Pass Active
-        </div>
-        <p class="text-[10px] text-slate-400 mt-0.5">Gemini Engine Locked</p>
-      </div>
-
-      <!-- Pricing Badge -->
-      <div class="p-2.5 rounded-xl gold-gradient-bg flex items-center justify-between text-slate-950 font-bold text-xs shadow-lg">
-        <div class="flex items-center gap-1.5">
-          <span>👑</span> Buy KING Pro
-        </div>
-        <span class="bg-slate-950/20 px-2 py-0.5 rounded text-[10px] font-black">Rs. 1500</span>
-      </div>
-
-      <!-- Usage Box -->
-      <div class="p-3 rounded-xl bg-[#0d1626] border border-slate-800 space-y-2 text-[10px]">
-        <div class="flex justify-between items-center">
-          <span class="text-amber-400 font-bold">VIP UNLIMITED</span>
-          <span class="text-slate-400">Gemini 3.6 Flash</span>
-        </div>
-        <div class="flex justify-between items-center text-slate-300">
-          <span class="flex items-center gap-1">💬 Messages:</span>
-          <span class="text-emerald-400 font-black">UNLIMITED</span>
-        </div>
-        <div class="flex justify-between items-center text-slate-300">
-          <span class="flex items-center gap-1">🎨 Image Creation:</span>
-          <span class="text-emerald-400 font-black">UNLIMITED</span>
-        </div>
-      </div>
-
-      <!-- Recent Chats -->
-      <div class="space-y-2">
-        <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-          <span>Recent Chats</span>
-          <div class="flex gap-2">
-            <button onclick="clearHistory()" class="text-slate-400 hover:text-red-400">Clear</button>
-            <button onclick="createNewChat()" class="text-amber-400 hover:underline">+ New</button>
-          </div>
-        </div>
-        <div id="chatHistoryList" class="space-y-1"></div>
-      </div>
-
-      <!-- Intelligence Modes -->
-      <div class="space-y-2 pt-2">
-        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Intelligence Modes</p>
-        
-        <button onclick="switchMode('chat')" id="navChatBtn" class="w-full p-2.5 rounded-xl bg-[#0d1626] hover:bg-slate-800 text-slate-300 text-xs flex items-center justify-between border border-slate-800 transition">
-          <span class="flex items-center gap-2">💬 King AI Chat PRO</span>
-          <span class="bg-slate-800 text-slate-400 text-[9px] px-1.5 py-0.5 rounded">3.6 Flash</span>
-        </button>
-
-        <button onclick="switchMode('image')" id="navImageBtn" class="w-full p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between font-semibold shadow-inner">
-          <span class="flex items-center gap-2">🎨 8K Image Studio</span>
-          <span class="bg-amber-500/20 text-amber-400 text-[9px] px-1.5 py-0.5 rounded">Flux 8K</span>
-        </button>
-
-        <button class="w-full p-2.5 rounded-xl bg-[#0d1626] opacity-60 text-slate-400 text-xs flex items-center gap-2 border border-slate-800/50 cursor-not-allowed">🛡️ Monogram & Shields</button>
-        <button class="w-full p-2.5 rounded-xl bg-[#0d1626] opacity-60 text-slate-400 text-xs flex items-center gap-2 border border-slate-800/50 cursor-not-allowed">🎬 Cinema Studio Pro</button>
-        <button class="w-full p-2.5 rounded-xl bg-[#0d1626] opacity-60 text-slate-400 text-xs flex items-center gap-2 border border-slate-800/50 cursor-not-allowed">🧰 AI Master Tools</button>
-      </div>
-
-      <!-- Saved Creations -->
-      <div class="pt-2 border-t border-slate-800/80 flex justify-between items-center text-xs text-slate-400">
-        <span class="flex items-center gap-2">📁 Saved Creations</span>
-        <span id="savedCreationsCount" class="bg-slate-800 px-2 py-0.5 rounded text-[10px] font-bold text-slate-300">0</span>
-      </div>
-
-    </aside>
-
-    <!-- Main Workspace -->
-    <main class="flex-1 p-6 bg-[#050b14] overflow-y-auto">
-      
-      <!-- 8K Image Studio -->
-      <div id="imageStudioView" class="max-w-4xl space-y-6">
-        <h1 class="text-xl font-black gold-gradient-text flex items-center gap-2">
-          🎨 8K IMAGE STUDIO
-        </h1>
-
-        <div class="p-4 rounded-2xl bg-[#08101d] border border-slate-800 shadow-xl space-y-4">
-          <textarea id="imagePrompt" rows="3" placeholder="image of honda civic" class="w-full bg-[#050b14] text-xs text-slate-200 border border-slate-800 rounded-xl p-3 focus:outline-none focus:border-amber-500 resize-none">image of honda civic</textarea>
-
-          <button onclick="generateImage()" id="generateBtn" class="w-full py-3 gold-gradient-bg text-slate-950 font-bold text-xs rounded-xl shadow-lg hover:opacity-95 transition">
-            Generate 8K Image
+    <aside class="w-full md:w-64 bg-[#090f1a] border-r border-slate-800 p-4 flex flex-col justify-between gap-4">
+      <div class="space-y-4">
+        <div class="space-y-2">
+          <button id="navChatBtn" onclick="switchMode('chat')" class="w-full p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between font-semibold shadow-inner">
+            <span>💬 AI Chat Studio</span>
+          </button>
+          <button id="navImageBtn" onclick="switchMode('image')" class="w-full p-2.5 rounded-xl bg-[#0d1626] hover:bg-slate-800 text-slate-300 text-xs flex items-center justify-between border border-slate-800 transition">
+            <span>🎨 Image Generator</span>
           </button>
         </div>
 
-        <div class="space-y-3">
-          <p class="text-xs font-bold text-slate-400">Generated Result:</p>
-          <div id="imageResultContainer" class="w-80 h-80 rounded-2xl bg-[#08101d] border border-slate-800 flex items-center justify-center overflow-hidden relative shadow-2xl">
-            <img id="generatedImage" src="https://image.pollinations.ai/prompt/image%20of%20honda%20civic?width=800&height=800&nologo=true" alt="Honda Civic Result" class="w-full h-full object-cover">
-            <div id="loadingOverlay" class="hidden absolute inset-0 bg-slate-950/80 flex items-center justify-center text-amber-400 text-xs font-bold">
-              ⚡ Generating 8K Image...
-            </div>
+        <button onclick="createNewChat()" class="w-full py-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 rounded-lg text-xs font-bold transition">
+          + New Session
+        </button>
+
+        <div class="mt-4">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Saved History</span>
+            <span id="savedCreationsCount" class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded-full font-bold">0</span>
           </div>
+          <div id="chatHistoryList" class="space-y-1 max-h-60 overflow-y-auto pr-1"></div>
         </div>
       </div>
 
-      <!-- Chat Studio -->
-      <div id="chatStudioView" class="hidden max-w-4xl h-full flex flex-col space-y-4">
-        <h1 class="text-xl font-black gold-gradient-text">💬 KING AI CHAT PRO</h1>
-        <div id="chatMessages" class="flex-1 bg-[#08101d] border border-slate-800 rounded-2xl p-4 overflow-y-auto space-y-3 text-xs">
-          <div class="p-3 bg-[#0d1626] rounded-xl text-amber-300">
-            👑 Welcome to King AI Chat PRO.
+      <button onclick="clearHistory()" class="w-full py-2 text-slate-500 hover:text-red-400 text-xs transition border border-slate-800 hover:border-red-900/40 rounded-lg">
+        Clear All History
+      </button>
+    </aside>
+
+    <!-- Content Workspace -->
+    <main class="flex-1 flex flex-col bg-slate-950 relative overflow-hidden">
+
+      <!-- Chat View -->
+      <div id="chatStudioView" class="flex-1 flex flex-col h-full">
+        <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3">
+          <div class="p-3 bg-[#0d1626] border border-slate-800 rounded-xl text-amber-300 max-w-md shadow">
+            👑 Welcome to KING AI PRO! Send a message to start generating responses.
           </div>
         </div>
-        <form onsubmit="handleChatSubmit(event)" class="flex gap-2">
-          <input id="chatInput" type="text" placeholder="Ask King AI..." class="flex-1 bg-[#08101d] text-xs rounded-xl px-4 py-3 border border-slate-800 text-white focus:outline-none focus:border-amber-500">
-          <button type="submit" class="gold-gradient-bg text-slate-950 px-5 py-3 rounded-xl font-bold text-xs">Send</button>
+        <form onsubmit="handleChatSubmit(event)" class="p-4 border-t border-slate-800 bg-[#090f1a] flex gap-2">
+          <input type="text" id="chatInput" placeholder="Type your prompt here..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500 transition">
+          <button type="submit" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs transition">Send</button>
         </form>
+      </div>
+
+      <!-- Image Studio View -->
+      <div id="imageStudioView" class="flex-1 flex flex-col items-center justify-center p-6 space-y-4 hidden">
+        <div class="w-full max-w-lg aspect-square bg-[#0d1626] border border-slate-800 rounded-2xl flex items-center justify-center relative overflow-hidden shadow-2xl">
+          <img id="generatedImage" src="https://via.placeholder.com/800x800?text=Your+AI+Artwork+Will+Appear+Here" alt="AI Output" class="w-full h-full object-cover">
+          <div id="loadingOverlay" class="absolute inset-0 bg-slate-950/80 flex items-center justify-center hidden">
+            <p class="text-amber-400 text-sm font-semibold animate-pulse">Creating masterpiece...</p>
+          </div>
+        </div>
+        <div class="w-full max-w-lg flex gap-2">
+          <input type="text" id="imagePrompt" placeholder="Describe the image you want to create..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500 transition">
+          <button onclick="generateImage()" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs transition">Generate</button>
+        </div>
       </div>
 
     </main>
   </div>
 
+  <!-- Application Logic -->
   <script>
-    // Updated Firebase Configuration
+    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCtQ0mFr-Sj2yxkIWFKal4tuvi9HrjvUGc",
       authDomain: "king-ai-pro.firebaseapp.com",
@@ -201,6 +114,7 @@
       measurementId: "G-412V3TL038"
     };
 
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -208,18 +122,18 @@
 
     let currentUser = null;
     let activeChatId = null;
-
     let guestChats = [];
     let guestSavedCount = 0;
 
+    // Auth State Observer
     auth.onAuthStateChanged(async (user) => {
       const signInBtn = document.getElementById('signInBtn');
       const signOutBtn = document.getElementById('signOutBtn');
 
       if (user) {
         currentUser = user;
-        signInBtn.classList.add('hidden');
-        signOutBtn.classList.remove('hidden');
+        if (signInBtn) signInBtn.classList.add('hidden');
+        if (signOutBtn) signOutBtn.classList.remove('hidden');
 
         document.getElementById('userNameDisplay').innerText = user.displayName || "Abdullah Waheed";
         document.getElementById('userEmailDisplay').innerText = user.email || "Official User";
@@ -236,8 +150,8 @@
         currentUser = null;
         activeChatId = null;
 
-        signInBtn.classList.remove('hidden');
-        signOutBtn.classList.add('hidden');
+        if (signInBtn) signInBtn.classList.remove('hidden');
+        if (signOutBtn) signOutBtn.classList.add('hidden');
 
         document.getElementById('userNameDisplay').innerText = "Abdullah Waheed";
         document.getElementById('userEmailDisplay').innerText = "Official App Owner & Creator";
@@ -247,6 +161,7 @@
       }
     });
 
+    // Auth Actions
     function loginWithGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider).catch(err => alert("Google Sign-In Failed: " + err.message));
@@ -256,6 +171,7 @@
       auth.signOut();
     }
 
+    // Sync Firestore Data
     function syncUserData() {
       if (!currentUser) return;
 
@@ -263,6 +179,7 @@
         .orderBy('updatedAt', 'desc')
         .onSnapshot(snapshot => {
           const chatList = document.getElementById('chatHistoryList');
+          if (!chatList) return;
           chatList.innerHTML = '';
 
           let count = 0;
@@ -282,6 +199,7 @@
 
     function renderGuestHistory() {
       const chatList = document.getElementById('chatHistoryList');
+      if (!chatList) return;
       chatList.innerHTML = '';
 
       if (guestChats.length === 0) {
@@ -298,6 +216,7 @@
       }
     }
 
+    // UI View Switching
     function switchMode(mode) {
       const imgView = document.getElementById('imageStudioView');
       const chatView = document.getElementById('chatStudioView');
@@ -317,6 +236,7 @@
       }
     }
 
+    // Image Generation
     async function generateImage() {
       const prompt = document.getElementById('imagePrompt').value.trim();
       if (!prompt) return;
@@ -344,6 +264,7 @@
       }
     }
 
+    // Chat Operations
     async function handleChatSubmit(e) {
       e.preventDefault();
       const input = document.getElementById('chatInput');
