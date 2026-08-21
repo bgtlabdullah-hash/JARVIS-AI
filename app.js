@@ -14,6 +14,9 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// 🔑 REPLACE THIS VALUE WITH YOUR AI STUDIO KEY (starts with AIzaSy...)
+const GEMINI_API_KEY = "AQ.Ab8RN6LK3scyH67w6bsr-dBT4ozTDgbVyPtZBs7uXzTWjpw0QA";
+
 let currentUser = null;
 let activeChatId = null;
 let guestChats = [];
@@ -150,7 +153,7 @@ function renderGuestHistory() {
   });
 }
 
-// Fully Working Open Text Integration (No 402 Errors)
+// Native Gemini REST API Request Handler
 async function handleChatSubmit(e) {
   e.preventDefault();
   const input = document.getElementById('chatInput');
@@ -161,30 +164,35 @@ async function handleChatSubmit(e) {
   appendMessage('user', text);
 
   try {
-    const systemPrompt = "You are KING AI PRO, created and owned by Abdullah Waheed. Provide clear, accurate, and helpful answers.";
-    const fullQuery = `${systemPrompt}\n\nUser Question: ${text}`;
-    
-    // Direct open proxy endpoint for reliable responses
-    const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(fullQuery)}&format=json&no_html=1&skip_disambig=1`);
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: {
+          parts: [{ text: "You are KING AI PRO, created and owned by Abdullah Waheed." }]
+        },
+        contents: [{
+          parts: [{ text: text }]
+        }]
+      })
+    });
+
     const data = await response.json();
     
-    let reply = data.AbstractText || data.Definition || "";
-    
-    if (!reply) {
-      // Direct text fallback endpoint
-      const fallbackRes = await fetch(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(text)}`);
-      reply = `👑 King AI Engine Active: Received your query "${text}". System is operating normally.`;
-    }
+    if (data.candidates && data.candidates[0].content.parts[0].text) {
+      const reply = data.candidates[0].content.parts[0].text;
+      appendMessage('assistant', reply);
 
-    appendMessage('assistant', reply);
-
-    if (currentUser) {
-      saveMessageToCloud(text, reply);
+      if (currentUser) {
+        saveMessageToCloud(text, reply);
+      } else {
+        saveGuestChat(text, reply);
+      }
     } else {
-      saveGuestChat(text, reply);
+      appendMessage('assistant', "👑 King AI: Invalid API Key. Please generate a valid key starting with 'AIzaSy' from Google AI Studio.");
     }
   } catch (err) {
-    appendMessage('assistant', "👑 King AI: Engine busy, please try sending your message again.");
+    appendMessage('assistant', "👑 King AI: Connection error. Please check your internet connection.");
   }
 }
 
