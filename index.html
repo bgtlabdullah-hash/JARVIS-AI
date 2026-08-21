@@ -3,10 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KING AI PRO — Owned by Abdullah Waheed</title>
+  <title>KING AI VIP PRO — Owned by Abdullah Waheed</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -15,8 +13,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Cinzel:wght@700;900&display=swap');
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cinzel:wght@700;900&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #030712; }
     .font-royal { font-family: 'Cinzel', serif; }
     .gold-gradient-bg { background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); }
     .gold-gradient-text {
@@ -26,82 +24,181 @@
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+<body class="bg-[#050b14] text-slate-100 min-h-screen flex flex-col font-sans">
 
-  <!-- Main App Header -->
-  <header class="flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-800">
+  <!-- Header -->
+  <header class="flex items-center justify-between px-6 py-3 bg-[#08101d] border-b border-slate-800/80">
     <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-lg gold-gradient-bg flex items-center justify-center text-slate-950 font-black">👑</div>
+      <div class="w-8 h-8 rounded-lg gold-gradient-bg flex items-center justify-center text-slate-950 font-black text-sm shadow-md">👑</div>
       <div>
-        <span class="font-royal font-black text-base gold-gradient-text">KING AI PRO</span>
-        <p class="text-[10px] text-amber-300">Owned by Abdullah Waheed</p>
+        <div class="flex items-center gap-2">
+          <span class="font-royal font-black text-base gold-gradient-text tracking-wide">KING AI</span>
+          <span class="bg-emerald-500 text-slate-950 text-[9px] font-black px-1.5 py-0.5 rounded">VIP PRO</span>
+        </div>
+        <p class="text-[10px] text-amber-300/80 font-medium">Owned by <span class="font-bold text-amber-300">Abdullah Waheed</span></p>
       </div>
     </div>
     
-    <!-- Navigation / Header Auth Controls -->
+    <!-- Top Right Controls -->
     <div class="flex items-center gap-3">
-      <div class="px-3 py-1.5 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs">🎟️ VIP ACTIVE</div>
-      <button id="signInBtn" onclick="loginWithGoogle()" class="gold-gradient-bg text-slate-950 px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 hover:opacity-90 transition">
+      <!-- VIP Badge -->
+      <div id="vipBadge" class="px-3 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs flex items-center gap-1">
+        🎟️ VIP ACTIVE
+      </div>
+
+      <!-- Optional Google Auth Controls -->
+      <button id="signInBtn" onclick="loginWithGoogle()" class="gold-gradient-bg text-slate-950 px-3.5 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5 hover:opacity-90 shadow-md transition">
         <svg class="w-3.5 h-3.5" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1H12v3.8h5.4c-.2 1.2-.9 2.3-2 3.1v2.5h3.2c1.9-1.7 3-4.3 3-7.4 0-.5 0-1-.1-1.4z"/><path fill="currentColor" d="M12 21c2.7 0 5-1 6.6-2.6l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.2H3.1v2.6C4.7 18.5 8.1 21 12 21z"/><path fill="currentColor" d="M6.4 12.7c-.2-.6-.3-1.3-.3-2.7s.1-2.1.3-2.7V4.7H3.1C2.4 6.1 2 7.7 2 9.5s.4 3.4 1.1 4.8l3.3-2.6z"/><path fill="currentColor" d="M12 5.8c1.5 0 2.8.5 3.8 1.5l2.8-2.8C16.9 2.9 14.6 2 12 2 8.1 2 4.7 4.5 3.1 7.7l3.3 2.6c.8-2.4 3-4.5 5.6-4.5z"/></svg>
         <span>Sign In</span>
       </button>
-      <button id="signOutBtn" onclick="logout()" class="hidden text-xs text-slate-400 hover:text-red-400 font-bold px-2 py-1">
+
+      <button id="signOutBtn" onclick="logout()" class="hidden text-xs text-slate-400 hover:text-red-400 font-bold px-2 py-1 transition">
         Logout
       </button>
     </div>
   </header>
 
-  <!-- Application Body (Loads directly without blocking auth screen) -->
-  <div id="appContainer" class="flex-1 flex h-[calc(100vh-57px)]">
+  <!-- App Layout -->
+  <div class="flex-1 flex overflow-hidden">
+
     <!-- Sidebar -->
-    <aside class="w-64 bg-slate-900 border-r border-slate-800 p-3 space-y-4 flex flex-col">
-      <!-- User Info Box -->
-      <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-3">
-        <img id="userAvatar" class="w-8 h-8 rounded-full border border-slate-700 object-cover" src="https://via.placeholder.com/40?text=👑" alt="User">
+    <aside class="w-72 bg-[#08101d] border-r border-slate-800/80 p-4 space-y-4 flex flex-col overflow-y-auto">
+      
+      <!-- User Card -->
+      <div class="p-3 rounded-xl bg-[#0d1626] border border-slate-800 flex items-center gap-3 shadow-inner">
+        <img id="userAvatarImg" src="https://via.placeholder.com/40?text=👑" alt="User Avatar" class="w-10 h-10 rounded-xl border border-amber-500/30 object-cover">
         <div class="overflow-hidden">
-          <h3 id="userName" class="font-bold text-xs text-white truncate">Guest User</h3>
-          <p id="userStatus" class="text-[10px] text-slate-400 font-semibold">Standard Access</p>
+          <h3 id="userNameDisplay" class="font-bold text-xs text-white truncate">Abdullah Waheed</h3>
+          <p id="userEmailDisplay" class="text-[9px] text-slate-400 font-semibold truncate">Official App Owner & Creator</p>
         </div>
       </div>
 
-      <!-- Cloud Chat History -->
-      <div class="flex-1 space-y-2 overflow-y-auto">
-        <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
-          <span>Cloud Chats</span>
-          <button onclick="createNewChat()" class="text-amber-400 hover:underline">+ New</button>
+      <!-- VIP Pass Status Card -->
+      <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+        <div class="flex items-center gap-1.5 font-bold text-xs">
+          <span>🎟️</span> VIP Pass Active
         </div>
-        <div id="cloudChatList" class="space-y-1">
-          <p id="guestNotice" class="text-[10px] text-slate-500 italic p-1">Sign in with Google to enable cloud chat saving across devices.</p>
+        <p class="text-[10px] text-slate-400 mt-0.5">Gemini Engine Locked</p>
+      </div>
+
+      <!-- Pricing Badge -->
+      <div class="p-2.5 rounded-xl gold-gradient-bg flex items-center justify-between text-slate-950 font-bold text-xs shadow-lg">
+        <div class="flex items-center gap-1.5">
+          <span>👑</span> Buy KING Pro
+        </div>
+        <span class="bg-slate-950/20 px-2 py-0.5 rounded text-[10px] font-black">Rs. 1500</span>
+      </div>
+
+      <!-- Usage Box -->
+      <div class="p-3 rounded-xl bg-[#0d1626] border border-slate-800 space-y-2 text-[10px]">
+        <div class="flex justify-between items-center">
+          <span class="text-amber-400 font-bold">VIP UNLIMITED</span>
+          <span class="text-slate-400">Gemini 3.6 Flash</span>
+        </div>
+        <div class="flex justify-between items-center text-slate-300">
+          <span class="flex items-center gap-1">💬 Messages:</span>
+          <span class="text-emerald-400 font-black">UNLIMITED</span>
+        </div>
+        <div class="flex justify-between items-center text-slate-300">
+          <span class="flex items-center gap-1">🎨 Image Creation:</span>
+          <span class="text-emerald-400 font-black">UNLIMITED</span>
         </div>
       </div>
+
+      <!-- Recent Chats -->
+      <div class="space-y-2">
+        <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+          <span>Recent Chats</span>
+          <div class="flex gap-2">
+            <button onclick="clearHistory()" class="text-slate-400 hover:text-red-400">Clear</button>
+            <button onclick="createNewChat()" class="text-amber-400 hover:underline">+ New</button>
+          </div>
+        </div>
+        <div id="chatHistoryList" class="space-y-1"></div>
+      </div>
+
+      <!-- Intelligence Modes -->
+      <div class="space-y-2 pt-2">
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Intelligence Modes</p>
+        
+        <button onclick="switchMode('chat')" id="navChatBtn" class="w-full p-2.5 rounded-xl bg-[#0d1626] hover:bg-slate-800 text-slate-300 text-xs flex items-center justify-between border border-slate-800 transition">
+          <span class="flex items-center gap-2">💬 King AI Chat PRO</span>
+          <span class="bg-slate-800 text-slate-400 text-[9px] px-1.5 py-0.5 rounded">3.6 Flash</span>
+        </button>
+
+        <button onclick="switchMode('image')" id="navImageBtn" class="w-full p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between font-semibold shadow-inner">
+          <span class="flex items-center gap-2">🎨 8K Image Studio</span>
+          <span class="bg-amber-500/20 text-amber-400 text-[9px] px-1.5 py-0.5 rounded">Flux 8K</span>
+        </button>
+
+        <button class="w-full p-2.5 rounded-xl bg-[#0d1626] opacity-60 text-slate-400 text-xs flex items-center gap-2 border border-slate-800/50 cursor-not-allowed">🛡️ Monogram & Shields</button>
+        <button class="w-full p-2.5 rounded-xl bg-[#0d1626] opacity-60 text-slate-400 text-xs flex items-center gap-2 border border-slate-800/50 cursor-not-allowed">🎬 Cinema Studio Pro</button>
+        <button class="w-full p-2.5 rounded-xl bg-[#0d1626] opacity-60 text-slate-400 text-xs flex items-center gap-2 border border-slate-800/50 cursor-not-allowed">🧰 AI Master Tools</button>
+      </div>
+
+      <!-- Saved Creations -->
+      <div class="pt-2 border-t border-slate-800/80 flex justify-between items-center text-xs text-slate-400">
+        <span class="flex items-center gap-2">📁 Saved Creations</span>
+        <span id="savedCreationsCount" class="bg-slate-800 px-2 py-0.5 rounded text-[10px] font-bold text-slate-300">0</span>
+      </div>
+
     </aside>
 
-    <!-- Chat View Main Panel -->
-    <main class="flex-1 flex flex-col bg-slate-950">
-      <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-4">
-        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 text-xs text-amber-300 max-w-xl">
-          👑 Welcome to KING AI PRO! Send a message below to begin chatting immediately, or sign in to save your conversation history across devices.
+    <!-- Main Workspace -->
+    <main class="flex-1 p-6 bg-[#050b14] overflow-y-auto">
+      
+      <!-- 8K Image Studio -->
+      <div id="imageStudioView" class="max-w-4xl space-y-6">
+        <h1 class="text-xl font-black gold-gradient-text flex items-center gap-2">
+          🎨 8K IMAGE STUDIO
+        </h1>
+
+        <div class="p-4 rounded-2xl bg-[#08101d] border border-slate-800 shadow-xl space-y-4">
+          <textarea id="imagePrompt" rows="3" placeholder="image of honda civic" class="w-full bg-[#050b14] text-xs text-slate-200 border border-slate-800 rounded-xl p-3 focus:outline-none focus:border-amber-500 resize-none">image of honda civic</textarea>
+
+          <button onclick="generateImage()" id="generateBtn" class="w-full py-3 gold-gradient-bg text-slate-950 font-bold text-xs rounded-xl shadow-lg hover:opacity-95 transition">
+            Generate 8K Image
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          <p class="text-xs font-bold text-slate-400">Generated Result:</p>
+          <div id="imageResultContainer" class="w-80 h-80 rounded-2xl bg-[#08101d] border border-slate-800 flex items-center justify-center overflow-hidden relative shadow-2xl">
+            <img id="generatedImage" src="https://image.pollinations.ai/prompt/image%20of%20honda%20civic?width=800&height=800&nologo=true" alt="Honda Civic Result" class="w-full h-full object-cover">
+            <div id="loadingOverlay" class="hidden absolute inset-0 bg-slate-950/80 flex items-center justify-center text-amber-400 text-xs font-bold">
+              ⚡ Generating 8K Image...
+            </div>
+          </div>
         </div>
       </div>
-      
-      <div class="p-3 border-t border-slate-800 bg-slate-900">
-        <form onsubmit="handleChatSubmit(event)" class="max-w-3xl mx-auto flex gap-2">
-          <input id="chatInput" type="text" placeholder="Ask King AI anything..." class="flex-1 bg-slate-950 text-xs rounded-xl px-4 py-3 border border-slate-800 text-white focus:outline-none focus:border-amber-500">
-          <button type="submit" class="gold-gradient-bg text-slate-950 px-5 py-3 rounded-xl font-bold text-xs hover:opacity-90">Send</button>
+
+      <!-- Chat Studio -->
+      <div id="chatStudioView" class="hidden max-w-4xl h-full flex flex-col space-y-4">
+        <h1 class="text-xl font-black gold-gradient-text">💬 KING AI CHAT PRO</h1>
+        <div id="chatMessages" class="flex-1 bg-[#08101d] border border-slate-800 rounded-2xl p-4 overflow-y-auto space-y-3 text-xs">
+          <div class="p-3 bg-[#0d1626] rounded-xl text-amber-300">
+            👑 Welcome to King AI Chat PRO.
+          </div>
+        </div>
+        <form onsubmit="handleChatSubmit(event)" class="flex gap-2">
+          <input id="chatInput" type="text" placeholder="Ask King AI..." class="flex-1 bg-[#08101d] text-xs rounded-xl px-4 py-3 border border-slate-800 text-white focus:outline-none focus:border-amber-500">
+          <button type="submit" class="gold-gradient-bg text-slate-950 px-5 py-3 rounded-xl font-bold text-xs">Send</button>
         </form>
       </div>
+
     </main>
   </div>
 
   <script>
-    // 1. Firebase Initialization
+    // Updated Firebase Configuration
     const firebaseConfig = {
-      apiKey: "YOUR_FIREBASE_PUBLIC_CLIENT_KEY",
-      authDomain: "your-app.firebaseapp.com",
-      projectId: "your-app-id",
-      storageBucket: "your-app.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:abcdef"
+      apiKey: "AIzaSyCtQ0mFr-Sj2yxkIWFKal4tuvi9HrjvUGc",
+      authDomain: "king-ai-pro.firebaseapp.com",
+      projectId: "king-ai-pro",
+      storageBucket: "king-ai-pro.firebasestorage.app",
+      messagingSenderId: "1031703957787",
+      appId: "1:1031703957787:web:6bd7a28e6a9d2252e4c3be",
+      measurementId: "G-412V3TL038"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -112,76 +209,141 @@
     let currentUser = null;
     let activeChatId = null;
 
-    // 2. Auth Observer (Handles guest & logged-in states inline)
-    auth.onAuthStateChanged(user => {
+    let guestChats = [];
+    let guestSavedCount = 0;
+
+    auth.onAuthStateChanged(async (user) => {
       const signInBtn = document.getElementById('signInBtn');
       const signOutBtn = document.getElementById('signOutBtn');
-      const userStatus = document.getElementById('userStatus');
 
       if (user) {
         currentUser = user;
-        if (signInBtn) signInBtn.classList.add('hidden');
-        if (signOutBtn) signOutBtn.classList.remove('hidden');
+        signInBtn.classList.add('hidden');
+        signOutBtn.classList.remove('hidden');
 
-        document.getElementById('userName').innerText = user.displayName || "User";
-        document.getElementById('userAvatar').src = user.photoURL || "https://via.placeholder.com/40";
-        if (userStatus) {
-          userStatus.innerText = "Cloud Synced";
-          userStatus.className = "text-[10px] text-emerald-400 font-semibold";
+        document.getElementById('userNameDisplay').innerText = user.displayName || "Abdullah Waheed";
+        document.getElementById('userEmailDisplay').innerText = user.email || "Official User";
+        document.getElementById('userAvatarImg').src = user.photoURL || "https://via.placeholder.com/40";
+
+        const userDocRef = db.collection('users').doc(user.uid);
+        const doc = await userDocRef.get();
+        if (!doc.exists) {
+          await userDocRef.set({ isVIP: true, email: user.email, name: user.displayName });
         }
 
-        syncCloudData();
+        syncUserData();
       } else {
         currentUser = null;
-        if (signInBtn) signInBtn.classList.remove('hidden');
-        if (signOutBtn) signOutBtn.classList.add('hidden');
+        activeChatId = null;
 
-        document.getElementById('userName').innerText = "Guest User";
-        document.getElementById('userAvatar').src = "https://via.placeholder.com/40?text=👑";
-        if (userStatus) {
-          userStatus.innerText = "Standard Access";
-          userStatus.className = "text-[10px] text-slate-400 font-semibold";
-        }
+        signInBtn.classList.remove('hidden');
+        signOutBtn.classList.add('hidden');
 
-        const chatList = document.getElementById('cloudChatList');
-        if (chatList) {
-          chatList.innerHTML = '<p class="text-[10px] text-slate-500 italic p-1">Sign in with Google to enable cloud chat saving across devices.</p>';
-        }
+        document.getElementById('userNameDisplay').innerText = "Abdullah Waheed";
+        document.getElementById('userEmailDisplay').innerText = "Official App Owner & Creator";
+        document.getElementById('userAvatarImg').src = "https://via.placeholder.com/40?text=👑";
+
+        renderGuestHistory();
       }
     });
 
     function loginWithGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch(err => alert("Sign-in failed: " + err.message));
+      auth.signInWithPopup(provider).catch(err => alert("Google Sign-In Failed: " + err.message));
     }
 
     function logout() {
       auth.signOut();
     }
 
-    // 3. Real-Time Cloud Synchronization
-    function syncCloudData() {
+    function syncUserData() {
       if (!currentUser) return;
 
       db.collection('users').doc(currentUser.uid).collection('chats')
         .orderBy('updatedAt', 'desc')
         .onSnapshot(snapshot => {
-          const chatList = document.getElementById('cloudChatList');
-          if (!chatList) return;
-
+          const chatList = document.getElementById('chatHistoryList');
           chatList.innerHTML = '';
+
+          let count = 0;
           snapshot.forEach(doc => {
+            count++;
             const chat = doc.data();
-            const btn = document.createElement('button');
-            btn.className = 'w-full text-left p-2 rounded-lg text-xs truncate bg-slate-800 hover:bg-slate-700 text-slate-200 mb-1 flex items-center justify-between transition';
-            btn.innerText = chat.title || 'Conversation';
-            btn.onclick = () => loadCloudChat(doc.id, chat.messages);
-            chatList.appendChild(btn);
+            const div = document.createElement('div');
+            div.className = "p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex justify-between items-center cursor-pointer mb-1";
+            div.innerHTML = `<span class="truncate">${chat.title || 'Conversation'}</span><span onclick="deleteChat('${doc.id}', event)" class="text-slate-500 hover:text-red-400 text-[10px]">✕</span>`;
+            div.onclick = () => loadCloudChat(doc.id, chat.messages);
+            chatList.appendChild(div);
           });
+
+          document.getElementById('savedCreationsCount').innerText = count;
         });
     }
 
-    // 4. Message Handling & Backend Proxy Calls
+    function renderGuestHistory() {
+      const chatList = document.getElementById('chatHistoryList');
+      chatList.innerHTML = '';
+
+      if (guestChats.length === 0) {
+        document.getElementById('savedCreationsCount').innerText = "0";
+      } else {
+        guestChats.forEach((chat, idx) => {
+          const div = document.createElement('div');
+          div.className = "p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex justify-between items-center cursor-pointer mb-1";
+          div.innerHTML = `<span class="truncate">${chat.title}</span><span onclick="deleteGuestChat(${idx}, event)" class="text-slate-500 hover:text-red-400 text-[10px]">✕</span>`;
+          div.onclick = () => loadGuestChat(idx);
+          chatList.appendChild(div);
+        });
+        document.getElementById('savedCreationsCount').innerText = guestSavedCount;
+      }
+    }
+
+    function switchMode(mode) {
+      const imgView = document.getElementById('imageStudioView');
+      const chatView = document.getElementById('chatStudioView');
+      const navImg = document.getElementById('navImageBtn');
+      const navChat = document.getElementById('navChatBtn');
+
+      if (mode === 'image') {
+        imgView.classList.remove('hidden');
+        chatView.classList.add('hidden');
+        navImg.className = "w-full p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between font-semibold shadow-inner";
+        navChat.className = "w-full p-2.5 rounded-xl bg-[#0d1626] hover:bg-slate-800 text-slate-300 text-xs flex items-center justify-between border border-slate-800 transition";
+      } else {
+        imgView.classList.add('hidden');
+        chatView.classList.remove('hidden');
+        navChat.className = "w-full p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between font-semibold shadow-inner";
+        navImg.className = "w-full p-2.5 rounded-xl bg-[#0d1626] hover:bg-slate-800 text-slate-300 text-xs flex items-center justify-between border border-slate-800 transition";
+      }
+    }
+
+    async function generateImage() {
+      const prompt = document.getElementById('imagePrompt').value.trim();
+      if (!prompt) return;
+
+      const overlay = document.getElementById('loadingOverlay');
+      const img = document.getElementById('generatedImage');
+      overlay.classList.remove('hidden');
+
+      try {
+        const callProxy = functions.httpsCallable('geminiProxy');
+        const res = await callProxy({ mode: "image", prompt: prompt });
+        if (res.data && res.data.imageUrl) {
+          img.src = res.data.imageUrl;
+        }
+      } catch (err) {
+        const encoded = encodeURIComponent(prompt);
+        img.src = `https://image.pollinations.ai/prompt/${encoded}?width=800&height=800&nologo=true&seed=${Math.floor(Math.random()*1000000)}`;
+      } finally {
+        img.onload = () => overlay.classList.add('hidden');
+      }
+
+      if (!currentUser) {
+        guestSavedCount++;
+        document.getElementById('savedCreationsCount').innerText = guestSavedCount;
+      }
+    }
+
     async function handleChatSubmit(e) {
       e.preventDefault();
       const input = document.getElementById('chatInput');
@@ -192,39 +354,33 @@
       appendMessage('user', text);
 
       try {
-        const callGemini = functions.httpsCallable('geminiProxy');
-        const result = await callGemini({
+        const callProxy = functions.httpsCallable('geminiProxy');
+        const res = await callProxy({
+          mode: "text",
           systemInstruction: { parts: [{ text: "You are KING AI PRO, owned by Abdullah Waheed." }] },
           contents: [{ parts: [{ text: text }] }]
         });
 
-        const reply = result.data.candidates[0].content.parts[0].text;
+        const reply = res.data.candidates[0].content.parts[0].text;
         appendMessage('assistant', reply);
 
         if (currentUser) {
           saveMessageToCloud(text, reply);
+        } else {
+          saveGuestChat(text, reply);
         }
-      } catch (error) {
-        console.error("Backend request failed:", error);
-        appendMessage('assistant', "⚠️ Error communicating with server proxy.");
+      } catch (err) {
+        appendMessage('assistant', "⚠️ Error executing request.");
       }
     }
 
     function appendMessage(role, text) {
       const container = document.getElementById('chatMessages');
-      if (!container) return;
-
       const div = document.createElement('div');
       div.className = role === 'user' 
-        ? 'p-3 rounded-xl bg-slate-800 text-xs text-white ml-auto max-w-md shadow-md mb-3' 
-        : 'p-4 rounded-xl bg-slate-900 border border-slate-800 text-xs text-amber-300 mr-auto max-w-xl shadow-md mb-3';
-
-      if (role === 'assistant' && typeof marked !== 'undefined') {
-        div.innerHTML = marked.parse(text);
-      } else {
-        div.innerText = text;
-      }
-
+        ? "p-3 bg-slate-800 rounded-xl text-white ml-auto max-w-md shadow" 
+        : "p-3 bg-[#0d1626] border border-slate-800 rounded-xl text-amber-300 mr-auto max-w-md shadow";
+      div.innerText = text;
       container.appendChild(div);
       container.scrollTop = container.scrollHeight;
     }
@@ -238,7 +394,7 @@
 
       const chatRef = db.collection('users').doc(currentUser.uid).collection('chats').doc(activeChatId);
       chatRef.set({
-        title: userMsg.substring(0, 20) + '...',
+        title: userMsg.substring(0, 18) + '...',
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         messages: firebase.firestore.FieldValue.arrayUnion(
           { role: 'user', text: userMsg },
@@ -247,20 +403,60 @@
       }, { merge: true });
     }
 
-    function createNewChat() {
-      activeChatId = null;
-      document.getElementById('chatMessages').innerHTML = '';
+    function saveGuestChat(userMsg, aiMsg) {
+      const title = userMsg.substring(0, 18) + '...';
+      guestChats.push({ title, messages: [{ role: 'user', text: userMsg }, { role: 'assistant', text: aiMsg }] });
+      renderGuestHistory();
     }
 
     function loadCloudChat(id, messages) {
       activeChatId = id;
       const container = document.getElementById('chatMessages');
-      if (!container) return;
-
       container.innerHTML = '';
       if (Array.isArray(messages)) {
         messages.forEach(m => appendMessage(m.role, m.text));
       }
+      switchMode('chat');
+    }
+
+    function loadGuestChat(idx) {
+      const container = document.getElementById('chatMessages');
+      container.innerHTML = '';
+      if (guestChats[idx] && guestChats[idx].messages) {
+        guestChats[idx].messages.forEach(m => appendMessage(m.role, m.text));
+      }
+      switchMode('chat');
+    }
+
+    function createNewChat() {
+      activeChatId = null;
+      document.getElementById('chatMessages').innerHTML = '<div class="p-3 bg-[#0d1626] rounded-xl text-amber-300">👑 New Session Started</div>';
+      switchMode('chat');
+    }
+
+    function deleteChat(id, e) {
+      e.stopPropagation();
+      if (!currentUser) return;
+      db.collection('users').doc(currentUser.uid).collection('chats').doc(id).delete();
+    }
+
+    function deleteGuestChat(idx, e) {
+      e.stopPropagation();
+      guestChats.splice(idx, 1);
+      renderGuestHistory();
+    }
+
+    function clearHistory() {
+      if (currentUser) {
+        db.collection('users').doc(currentUser.uid).collection('chats').get().then(snap => {
+          snap.forEach(doc => doc.ref.delete());
+        });
+      } else {
+        guestChats = [];
+        guestSavedCount = 0;
+        renderGuestHistory();
+      }
+      createNewChat();
     }
   </script>
 </body>
