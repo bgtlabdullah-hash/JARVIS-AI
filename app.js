@@ -14,7 +14,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Active Google AI Key (Updated)
+// Active Google AI Key
 const GEMINI_API_KEY = "AIzaSyD_AqRf3875g0oaJdy2Ymp6867RUp8riCo";
 
 let currentUser = null;
@@ -153,7 +153,7 @@ function renderGuestHistory() {
   });
 }
 
-// Direct Chat Handler
+// Direct Chat Handler - Upgraded to Gemini 3.6 Flash
 async function handleChatSubmit(e) {
   e.preventDefault();
   const input = document.getElementById('chatInput');
@@ -177,7 +177,7 @@ async function handleChatSubmit(e) {
   }
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`;
     
     const response = await fetch(url, {
       method: 'POST',
