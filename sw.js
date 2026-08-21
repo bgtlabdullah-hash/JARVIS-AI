@@ -1,13 +1,19 @@
 const functions = require("firebase-functions");
 const fetch = require("node-fetch");
 
-// Retrieve API key securely from Firebase environment configuration
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 exports.geminiProxy = functions.https.onCall(async (data, context) => {
-  const { contents, systemInstruction } = data;
+  const { mode, prompt, systemInstruction, contents } = data;
 
-  // Endpoint for Gemini 2.5 Flash
+  // Image Generation Endpoint
+  if (mode === "image") {
+    const encodedPrompt = encodeURIComponent(prompt || "8k high quality car");
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1280&height=720&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
+    return { imageUrl };
+  }
+
+  // Text Chat Endpoint
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
   try {
@@ -21,17 +27,13 @@ exports.geminiProxy = functions.https.onCall(async (data, context) => {
     });
 
     const responseData = await response.json();
-
     if (!response.ok) {
-      throw new functions.https.HttpsError(
-        "internal",
-        responseData.error?.message || "Gemini API request failed"
-      );
+      throw new functions.https.HttpsError("internal", responseData.error?.message || "API request failed");
     }
 
     return responseData;
   } catch (error) {
-    console.error("Proxy execution error:", error);
+    console.error("Error executing proxy:", error);
     throw new functions.https.HttpsError("internal", error.message);
   }
 });
