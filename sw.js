@@ -21,7 +21,7 @@ let activeChatId = null;
 let guestChats = [];
 let guestSavedCount = 0;
 
-// Authentication Observer
+// Authentication State Observer
 auth.onAuthStateChanged(async (user) => {
   const signInBtn = document.getElementById('signInBtn');
   const signOutBtn = document.getElementById('signOutBtn');
@@ -112,7 +112,7 @@ function renderGuestHistory() {
   }
 }
 
-// UI Navigation
+// UI Navigation / View Switching
 function switchMode(mode) {
   const imgView = document.getElementById('imageStudioView');
   const chatView = document.getElementById('chatStudioView');
@@ -160,7 +160,7 @@ async function generateImage() {
   }
 }
 
-// Chat Operations
+// Chat Handling
 async function handleChatSubmit(e) {
   e.preventDefault();
   const input = document.getElementById('chatInput');
