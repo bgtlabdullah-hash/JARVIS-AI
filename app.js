@@ -15,7 +15,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // Active Google AI Studio Key
-const GEMINI_API_KEY = "AQ.Ab8RN6I6pbd4FSGwYtoF1maGoEOPHFdYQiWvJS9BFXSlMZ3ttg";
+const GEMINI_API_KEY = "AIzaSyOR-A0Sld70PJ2vjVYadg1bQccNWmOcY2A";
 
 let currentUser = null;
 let activeChatId = null;
@@ -195,7 +195,7 @@ async function handleChatSubmit(e) {
         saveGuestChat(text, reply);
       }
     } else {
-      appendMessage('assistant', "👑 King AI: Engine authorization error. Please refresh your browser.");
+      appendMessage('assistant', "👑 King AI: Engine authorization error. Please check your API key.");
     }
   } catch (err) {
     appendMessage('assistant', "👑 King AI: Connection error. Please check your internet connection.");
