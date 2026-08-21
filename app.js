@@ -150,7 +150,7 @@ function renderGuestHistory() {
   });
 }
 
-// Chat Functionality Fixed (Direct Gemini API Call)
+// Fixed Chat Functionality - Direct Clean Stream
 async function handleChatSubmit(e) {
   e.preventDefault();
   const input = document.getElementById('chatInput');
@@ -161,28 +161,19 @@ async function handleChatSubmit(e) {
   appendMessage('user', text);
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${firebaseConfig.apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const response = await fetch("https://text.pollinations.ai/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        system_instruction: {
-          parts: [{ text: "You are KING AI PRO, created and owned by Abdullah Waheed." }]
-        },
-        contents: [{
-          parts: [{ text: text }]
-        }]
+        messages: [
+          { role: "system", content: "You are KING AI PRO, created and owned by Abdullah Waheed." },
+          { role: "user", content: text }
+        ],
+        model: "openai"
       })
     });
 
-    const data = await response.json();
-    let reply = "";
-
-    if (data.candidates && data.candidates[0].content.parts[0].text) {
-      reply = data.candidates[0].content.parts[0].text;
-    } else {
-      const altRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?model=mistral`);
-      reply = await altRes.text();
-    }
+    const reply = await response.text();
 
     appendMessage('assistant', reply);
 
@@ -192,7 +183,7 @@ async function handleChatSubmit(e) {
       saveGuestChat(text, reply);
     }
   } catch (err) {
-    appendMessage('assistant', "👑 King AI: Engine busy, please try sending your message again.");
+    appendMessage('assistant', "👑 King AI: Connection error. Please try sending your message again.");
   }
 }
 
