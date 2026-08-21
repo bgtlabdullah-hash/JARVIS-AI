@@ -14,8 +14,8 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// 🔑 REPLACE THIS VALUE WITH YOUR AI STUDIO KEY (starts with AIzaSy...)
-const GEMINI_API_KEY = "AQ.Ab8RN6LK3scyH67w6bsr-dBT4ozTDgbVyPtZBs7uXzTWjpw0QA";
+// Active Google AI Studio Key
+const GEMINI_API_KEY = "AQ.Ab8RN6I6pbd4FSGwYtoF1maGoEOPHFdYQiWvJS9BFXSlMZ3ttg";
 
 let currentUser = null;
 let activeChatId = null;
@@ -153,7 +153,7 @@ function renderGuestHistory() {
   });
 }
 
-// Native Gemini REST API Request Handler
+// Native Gemini API Direct Handler using Google AI Quickstart Routing
 async function handleChatSubmit(e) {
   e.preventDefault();
   const input = document.getElementById('chatInput');
@@ -164,22 +164,28 @@ async function handleChatSubmit(e) {
   appendMessage('user', text);
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent", {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-goog-api-key': GEMINI_API_KEY
+      },
       body: JSON.stringify({
-        system_instruction: {
-          parts: [{ text: "You are KING AI PRO, created and owned by Abdullah Waheed." }]
-        },
-        contents: [{
-          parts: [{ text: text }]
-        }]
+        contents: [
+          {
+            parts: [
+              {
+                text: `You are KING AI PRO created by Abdullah Waheed. ${text}`
+              }
+            ]
+          }
+        ]
       })
     });
 
     const data = await response.json();
     
-    if (data.candidates && data.candidates[0].content.parts[0].text) {
+    if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
       const reply = data.candidates[0].content.parts[0].text;
       appendMessage('assistant', reply);
 
@@ -189,7 +195,7 @@ async function handleChatSubmit(e) {
         saveGuestChat(text, reply);
       }
     } else {
-      appendMessage('assistant', "👑 King AI: Invalid API Key. Please generate a valid key starting with 'AIzaSy' from Google AI Studio.");
+      appendMessage('assistant', "👑 King AI: Engine authorization error. Please refresh your browser.");
     }
   } catch (err) {
     appendMessage('assistant', "👑 King AI: Connection error. Please check your internet connection.");
