@@ -150,7 +150,7 @@ function renderGuestHistory() {
   });
 }
 
-// Fixed Chat Functionality - Direct Clean Stream
+// Fixed Chat Functionality - Bypasses 402 Payment Error
 async function handleChatSubmit(e) {
   e.preventDefault();
   const input = document.getElementById('chatInput');
@@ -161,20 +161,14 @@ async function handleChatSubmit(e) {
   appendMessage('user', text);
 
   try {
-    const response = await fetch("https://text.pollinations.ai/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        messages: [
-          { role: "system", content: "You are KING AI PRO, created and owned by Abdullah Waheed." },
-          { role: "user", content: text }
-        ],
-        model: "openai"
-      })
-    });
+    const promptText = encodeURIComponent(`You are KING AI PRO created by Abdullah Waheed. User says: ${text}`);
+    const response = await fetch(`https://text.pollinations.ai/${promptText}?model=openai`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
     const reply = await response.text();
-
     appendMessage('assistant', reply);
 
     if (currentUser) {
@@ -183,7 +177,7 @@ async function handleChatSubmit(e) {
       saveGuestChat(text, reply);
     }
   } catch (err) {
-    appendMessage('assistant', "👑 King AI: Connection error. Please try sending your message again.");
+    appendMessage('assistant', "👑 King AI: Connection issue. Please try again in a moment.");
   }
 }
 
