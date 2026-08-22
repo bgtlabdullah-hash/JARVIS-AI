@@ -14,35 +14,40 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Active Google AI Key (Updated)
+// Active Google AI Key
 const GEMINI_API_KEY = "AIzaSyA0nw6OIvIcQrZE99_ZsnD_y6AiuOqrF9w";
+const SAFEPAY_LINK = "https://sandbox.api.getsafepay.com/io/quick-link?ql=link_4be624f5-369c-43b5-9e69-082072b78c79";
 
 let currentUser = null;
 let activeChatId = null;
 let guestChats = [];
+let attachedImageBase64 = null;
+
+// Track usage in LocalStorage for Free Users
+let msgCount = parseInt(localStorage.getItem('king_msg_count') || '0', 10);
+let imgCount = parseInt(localStorage.getItem('king_img_count') || '0', 10);
 let isProUnlocked = localStorage.getItem('king_pro_unlocked') === 'true';
 
-// Initialize PRO UI state on load
+// Initialize UI and file inputs on load
 document.addEventListener('DOMContentLoaded', () => {
   updateProUI();
+  injectMediaInputControls();
 });
 
-// Password Activation Logic
 function unlockProMode() {
-  if (isProUnlocked) {
-    alert("King AI PRO is already activated!");
-    return;
-  }
-
-  const inputPass = prompt("Enter the King AI PRO Activation Password:");
-  if (inputPass === "KingAIPro@2026") {
-    isProUnlocked = true;
-    localStorage.setItem('king_pro_unlocked', 'true');
-    updateProUI();
-    alert("🎉 King AI PRO successfully activated!");
-  } else if (inputPass !== null) {
-    alert("❌ Invalid Activation Password!");
-  }
+  // Direct redirect to Safepay payment quick-link
+  window.open(SAFEPAY_LINK, '_blank');
+  
+  // Optional backup password trigger
+  setTimeout(() => {
+    const inputPass = prompt("Already purchased or have an activation code? Enter it below:");
+    if (inputPass === "KingAIPro@2026") {
+      isProUnlocked = true;
+      localStorage.setItem('king_pro_unlocked', 'true');
+      updateProUI();
+      alert("🎉 King AI PRO / VIP Pass successfully activated! Unlimited access granted.");
+    }
+  }, 1000);
 }
 
 function updateProUI() {
@@ -52,20 +57,67 @@ function updateProUI() {
   if (isProUnlocked) {
     if (btn) {
       btn.className = "bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-lg";
-      btn.innerHTML = "📺 VIP ACTIVE";
+      btn.innerHTML = "📺 VIP UNLIMITED ACTIVE";
+      btn.onclick = () => alert("VIP Pass is Active! Enjoy unlimited access.");
     }
-    if (badge) {
-      badge.innerText = "🎟️ VIP Pass Active";
-    }
+    if (badge) badge.innerText = "🎟️ VIP Pass Active (Unlimited)";
   } else {
     if (btn) {
-      btn.className = "bg-amber-500/20 border border-amber-500/50 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-amber-500/30 transition";
-      btn.innerHTML = "🔒 Activate PRO";
+      btn.className = "bg-amber-500/20 border border-amber-500/50 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-amber-500/30 transition cursor-pointer";
+      btn.innerHTML = "⚡ Upgrade to PRO";
+      btn.onclick = unlockProMode;
     }
-    if (badge) {
-      badge.innerText = "🔒 Free Tier (Enter Password)";
-    }
+    if (badge) badge.innerText = `🔒 Free Tier (${50 - msgCount} Msgs, ${3 - imgCount} Imgs left)`;
   }
+}
+
+// Inject Upload and Camera Buttons beside Chat Input
+function injectMediaInputControls() {
+  const chatForm = document.getElementById('chatForm') || document.querySelector('form');
+  if (!chatForm) return;
+
+  const inputContainer = chatForm.querySelector('div') || chatForm;
+  
+  // Create hidden file inputs
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.id = 'chatImageUpload';
+  fileInput.accept = 'image/*';
+  fileInput.style.display = 'none';
+
+  const cameraInput = document.createElement('input');
+  cameraInput.type = 'file';
+  cameraInput.id = 'chatCameraUpload';
+  cameraInput.accept = 'image/*';
+  cameraInput.capture = 'environment';
+  cameraInput.style.display = 'none';
+
+  // Create UI Buttons
+  const mediaBtnGroup = document.createElement('div');
+  mediaBtnGroup.className = "flex items-center gap-1 mr-2";
+  mediaBtnGroup.innerHTML = `
+    <button type="button" onclick="document.getElementById('chatImageUpload').click()" title="Upload Photo" class="p-2 text-slate-400 hover:text-amber-400 bg-slate-800/80 rounded-lg text-sm">📁</button>
+    <button type="button" onclick="document.getElementById('chatCameraUpload').click()" title="Take Photo" class="p-2 text-slate-400 hover:text-amber-400 bg-slate-800/80 rounded-lg text-sm">📸</button>
+  `;
+
+  chatForm.insertBefore(mediaBtnGroup, chatForm.firstChild);
+  document.body.appendChild(fileInput);
+  document.body.appendChild(cameraInput);
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        attachedImageBase64 = event.target.result.split(',')[1];
+        appendMessage('user', `📷 Attached Image: ${file.name}`);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  fileInput.addEventListener('change', handleFileSelect);
+  cameraInput.addEventListener('change', handleFileSelect);
 }
 
 // Authentication Listener
@@ -86,7 +138,6 @@ auth.onAuthStateChanged(async (user) => {
     if (!doc.exists) {
       await userDocRef.set({ isVIP: true, email: user.email, name: user.displayName });
     }
-
     syncUserData();
   } else {
     currentUser = null;
@@ -153,25 +204,50 @@ function renderGuestHistory() {
   });
 }
 
-// Direct Chat Handler - Upgraded to Gemini 3.6 Flash
+// Direct Chat Handler - Gemini 3.6 Flash
 async function handleChatSubmit(e) {
   e.preventDefault();
   const input = document.getElementById('chatInput');
   const text = input.value.trim();
-  if (!text) return;
+  if (!text && !attachedImageBase64) return;
 
-  input.value = '';
-  appendMessage('user', text);
-
-  // Auto-detect image requests inside text chat
-  if (text.toLowerCase().startsWith("generate image") || text.toLowerCase().startsWith("make image") || text.toLowerCase().startsWith("draw")) {
-    const prompt = text.replace(/(generate image|make image|draw)/i, '').trim();
-    appendMessage('assistant', `🎨 Generating image for: "${prompt}"...`);
-    generateImageFromText(prompt);
+  // Check Message Usage Limits for Free Users
+  if (!isProUnlocked && msgCount >= 50) {
+    alert("⚠️ You have reached the Free Tier limit of 50 messages. Please upgrade to PRO for unlimited access!");
+    unlockProMode();
     return;
   }
 
-  // Auto-detect location/navigation requests inside text chat
+  input.value = '';
+  if (text) appendMessage('user', text);
+
+  // Auto-detect image creation requests
+  if (text.toLowerCase().startsWith("generate image") || text.toLowerCase().startsWith("make image") || text.toLowerCase().startsWith("draw")) {
+    if (!isProUnlocked && imgCount >= 3) {
+      alert("⚠️ You have reached the Free Limit of 3 image creations. Upgrade to PRO for unlimited image generation!");
+      unlockProMode();
+      return;
+    }
+    const prompt = text.replace(/(generate image|make image|draw)/i, '').trim();
+    appendMessage('assistant', `🎨 Generating image for: "${prompt}"...`);
+    generateImageFromText(prompt);
+    
+    if (!isProUnlocked) {
+      imgCount++;
+      localStorage.setItem('king_img_count', imgCount);
+      updateProUI();
+    }
+    return;
+  }
+
+  // Increment Message Count
+  if (!isProUnlocked) {
+    msgCount++;
+    localStorage.setItem('king_msg_count', msgCount);
+    updateProUI();
+  }
+
+  // Auto-detect location requests
   if (text.toLowerCase().includes("route") || text.toLowerCase().includes("map") || text.toLowerCase().includes("directions to")) {
     appendLocationCard(text);
   }
@@ -179,20 +255,21 @@ async function handleChatSubmit(e) {
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`;
     
+    const parts = [{ text: `You are KING AI PRO created by Abdullah Waheed. ${text}` }];
+    if (attachedImageBase64) {
+      parts.push({
+        inline_data: {
+          mime_type: "image/jpeg",
+          data: attachedImageBase64
+        }
+      });
+      attachedImageBase64 = null; // Reset image attachment after sending
+    }
+
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: `You are KING AI PRO created by Abdullah Waheed. ${text}`
-              }
-            ]
-          }
-        ]
-      })
+      body: JSON.stringify({ contents: [{ parts: parts }] })
     });
 
     const data = await response.json();
@@ -207,7 +284,7 @@ async function handleChatSubmit(e) {
         saveGuestChat(text, reply);
       }
     } else {
-      const errDetail = data.error ? data.error.message : "Engine authorization error. Check API key restrictions.";
+      const errDetail = data.error ? data.error.message : "Engine authorization error.";
       appendMessage('assistant', `👑 King AI Error: ${errDetail}`);
     }
   } catch (err) {
@@ -227,7 +304,7 @@ function appendMessage(role, text) {
   container.scrollTop = container.scrollHeight;
 }
 
-// Multi-Modal Location Router Component
+// Multi-Modal Location Router
 function appendLocationCard(queryText) {
   const container = document.getElementById('chatMessages');
   if (!container) return;
@@ -239,30 +316,21 @@ function appendLocationCard(queryText) {
   
   div.innerHTML = `
     <div class="font-bold text-amber-400 mb-2 flex items-center gap-2">📍 Navigation Router</div>
-    <p class="text-xs text-slate-300 mb-3">View live routes and options for: <strong>${decodeURIComponent(destination)}</strong></p>
-    
+    <p class="text-xs text-slate-300 mb-3">View live routes for: <strong>${decodeURIComponent(destination)}</strong></p>
     <div class="grid grid-cols-4 gap-2 mb-3">
-      <a href="https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving" target="_blank" class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-center text-amber-300 text-xs font-semibold hover:bg-amber-500/20">🚗 Drive</a>
-      <a href="https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=bicycling" target="_blank" class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-center text-amber-300 text-xs font-semibold hover:bg-amber-500/20">🏍️ Bike</a>
-      <a href="https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=walking" target="_blank" class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-center text-amber-300 text-xs font-semibold hover:bg-amber-500/20">🚶 Walk</a>
-      <a href="https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=transit" target="_blank" class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-center text-amber-300 text-xs font-semibold hover:bg-amber-500/20">✈️ Transit</a>
+      <a href="https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving" target="_blank" class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-center text-amber-300 text-xs font-semibold">🚗 Drive</a>
+      <a href="https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=bicycling" target="_blank" class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-center text-amber-300 text-xs font-semibold">🏍️ Bike</a>
+      <a href="https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=walking" target="_blank" class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-center text-amber-300 text-xs font-semibold">🚶 Walk</a>
+      <a href="https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=transit" target="_blank" class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-center text-amber-300 text-xs font-semibold">✈️ Transit</a>
     </div>
-
-    <iframe 
-      width="100%" 
-      height="200" 
-      style="border:0; border-radius: 12px;" 
-      loading="lazy" 
-      allowfullscreen 
-      src="https://maps.google.com/maps?q=${destination}&t=&z=13&ie=UTF8&iwloc=&output=embed">
-    </iframe>
+    <iframe width="100%" height="200" style="border:0; border-radius: 12px;" loading="lazy" allowfullscreen src="https://maps.google.com/maps?q=${destination}&t=&z=13&ie=UTF8&iwloc=&output=embed"></iframe>
   `;
 
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
 }
 
-// Image Generation Engines
+// Image Generation
 async function generateImageFromText(promptText) {
   const seed = Math.floor(Math.random() * 1000000);
   const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?width=1280&height=720&nologo=true&seed=${seed}`;
@@ -278,6 +346,12 @@ async function generateImageFromText(promptText) {
 }
 
 async function generateImage() {
+  if (!isProUnlocked && imgCount >= 3) {
+    alert("⚠️ Free limit of 3 image creations reached. Upgrade to PRO!");
+    unlockProMode();
+    return;
+  }
+
   const promptInput = document.getElementById('imagePrompt');
   if (!promptInput) return;
   const prompt = promptInput.value.trim();
@@ -293,6 +367,11 @@ async function generateImage() {
   img.src = imageUrl;
   img.onload = () => {
     if (overlay) overlay.classList.add('hidden');
+    if (!isProUnlocked) {
+      imgCount++;
+      localStorage.setItem('king_img_count', imgCount);
+      updateProUI();
+    }
   };
 }
 
