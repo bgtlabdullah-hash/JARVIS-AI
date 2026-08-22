@@ -15,7 +15,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // API & Payment Credentials
-const GEMINI_API_KEY = atob("QVEuQWI4Uk42SkhUY2NBYUNlV3FKaEJOV3hTenEtaDZ0NVBVYy1Mc2FwbWV4NGFUa0tUWEE="); 
+const GEMINI_API_KEY = atob("QVEuQWI4Uk42SkhUY2NBYUNlV3FKaEJOV3hTenEtaDZ0NVBVYy1Mc2FwbWV4NGFUa0tUWEE=");
 const SAFEPAY_LINK = "https://sandbox.api.getsafepay.com/io/quick-link?ql=link_4be624f5-369c-43b5-9e69-082072b78c79";
 
 let currentUser = null;
@@ -31,20 +31,64 @@ let isProUnlocked = localStorage.getItem('king_pro_unlocked') === 'true';
 document.addEventListener('DOMContentLoaded', () => {
   updateProUI();
   injectMediaInputControls();
+  createVipModal();
 });
 
+// Create Interactive VIP Modal Interface
+function createVipModal() {
+  if (document.getElementById('vipModal')) return;
+
+  const modalHtml = `
+    <div id="vipModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-[#0d1628] border border-amber-500/40 rounded-2xl max-w-md w-full p-6 text-slate-200 shadow-2xl relative">
+        <button onclick="closeVipModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold">✕</button>
+        <h3 class="text-xl font-bold text-amber-400 mb-2 flex items-center gap-2">👑 Upgrade to KING AI PRO</h3>
+        <p class="text-xs text-slate-300 mb-4">Unlock unlimited chat messages, unlimited 4K image generations, and priority processing.</p>
+        
+        <div class="space-y-3 mb-6">
+          <a href="${SAFEPAY_LINK}" target="_blank" class="block w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold rounded-xl text-center shadow-lg transition">
+            💳 Pay via Safepay Checkout
+          </a>
+        </div>
+
+        <div class="border-t border-slate-800 pt-4">
+          <label class="block text-xs font-semibold text-amber-300/80 mb-2">Already have a VIP Pass Code?</label>
+          <div class="flex gap-2">
+            <input type="password" id="vipPassInput" placeholder="Enter VIP Pass Code" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white w-full focus:outline-none focus:border-amber-500">
+            <button onclick="verifyVipCode()" class="bg-amber-500/20 border border-amber-500/50 text-amber-300 px-4 py-2 rounded-lg text-xs font-bold hover:bg-amber-500/30 transition">Activate</button>
+          </div>
+          <p id="vipErrorMsg" class="text-[11px] text-red-400 mt-2 hidden">❌ Invalid Pass Code. Try again!</p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
 function unlockProMode() {
-  window.open(SAFEPAY_LINK, '_blank');
-  
-  setTimeout(() => {
-    const inputPass = prompt("Enter VIP Pass / Activation Key if already purchased:");
-    if (inputPass === "KingAIPro@2026") {
-      isProUnlocked = true;
-      localStorage.setItem('king_pro_unlocked', 'true');
-      updateProUI();
-      alert("🎉 King AI PRO / VIP Pass successfully activated! Unlimited access granted.");
-    }
-  }, 500);
+  const modal = document.getElementById('vipModal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeVipModal() {
+  const modal = document.getElementById('vipModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function verifyVipCode() {
+  const code = document.getElementById('vipPassInput').value.trim();
+  const err = document.getElementById('vipErrorMsg');
+
+  if (code === "KingAI@2026") {
+    isProUnlocked = true;
+    localStorage.setItem('king_pro_unlocked', 'true');
+    updateProUI();
+    closeVipModal();
+    alert("🎉 King AI PRO / VIP Pass activated successfully! Unlimited access granted.");
+  } else {
+    if (err) err.classList.remove('hidden');
+  }
 }
 
 function updateProUI() {
@@ -248,7 +292,6 @@ async function handleChatSubmit(e) {
   }
 
   try {
-    // Standard endpoint without query param key
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent`;
     
     const parts = [{ text: `You are KING AI PRO created by Abdullah Waheed. ${text}` }];
@@ -262,7 +305,6 @@ async function handleChatSubmit(e) {
       attachedImageBase64 = null;
     }
 
-    // Header-based API key transmission required for AQ... keys
     const response = await fetch(url, {
       method: 'POST',
       headers: { 
