@@ -14,8 +14,8 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Active Google AI Key
-const GEMINI_API_KEY = "AIzaSyD_AqRf3875g0oaJdy2Ymp6867RUp8riCo";
+// Active Google AI Key (Updated)
+const GEMINI_API_KEY = "AIzaSyA0nw6OIvIcQrZE99_ZsnD_y6AiuOqrF9w";
 
 let currentUser = null;
 let activeChatId = null;
