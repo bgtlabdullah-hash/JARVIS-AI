@@ -102,8 +102,8 @@
           <span id="msgLimitBadge" class="text-emerald-400 font-bold font-mono">UNLIMITED</span>
         </div>
         <div class="flex justify-between items-center">
-          <span class="text-slate-400">🎨 Image Creation:</span>
-          <span id="imgLimitBadge" class="text-emerald-400 font-bold font-mono">UNLIMITED</span>
+          <span class="text-slate-400">🎨 Image Speed:</span>
+          <span id="imgLimitBadge" class="text-emerald-400 font-bold font-mono">1-2 MIN (30s VIP)</span>
         </div>
       </div>
 
@@ -120,7 +120,7 @@
 
       <!-- 10 INTELLIGENCE MODES & ADMIN FOLDER -->
       <div id="drawerIntelligenceModes" class="space-y-2 pt-2 border-t border-slate-800/80">
-        <!-- Rendered via JavaScript -->
+        <!-- Rendered dynamically via JS -->
       </div>
 
     </aside>
@@ -134,7 +134,7 @@
           <div class="p-4 bg-slate-900/60 border border-slate-800 rounded-2xl max-w-lg mx-auto text-center space-y-2 mt-8">
             <div class="text-2xl">👑</div>
             <h3 class="text-amber-400 font-bold text-sm">Welcome to KING AI Studio</h3>
-            <p class="text-slate-400 text-xs leading-relaxed">Select any folder mode from the left drawer to start creating, coding, solving math, or generating 8K images.</p>
+            <p class="text-slate-400 text-xs leading-relaxed">Select any folder mode from the left drawer to start creating, coding, writing essays, solving math, or generating fast images.</p>
           </div>
         </div>
 
@@ -145,17 +145,17 @@
         </div>
       </div>
 
-      <!-- FLUX 8K PHOTOREALISTIC IMAGE STUDIO VIEW -->
+      <!-- FAST IMAGE STUDIO VIEW -->
       <div id="imageStudioView" class="flex-1 flex flex-col items-center justify-center p-6 hidden overflow-y-auto">
         <div class="max-w-xl w-full bg-[#0d1628] border border-slate-800 p-6 rounded-2xl text-center space-y-4 shadow-2xl">
           <div class="text-3xl">🎨</div>
-          <h3 class="text-amber-400 font-bold text-base">8K Photorealistic Image Studio</h3>
-          <p class="text-slate-400 text-xs leading-relaxed">Enter a prompt below. KING AI will rewrite and render high-precision FLUX photographic visuals.</p>
-          
+          <h3 class="text-amber-400 font-bold text-base">Fast 8K Image Studio</h3>
+          <p class="text-slate-400 text-xs leading-relaxed">Images generate in <strong>1 to 2 minutes</strong> for free tier, and <strong>30 seconds</strong> for VIP PRO users.</p>
+
           <input type="text" id="imagePromptInput" placeholder="e.g. tree with 3 fruits growing mango, strawberry and peach..." onkeydown="if(event.key === 'Enter') generate8kImage()" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
-          
+
           <button id="generateImageBtn" onclick="generate8kImage()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 font-bold text-slate-950 text-xs rounded-xl shadow hover:brightness-110 transition">
-            Generate 8K Image
+            Generate Fast Image
           </button>
 
           <div id="imageOutputArea" class="mt-4 min-h-[250px] border border-dashed border-slate-800/80 rounded-xl flex items-center justify-center text-slate-500 text-xs overflow-hidden">
@@ -185,7 +185,7 @@
           <!-- System Overview Cards -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="p-4 bg-[#0d1628] border border-slate-800 rounded-2xl space-y-1">
-              <div class="text-xs text-slate-400">Today's System VIP Passcode</div>
+              <div class="text-xs text-slate-400">Today's Daily VIP Passcode</div>
               <div id="adminVipDisplay" class="text-sm font-mono font-bold text-amber-400">Loading...</div>
             </div>
             <div class="p-4 bg-[#0d1628] border border-slate-800 rounded-2xl space-y-1">
@@ -283,12 +283,29 @@
     </main>
   </div>
 
-  <!-- SIGN IN MODAL -->
+  <!-- SIGN IN MODAL WITH GOOGLE AUTH -->
   <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-[#0d1628] border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-slate-200 shadow-2xl relative space-y-4">
       <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold">✕</button>
       <h3 class="text-lg font-bold text-amber-400">Sign In to KING AI</h3>
       <p class="text-xs text-slate-400">Sync your chats, prompts, and account state across all your devices.</p>
+
+      <!-- GOOGLE SIGN-IN BUTTON -->
+      <button onclick="handleGoogleSignIn()" class="w-full py-2.5 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 shadow">
+        <svg class="w-4 h-4" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        Sign in with Google
+      </button>
+
+      <div class="relative flex py-1 items-center">
+        <div class="flex-grow border-t border-slate-800"></div>
+        <span class="flex-shrink mx-2 text-[10px] text-slate-500 uppercase tracking-wider">or with email</span>
+        <div class="flex-grow border-t border-slate-800"></div>
+      </div>
 
       <div class="space-y-3">
         <input type="email" id="authEmail" placeholder="Email Address" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-amber-500">
@@ -308,7 +325,7 @@
       <button onclick="closeVipModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold">✕</button>
       <h3 class="text-xl font-bold text-amber-400">👑 Upgrade to KING PRO</h3>
       <p class="text-xs text-slate-300 leading-relaxed">
-        Unlock <strong>Unlimited</strong> messages, 8K image generation, code crackers, and eliminate all wait cooldowns across all features!
+        Unlock <strong>Unlimited</strong> messages across all 10 tools, priority 30-second image generation, and eliminate all wait cooldowns!
       </p>
 
       <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-2 text-xs">
@@ -344,7 +361,6 @@
     const KING_AI_SYSTEM_PROMPT = "You are KING AI, an advanced AI application created by Abdullah Waheed. You must strictly identify as KING AI. Never say you are Gemini, ChatGPT, or any other model provider.";
 
     let currentUser = null;
-    let activeChatId = null;
     let activeMode = "chat";
     let isProUnlocked = false;
     let isAdminUnlocked = false;
@@ -352,16 +368,18 @@
     // Local Storage Data Store for Custom Passcodes
     let customPasscodes = JSON.parse(localStorage.getItem('kingai_custom_passcodes')) || {};
 
+    // EXACT 10 INTELLIGENCE TOOLS DICTIONARY
     const DEFAULT_LIMITS = {
       chat: { count: 0, max: 50, name: "King AI Chat PRO", tag: "8.0 Flash" },
-      image: { count: 0, max: 3, name: "8K Image Studio", tag: "King AI Diffusion" },
+      image: { count: 0, max: 3, name: "Fast 8K Image Studio", tag: "King AI Turbo" },
       reader: { count: 0, max: 3, name: "Photo & Document Reader", tag: "Vision" },
       codeGen: { count: 0, max: 4, name: "Python & Java Code Writer", tag: "Dev Studio" },
       codeCrack: { count: 0, max: 5, name: "Code Cracker & Debugger", tag: "Crack AI" },
       translator: { count: 0, max: Infinity, name: "All-Language Translator", tag: "PolyGlot" },
       voice: { count: 0, max: 3, name: "Voice Speech Synthesizer", tag: "TTS Pro" },
       docSummary: { count: 0, max: 2, name: "Document & PDF Summarizer", tag: "DocuAI" },
-      math: { count: 0, max: 5, name: "Math & Logic Solver", tag: "LogicX" }
+      math: { count: 0, max: 5, name: "Math & Logic Solver", tag: "LogicX" },
+      essay: { count: 0, max: 4, name: "Essay & Content Writer", tag: "WritePro" }
     };
 
     let userLimits = JSON.parse(JSON.stringify(DEFAULT_LIMITS));
@@ -371,6 +389,7 @@
       renderSideDrawerModes();
     });
 
+    // DAILY PASSCODE CALCULATION (CHANGES AUTOMATICALLY EVERYDAY)
     function getDailyVipPassword() {
       const START_DATE = new Date("2026-08-01T00:00:00").getTime();
       const daysPassed = Math.floor((Date.now() - START_DATE) / (24 * 60 * 60 * 1000));
@@ -383,7 +402,7 @@
         if (user) {
           currentUser = user;
           authBtn.innerText = "Sign Out";
-          document.getElementById('userNameDisplay').innerText = user.email.split('@')[0];
+          document.getElementById('userNameDisplay').innerText = user.displayName || user.email.split('@')[0];
           document.getElementById('vipBadgeText').innerText = `👤 ${user.email}`;
         } else {
           currentUser = null;
@@ -406,9 +425,21 @@
     function openVipModal() { document.getElementById('vipModal').classList.remove('hidden'); }
     function closeVipModal() { document.getElementById('vipModal').classList.add('hidden'); }
 
+    // GOOGLE SIGN-IN HANDLER
+    async function handleGoogleSignIn() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      try {
+        await auth.signInWithPopup(provider);
+        closeAuthModal();
+      } catch (err) {
+        alert("Google Sign-In Error: " + err.message);
+      }
+    }
+
     async function handleEmailSignIn() {
       const e = document.getElementById('authEmail').value;
       const p = document.getElementById('authPassword').value;
+      if(!e || !p) return alert("Please fill in both Email and Password.");
       try {
         await auth.signInWithEmailAndPassword(e, p);
         closeAuthModal();
@@ -418,17 +449,19 @@
     async function handleEmailSignUp() {
       const e = document.getElementById('authEmail').value;
       const p = document.getElementById('authPassword').value;
+      if(!e || !p) return alert("Please fill in both Email and Password.");
       try {
         await auth.createUserWithEmailAndPassword(e, p);
         closeAuthModal();
       } catch (err) { alert("Registration Error: " + err.message); }
     }
 
+    // RENDER ALL 10 AI TOOLS IN SIDEBAR
     function renderSideDrawerModes() {
       const container = document.getElementById('drawerIntelligenceModes');
       if (!container) return;
 
-      container.innerHTML = `<div class="text-[10px] font-bold text-slate-400 mb-2 px-1 uppercase tracking-wider">INTELLIGENCE MODES</div>`;
+      container.innerHTML = `<div class="text-[10px] font-bold text-slate-400 mb-2 px-1 uppercase tracking-wider">INTELLIGENCE MODES (10)</div>`;
 
       Object.keys(DEFAULT_LIMITS).forEach((key) => {
         const item = userLimits[key] || DEFAULT_LIMITS[key];
@@ -664,21 +697,18 @@
       alert("✅ All mode limits reset to defaults!");
     }
 
-    // --- REPLACED FLUX PHOTOREALISTIC IMAGE GENERATOR LOGIC ---
-
     function enhancePromptForRealism(prompt) {
       const cameraEnhancers = [
         "hyperrealistic",
         "photorealistic national geographic style",
-        "award-winning macro photography",
         "sharp focus",
         "8k resolution wallpaper",
-        "natural sunlight depth of field",
         "detailed textures"
       ];
       return `${prompt}, ${cameraEnhancers.join(", ")}`;
     }
 
+    // FAST 1-2 MINUTE IMAGE GENERATOR WITH VIP TURBO
     async function generate8kImage() {
       const promptInput = document.getElementById('imagePromptInput');
       const genBtn = document.getElementById('generateImageBtn');
@@ -698,31 +728,43 @@
       }
 
       genBtn.disabled = true;
-      genBtn.innerText = "Enhancing Prompt & Rendering 8K...";
+      genBtn.innerText = isProUnlocked ? "👑 Generating VIP Speed (30s-1m)..." : "⚡ Generating Fast Image (1-2m)...";
+
       outputArea.innerHTML = `
         <div class="p-6 text-center space-y-2">
-          <div class="text-amber-400 font-bold text-xs animate-pulse">🎨 Crafting hyperrealistic 8K scene...</div>
-          <p class="text-slate-500 text-[10px]">Rendering textures via FLUX Engine...</p>
+          <div class="text-amber-400 font-bold text-xs animate-pulse">
+            ${isProUnlocked ? '⚡ VIP Priority Engine Active...' : '🎨 Fast Image Engine Active...'}
+          </div>
+          <p class="text-slate-500 text-[10px]">Processing visual generation...</p>
         </div>
       `;
 
       try {
-        const enhancedPrompt = enhancePromptForRealism(rawPrompt);
         const seed = Math.floor(Math.random() * 1000000);
-        const encodedPrompt = encodeURIComponent(enhancedPrompt);
+        const encodedPrompt = encodeURIComponent(isProUnlocked ? enhancePromptForRealism(rawPrompt) : rawPrompt);
 
-        // Uses Pollinations FLUX Engine for photorealistic quality
-        const imageUrl = `https://pollinations.ai/p/${encodedPrompt}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true&enhance=false`;
+        // Tiered engine selection for target speeds
+        const selectedModel = isProUnlocked ? 'flux' : 'turbo';
+        const dimensions = isProUnlocked ? 1024 : 768;
+
+        const imageUrl = `https://pollinations.ai/p/${encodedPrompt}?width=${dimensions}&height=${dimensions}&seed=${seed}&model=${selectedModel}&nologo=true`;
 
         const img = new Image();
-        img.src = imageUrl;
+        
+        // Auto-timeout fallback (45s for VIP, 90s for Free) so images never hang
+        const timeoutMs = isProUnlocked ? 45000 : 90000;
+        const timer = setTimeout(() => {
+          const fallbackUrl = `https://pollinations.ai/p/${encodeURIComponent(rawPrompt)}?width=512&height=512&seed=${seed}&model=turbo&nologo=true`;
+          img.src = fallbackUrl;
+        }, timeoutMs);
 
         img.onload = () => {
+          clearTimeout(timer);
           outputArea.innerHTML = `
             <div class="w-full flex flex-col items-center gap-3 p-2">
-              <img src="${imageUrl}" alt="${rawPrompt}" class="w-full max-h-[480px] object-cover rounded-xl border border-slate-700/80 shadow-2xl" />
-              <a href="${imageUrl}" target="_blank" download="king-ai-8k.jpg" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl transition shadow flex items-center gap-1.5">
-                📥 Download 8K Image
+              <img src="${img.src}" alt="${rawPrompt}" class="w-full max-h-[480px] object-cover rounded-xl border border-slate-700/80 shadow-2xl" />
+              <a href="${img.src}" target="_blank" download="king-ai-image.jpg" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl transition shadow flex items-center gap-1.5">
+                📥 Download Image
               </a>
             </div>
           `;
@@ -733,21 +775,22 @@
           }
 
           genBtn.disabled = false;
-          genBtn.innerText = "Generate 8K Image";
+          genBtn.innerText = "Generate Fast Image";
         };
 
         img.onerror = () => {
-          throw new Error("Failed to load image from FLUX engine.");
+          clearTimeout(timer);
+          throw new Error("Engine timeout or network delay. Please try again.");
         };
+
+        img.src = imageUrl;
 
       } catch (err) {
         outputArea.innerHTML = `<div class="p-4 text-red-400 text-xs">❌ Error: ${err.message}</div>`;
         genBtn.disabled = false;
-        genBtn.innerText = "Generate 8K Image";
+        genBtn.innerText = "Generate Fast Image";
       }
     }
-
-    // --- CHAT PROMPT ENGINE ---
 
     async function sendUserPrompt() {
       const input = document.getElementById('userPromptInput');
