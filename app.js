@@ -1,7 +1,7 @@
 /**
- * KING AI - Complete Production Client Engine
- * Features: Multi-Device Account Sync, Secure Hash Admin, Daily Password Engine,
- * Interactive Folders, Tier Enforcements, & Persona Safeguards.
+ * KING AI - Full Engine with Complete UI, Account Sync,
+ * Dynamic VIP Passcode, Hash Admin, & Interactive Folders.
+ * Owner: Abdullah Waheed | Engine: KING AI Program
  */
 
 // 1. FIREBASE & API CONFIGURATION
@@ -22,15 +22,15 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// System Keys & Links
+// API Credentials & Payment Endpoints
 const GEMINI_API_KEY = atob("QVEuQWI4Uk42SkhUY2NBYUNlV3FKaEJOV3hTenEtaDZ0NVBVYy1Mc2FwbWV4NGFUa0tUWEE=");
 const SAFEPAY_LINK = "https://sandbox.api.getsafepay.com/io/quick-link?ql=link_4be624f5-369c-43b5-9e69-082072b78c79";
 
-// Hashed SHA-256 string for "abdullahwaheed123123098098"
+// Encrypted SHA-256 Hash for "abdullahwaheed123123098098"
 const ADMIN_PASSWORD_HASH = "81bc5171e2ef64d081fdb4977457bd7eece106edacff8cbb94cdd88d30d19ca7";
-const KING_AI_SYSTEM_PROMPT = "You are KING AI, an advanced AI system created by the King AI Program. You must always identify yourself as KING AI. Never say you are Gemini, OpenAI, or any other assistant.";
+const KING_AI_SYSTEM_PROMPT = "You are KING AI, an advanced AI application created by the King AI Program. You must strictly identify as KING AI. Never say you are Gemini, ChatGPT, or any other model provider.";
 
-// 2. APPLICATION STATE
+// 2. APPLICATION GLOBAL STATE
 let currentUser = null;
 let activeChatId = null;
 let activeMode = "chat";
@@ -38,16 +38,16 @@ let isProUnlocked = false;
 let dbListeners = [];
 
 const DEFAULT_LIMITS = {
-  chat: { count: 0, max: 50, name: "General Chat" },
-  image: { count: 0, max: 3, name: "4K Image Generator" },
-  reader: { count: 0, max: 3, name: "Photo & Document Reader" },
-  codeGen: { count: 0, max: 4, name: "Python, Java & Code Writer" },
-  codeCrack: { count: 0, max: 5, name: "Code Cracker & Debugger" },
-  translator: { count: 0, max: Infinity, name: "All-Language Translator" },
-  voice: { count: 0, max: 3, name: "Voice Speech / Text-to-Speech" },
-  docSummary: { count: 0, max: 2, name: "Document & PDF Summarizer" },
-  math: { count: 0, max: 5, name: "Mathematical & Logic Resolver" },
-  webGen: { count: 0, max: 2, name: "AI Website / Frontend Generator" }
+  chat: { count: 0, max: 50, name: "King AI Chat PRO", tag: "3.6 Flash" },
+  image: { count: 0, max: 3, name: "8K Image Studio", tag: "Flux 8K" },
+  reader: { count: 0, max: 3, name: "Photo & Document Reader", tag: "Vision" },
+  codeGen: { count: 0, max: 4, name: "Python & Java Code Writer", tag: "Dev Studio" },
+  codeCrack: { count: 0, max: 5, name: "Code Cracker & Debugger", tag: "Crack AI" },
+  translator: { count: 0, max: Infinity, name: "All-Language Translator", tag: "PolyGlot" },
+  voice: { count: 0, max: 3, name: "Voice Speech Synthesizer", tag: "TTS Pro" },
+  docSummary: { count: 0, max: 2, name: "Document & PDF Summarizer", tag: "DocuAI" },
+  math: { count: 0, max: 5, name: "Math & Logic Solver", tag: "LogicX" },
+  webGen: { count: 0, max: 2, name: "AI Web Page Builder", tag: "HTML/JS" }
 };
 
 let userLimits = JSON.parse(JSON.stringify(DEFAULT_LIMITS));
@@ -65,7 +65,7 @@ async function hashPassword(str) {
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Daily Dynamic Passcode Engine (Increments number daily)
+// Daily Auto-Incrementing VIP Password Engine
 function getDailyVipPassword() {
   const START_DATE = new Date("2026-08-01T00:00:00").getTime();
   const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -74,10 +74,10 @@ function getDailyVipPassword() {
   return `KingAIPro@${baseYearNumber + Math.max(0, daysPassed)}`;
 }
 
-// 4. AUTHENTICATION & MULTI-DEVICE ACCOUNT ISOLATION
+// 4. AUTHENTICATION & MULTI-DEVICE DATA SYNC
 function setupAuthStateListener() {
   auth.onAuthStateChanged(async (user) => {
-    // Unsubscribe previous active Firebase real-time sync listeners
+    // Unsubscribe existing Firestore listeners to prevent cross-account bleeding
     dbListeners.forEach(unsub => unsub && unsub());
     dbListeners = [];
 
@@ -101,26 +101,25 @@ function setupAuthStateListener() {
           isProUnlocked = !!data.isPro;
           if (data.usage) userLimits = data.usage;
         }
-        updateProUI();
+        updateHeaderAndProUI();
         renderSideDrawerModes();
       });
 
       dbListeners.push(unsubUser);
       syncUserAccountData(user.uid);
     } else {
-      // Anonymous / Signed Out State - Purge state and enforce temporary session
+      // Signed Out / Anonymous State
       currentUser = null;
       isProUnlocked = false;
       userLimits = JSON.parse(JSON.stringify(DEFAULT_LIMITS));
       activeChatId = null;
       clearFrontendUI();
-      updateProUI();
+      updateHeaderAndProUI();
       renderSideDrawerModes();
     }
   });
 }
 
-// Synchronize Account History Across All Active Devices & Tabs
 function syncUserAccountData(uid) {
   const convsRef = db.collection('users').doc(uid).collection('conversations').orderBy('updatedAt', 'desc');
 
@@ -130,7 +129,7 @@ function syncUserAccountData(uid) {
     historyContainer.innerHTML = '';
 
     if (snapshot.empty) {
-      historyContainer.innerHTML = `<div class="p-2 text-slate-500 text-xs italic">No saved history in this account.</div>`;
+      historyContainer.innerHTML = `<div class="p-2 text-slate-500 text-xs italic">Sign in to sync your account data.</div>`;
       return;
     }
 
@@ -141,7 +140,7 @@ function syncUserAccountData(uid) {
         activeChatId === doc.id ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-slate-900/60 text-slate-300 hover:bg-slate-800'
       }`;
       btn.innerHTML = `
-        <span class="truncate">💬 ${data.title || 'KING AI Chat'}</span>
+        <span class="truncate">💬 ${data.title || 'King AI Session'}</span>
         <span onclick="event.stopPropagation(); deleteAccountConversation('${doc.id}')" class="text-slate-500 hover:text-red-400 font-bold px-1">✕</span>
       `;
       btn.onclick = () => loadAccountConversation(doc.id);
@@ -152,68 +151,52 @@ function syncUserAccountData(uid) {
   dbListeners.push(unsubConvs);
 }
 
-// 5. INTERACTIVE FOLDERS & SIDE DRAWER ENGINE
+// 5. SIDEBAR & INTERACTIVE FOLDERS UI
 function renderSideDrawerModes() {
   const container = document.getElementById('drawerIntelligenceModes');
   if (!container) return;
 
   container.innerHTML = `
-    <div class="flex items-center gap-2 mb-3 px-1">
-      <span class="text-amber-400 text-sm">👑</span>
-      <h3 class="font-bold text-amber-400 text-xs tracking-wider uppercase">KING AI Power-Ups & Folders</h3>
-    </div>
+    <div class="text-[10px] font-bold text-slate-400 mb-2 px-1 tracking-wider uppercase">INTELLIGENCE MODES</div>
     <div id="folderButtonsContainer" class="space-y-1.5"></div>
   `;
 
   const folderContainer = document.getElementById('folderButtonsContainer');
 
-  const modeKeys = [
-    { key: "chat", icon: "💬", defaultMax: 50 },
-    { key: "image", icon: "🎨", defaultMax: 3 },
-    { key: "reader", icon: "📂", defaultMax: 3 },
-    { key: "codeGen", icon: "💻", defaultMax: 4 },
-    { key: "codeCrack", icon: "🔒", defaultMax: 5 },
-    { key: "translator", icon: "🌐", defaultMax: Infinity },
-    { key: "voice", icon: "🎙️", defaultMax: 3 },
-    { key: "docSummary", icon: "📄", defaultMax: 2 },
-    { key: "math", icon: "🧮", defaultMax: 5 },
-    { key: "webGen", icon: "🚀", defaultMax: 2 }
-  ];
-
-  modeKeys.forEach(({ key, icon, defaultMax }) => {
-    const item = userLimits[key] || { name: key, count: 0, max: defaultMax };
+  Object.keys(DEFAULT_LIMITS).forEach((key) => {
+    const item = userLimits[key] || DEFAULT_LIMITS[key];
     const isActiveFolder = activeMode === key;
 
     let badgeText = "";
     let badgeClass = "";
 
     if (isProUnlocked) {
-      badgeText = "♾️ Unlimited VIP";
-      badgeClass = "bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold";
+      badgeText = "UNLIMITED";
+      badgeClass = "text-emerald-400 font-bold";
     } else if (item.max === Infinity) {
-      badgeText = "♾️ Unlimited";
-      badgeClass = "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold";
+      badgeText = "UNLIMITED";
+      badgeClass = "text-emerald-400 font-bold";
     } else {
       const remaining = Math.max(0, item.max - item.count);
-      badgeText = `${remaining} / ${item.max} Free`;
-      badgeClass = "bg-slate-800 text-amber-400 border-slate-700";
+      badgeText = `${remaining}/${item.max} FREE`;
+      badgeClass = "text-amber-400 font-semibold";
     }
 
     const folderBtn = document.createElement('button');
-    folderBtn.className = `w-full text-left p-2.5 rounded-xl border flex items-center justify-between transition-all duration-200 ${
+    folderBtn.className = `w-full text-left p-2.5 rounded-xl border flex items-center justify-between transition-all duration-150 ${
       isActiveFolder
-        ? 'bg-amber-500/15 border-amber-500/60 text-amber-300 shadow-md shadow-amber-500/5'
-        : 'bg-slate-900/80 border-slate-800/80 text-slate-300 hover:bg-slate-800/90 hover:border-slate-700'
+        ? 'bg-amber-500/10 border-amber-500/40 text-amber-300 shadow-sm'
+        : 'bg-[#0f172a]/60 border-slate-800/80 text-slate-300 hover:bg-slate-800/80'
     }`;
 
     folderBtn.innerHTML = `
-      <div class="flex items-center gap-2 truncate pr-2">
-        <span class="text-sm">${icon}</span>
-        <span class="text-xs font-medium truncate">${item.name || key}</span>
+      <div class="flex items-center gap-2 truncate pr-1">
+        <span class="text-xs font-semibold truncate">${item.name}</span>
       </div>
-      <span class="text-[10px] px-2 py-0.5 rounded-md border ${badgeClass} shrink-0">
-        ${badgeText}
-      </span>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <span class="text-[9px] bg-slate-800/80 border border-slate-700/60 px-1.5 py-0.5 rounded text-slate-400 font-mono">${item.tag || 'AI'}</span>
+        <span class="text-[9px] ${badgeClass}">${badgeText}</span>
+      </div>
     `;
 
     folderBtn.onclick = () => {
@@ -224,7 +207,7 @@ function renderSideDrawerModes() {
     folderContainer.appendChild(folderBtn);
   });
 
-  // Locked Admin Folder Button
+  // Admin Folder Section
   const adminBtn = document.createElement('button');
   adminBtn.className = `w-full text-left p-2.5 mt-3 rounded-xl border flex items-center justify-between transition-all ${
     activeMode === 'admin'
@@ -234,10 +217,10 @@ function renderSideDrawerModes() {
 
   adminBtn.innerHTML = `
     <div class="flex items-center gap-2">
-      <span class="text-sm">🔐</span>
+      <span class="text-xs">🔐</span>
       <span class="text-xs font-bold">Admin Folder</span>
     </div>
-    <span class="text-[10px] px-2 py-0.5 rounded-md bg-red-900/40 border border-red-700/50 font-mono text-red-300 font-bold">
+    <span class="text-[9px] px-1.5 py-0.5 rounded bg-red-900/40 border border-red-700/50 font-mono text-red-300 font-bold">
       LOCKED
     </span>
   `;
@@ -248,17 +231,19 @@ function renderSideDrawerModes() {
 
   folderContainer.appendChild(adminBtn);
 
-  // VIP Feature Summary Banner
-  const footerBanner = document.createElement('div');
-  footerBanner.className = "text-[10px] text-amber-400/90 text-center pt-3 font-semibold flex flex-col items-center gap-1 border-t border-slate-800/80 mt-2";
-  footerBanner.innerHTML = `
-    <span>⚡ Zero Response Delays & Instant Processing</span>
-    <span class="text-slate-400 text-[9px]">VIP Unlocks Unlimited Chat, 4K Images, Readers & Code Crackers</span>
+  // Side Drawer Banner with Pro Upgrade Perks
+  const drawerBanner = document.createElement('div');
+  drawerBanner.className = "mt-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-[10px] space-y-1";
+  drawerBanner.innerHTML = `
+    <div class="font-bold flex items-center gap-1 text-amber-400">⚡ VIP PRO UNLOCKS:</div>
+    <div>• Unlimited Chat & 8K Image Creation</div>
+    <div>• Unlimited Code Crackers & Python/Java Studio</div>
+    <div>• Zero Response Waits & Zero Delay Cooldowns</div>
   `;
-  folderContainer.appendChild(footerBanner);
+  folderContainer.appendChild(drawerBanner);
 }
 
-// 6. ADMIN PANEL & SECURITY
+// 6. ADMIN FOLDER & DASHBOARD ENGINE
 async function verifyAndOpenAdmin() {
   const passwordInput = prompt("Enter Admin Password:");
   if (!passwordInput) return;
@@ -309,11 +294,11 @@ function showAdminDashboard() {
         <div class="p-4 bg-slate-900 rounded-xl border border-slate-700/50 shadow-inner">
           <span class="text-slate-400 text-xs block mb-1 uppercase tracking-wider">🔑 Today's VIP Pass Password</span>
           <span class="text-amber-400 font-mono text-xl font-bold">${getDailyVipPassword()}</span>
-          <span class="text-slate-500 text-[10px] block mt-1 italic">(Auto-increments 1 number every 24h)</span>
+          <span class="text-slate-500 text-[10px] block mt-1 italic">(Auto-increments 1 year every 24h)</span>
         </div>
 
         <div class="p-4 bg-slate-900 rounded-xl border border-slate-700/50 shadow-inner">
-          <span class="text-slate-400 text-xs block mb-1 uppercase tracking-wider">📈 Website Usage / Age</span>
+          <span class="text-slate-400 text-xs block mb-1 uppercase tracking-wider">📈 Website Usage / Uptime</span>
           <span class="text-slate-200 font-bold text-2xl">${daysActive} Days Active</span>
           <span class="text-slate-500 text-[10px] block mt-1 italic">Created on August 1, 2026</span>
         </div>
@@ -326,14 +311,14 @@ function showAdminDashboard() {
         </div>
 
         <div class="p-4 bg-slate-900 rounded-xl border border-slate-700/50 shadow-inner">
-          <span class="text-slate-400 text-xs block mb-1 uppercase tracking-wider">⚡ API Key Integration</span>
-          <span class="text-emerald-400 font-mono text-xs block truncate">Active (Firebase & Gemini Engine)</span>
-          <span class="text-slate-500 text-[10px] block mt-1 italic">Key status secure</span>
+          <span class="text-slate-400 text-xs block mb-1 uppercase tracking-wider">⚡ Connected API Keys</span>
+          <span class="text-emerald-400 font-mono text-xs block truncate">Active (Firebase & Gemini 3.6 Engine)</span>
+          <span class="text-slate-500 text-[10px] block mt-1 italic">Key integrity secured</span>
         </div>
       </div>
 
       <div class="mt-6 p-4 bg-slate-900/80 rounded-xl border border-slate-800">
-        <h4 class="text-xs font-bold text-slate-300 mb-2">💻 Developer Tools Access</h4>
+        <h4 class="text-xs font-bold text-slate-300 mb-2">💻 Developer Box Access Controls</h4>
         <p class="text-[11px] text-slate-400 mb-3">Inspect Element and Developer Box shortcuts (Ctrl+Shift+I / F12) are fully enabled across windows.</p>
         <button onclick="alert('Developer Box shortcuts (Ctrl+Shift+I, F12) are active.')" class="px-3 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-lg text-xs font-semibold transition">
           Test Developer Box Enablement
@@ -350,22 +335,22 @@ function closeAdminDashboard() {
   renderSideDrawerModes();
 }
 
-// 7. CHAT TRANSMISSION & LIMIT ENFORCEMENT
+// 7. CHAT & LIMIT ENGINE
 async function handleUserSendMessage(promptText) {
   if (!promptText || !promptText.trim()) return;
 
   const currentModeLimit = userLimits[activeMode] || DEFAULT_LIMITS[activeMode];
 
-  // Enforce message limits and wait periods for non-VIP users
+  // Enforce message limits and 1-2 hour waiting cooldown for free tier
   if (!isProUnlocked && currentModeLimit.max !== Infinity) {
     if (currentModeLimit.count >= currentModeLimit.max) {
-      alert(`⚠️ You have reached the limit for ${currentModeLimit.name} on the Free Tier.\n\nPlease wait 1 to 2 hours or upgrade to VIP Pass for Unlimited Access & Zero Delays!`);
+      alert(`⚠️ Wait for a moment! Free tier limit reached for ${currentModeLimit.name}.\n\nPlease wait 1 to 2 hours or upgrade to VIP PRO for Unlimited Access with ZERO wait delays!`);
       unlockProMode();
       return;
     }
   }
 
-  // Increment usage count if not VIP
+  // Increment local count if not VIP
   if (!isProUnlocked) {
     userLimits[activeMode].count += 1;
     if (currentUser) {
@@ -373,20 +358,17 @@ async function handleUserSendMessage(promptText) {
     }
   }
 
-  // Append user message to UI
   appendMessageToUI("user", promptText);
 
-  // Send request with enforced KING AI persona
   try {
     const responseText = await callGeminiApiWithPersona(promptText);
     appendMessageToUI("ai", responseText);
 
-    // Save message history to account if authenticated
     if (currentUser) {
       await saveMessageToAccount(promptText, responseText);
     }
   } catch (error) {
-    appendMessageToUI("ai", "⚠️ System Connection Error. Please try again.");
+    appendMessageToUI("ai", "⚠️ KING AI Engine Connection Delay. Please try again.");
   }
 
   renderSideDrawerModes();
@@ -399,7 +381,7 @@ async function callGeminiApiWithPersona(userPrompt) {
     contents: [{
       parts: [
         { text: KING_AI_SYSTEM_PROMPT },
-        { text: `User Prompt (${activeMode} mode): ${userPrompt}` }
+        { text: `[Mode: ${activeMode}] ${userPrompt}` }
       ]
     }]
   };
@@ -414,15 +396,13 @@ async function callGeminiApiWithPersona(userPrompt) {
   return data.candidates[0].content.parts[0].text;
 }
 
-// Save Chat to Firestore User Account
 async function saveMessageToAccount(promptText, responseText) {
   if (!currentUser) return;
-
   const userDoc = db.collection('users').doc(currentUser.uid);
 
   if (!activeChatId) {
     const newConv = await userDoc.collection('conversations').add({
-      title: promptText.slice(0, 30) + "...",
+      title: promptText.slice(0, 28) + "...",
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
@@ -430,15 +410,11 @@ async function saveMessageToAccount(promptText, responseText) {
   }
 
   await userDoc.collection('conversations').doc(activeChatId).collection('messages').add({
-    sender: "user",
-    text: promptText,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    sender: "user", text: promptText, timestamp: firebase.firestore.FieldValue.serverTimestamp()
   });
 
   await userDoc.collection('conversations').doc(activeChatId).collection('messages').add({
-    sender: "ai",
-    text: responseText,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    sender: "ai", text: responseText, timestamp: firebase.firestore.FieldValue.serverTimestamp()
   });
 
   await userDoc.collection('conversations').doc(activeChatId).update({
@@ -446,7 +422,7 @@ async function saveMessageToAccount(promptText, responseText) {
   });
 }
 
-// 8. HELPERS & UTILITIES
+// 8. HELPERS & UI UPDATERS
 function switchMode(modeKey) {
   activeMode = modeKey;
   const chatView = document.getElementById('chatStudioView');
@@ -471,12 +447,12 @@ function clearFrontendUI() {
   if (historyContainer) historyContainer.innerHTML = `<div class="p-2 text-slate-500 text-xs">Sign in to sync your account data.</div>`;
 }
 
-function updateProUI() {
+function updateHeaderAndProUI() {
   const badge = document.getElementById('vipBadgeText');
   if (badge) {
     badge.innerText = isProUnlocked 
-      ? "🎟️ VIP Pass Active (Unlimited Access & Zero Delay)" 
-      : (currentUser ? `👤 Signed In: ${currentUser.email}` : "🔒 Guest Session (Temporary)");
+      ? "🎟️ VIP PRO UNLIMITED ACTIVE" 
+      : (currentUser ? `👤 ${currentUser.email}` : "🔒 Guest Session (Temporary)");
   }
 }
 
@@ -486,8 +462,8 @@ function createVipModal() {
     <div id="vipModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
       <div class="bg-[#0d1628] border border-amber-500/40 rounded-2xl max-w-md w-full p-6 text-slate-200 shadow-2xl relative">
         <button onclick="closeVipModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold">✕</button>
-        <h3 class="text-xl font-bold text-amber-400 mb-2">👑 KING AI VIP Pass</h3>
-        <p class="text-xs text-slate-300 mb-4">Unlock unlimited access across all modes, zero wait delays, and instant code cracking.</p>
+        <h3 class="text-xl font-bold text-amber-400 mb-2">👑 Upgrade to KING PRO</h3>
+        <p class="text-xs text-slate-300 mb-4">Unlock unlimited messages, 8K image generation, Python/Java code cracker, and eliminate all 1-2 hour wait errors!</p>
         <a href="${SAFEPAY_LINK}" target="_blank" class="block w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 font-bold rounded-xl text-center text-slate-950 mb-4 transition hover:brightness-110">💳 Upgrade via Safepay (Rs. 1500)</a>
       </div>
     </div>
