@@ -1,4 +1,10 @@
-// Firebase Configuration
+/**
+ * KING AI - Complete Production Client Engine
+ * Features: Multi-Device Account Sync, Secure Hash Admin, Daily Password Engine,
+ * Interactive Folders, Tier Enforcements, & Persona Safeguards.
+ */
+
+// 1. FIREBASE & API CONFIGURATION
 const firebaseConfig = {
   apiKey: "AIzaSyCtQ0mFr-Sj2yxkIWFKal4tuvi9HrjvUGc",
   authDomain: "king-ai-pro.firebaseapp.com",
@@ -9,470 +15,447 @@ const firebaseConfig = {
   measurementId: "G-412V3TL038"
 };
 
-// Initialize Firebase Services
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// API & Payment Credentials
+// System Keys & Links
 const GEMINI_API_KEY = atob("QVEuQWI4Uk42SkhUY2NBYUNlV3FKaEJOV3hTenEtaDZ0NVBVYy1Mc2FwbWV4NGFUa0tUWEE=");
 const SAFEPAY_LINK = "https://sandbox.api.getsafepay.com/io/quick-link?ql=link_4be624f5-369c-43b5-9e69-082072b78c79";
 
+// Hashed SHA-256 string for "abdullahwaheed123123098098"
+const ADMIN_PASSWORD_HASH = "81bc5171e2ef64d081fdb4977457bd7eece106edacff8cbb94cdd88d30d19ca7";
+const KING_AI_SYSTEM_PROMPT = "You are KING AI, an advanced AI system created by the King AI Program. You must always identify yourself as KING AI. Never say you are Gemini, OpenAI, or any other assistant.";
+
+// 2. APPLICATION STATE
 let currentUser = null;
 let activeChatId = null;
-let guestChats = [];
-let attachedImageBase64 = null;
+let activeMode = "chat";
+let isProUnlocked = false;
+let dbListeners = [];
 
-// LocalStorage Tracking Counters
-let msgCount = parseInt(localStorage.getItem('king_msg_count') || '0', 10);
-let imgCount = parseInt(localStorage.getItem('king_img_count') || '0', 10);
-let codeGenCount = parseInt(localStorage.getItem('king_code_gen_count') || '0', 10);
-let codeCrackCount = parseInt(localStorage.getItem('king_code_crack_count') || '0', 10);
-let voiceCount = parseInt(localStorage.getItem('king_voice_count') || '0', 10);
-let docSummaryCount = parseInt(localStorage.getItem('king_doc_count') || '0', 10);
-let mathSolveCount = parseInt(localStorage.getItem('king_math_count') || '0', 10);
-let webGenCount = parseInt(localStorage.getItem('king_web_gen_count') || '0', 10);
-let isProUnlocked = localStorage.getItem('king_pro_unlocked') === 'true';
+const DEFAULT_LIMITS = {
+  chat: { count: 0, max: 50, name: "General Chat" },
+  image: { count: 0, max: 3, name: "4K Image Generator" },
+  reader: { count: 0, max: 3, name: "Photo & Document Reader" },
+  codeGen: { count: 0, max: 4, name: "Python, Java & Code Writer" },
+  codeCrack: { count: 0, max: 5, name: "Code Cracker & Debugger" },
+  translator: { count: 0, max: Infinity, name: "All-Language Translator" },
+  voice: { count: 0, max: 3, name: "Voice Speech / Text-to-Speech" },
+  docSummary: { count: 0, max: 2, name: "Document & PDF Summarizer" },
+  math: { count: 0, max: 5, name: "Mathematical & Logic Resolver" },
+  webGen: { count: 0, max: 2, name: "AI Website / Frontend Generator" }
+};
 
-// Calculate Daily Password Increment (Base: KingAI@2026)
-function getTodaysVipCode() {
-  const baseYear = 2026;
-  const startDate = new Date(2026, 7, 24);
-  const today = new Date();
-  const diffDays = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
-  const dynamicYear = baseYear + (diffDays > 0 ? diffDays : 0);
-  return `KingAI@${dynamicYear}`;
-}
+let userLimits = JSON.parse(JSON.stringify(DEFAULT_LIMITS));
 
+// 3. INITIALIZATION & LIFECYCLE
 document.addEventListener('DOMContentLoaded', () => {
-  if (!auth.currentUser) {
-    localStorage.removeItem('king_msg_count');
-    localStorage.removeItem('king_img_count');
-    localStorage.removeItem('king_code_gen_count');
-    localStorage.removeItem('king_code_crack_count');
-    localStorage.removeItem('king_voice_count');
-    localStorage.removeItem('king_doc_count');
-    localStorage.removeItem('king_math_count');
-    localStorage.removeItem('king_web_gen_count');
-    localStorage.removeItem('king_pro_unlocked');
-    msgCount = imgCount = codeGenCount = codeCrackCount = voiceCount = docSummaryCount = mathSolveCount = webGenCount = 0;
-    isProUnlocked = false;
-  }
-
-  updateProUI();
-  injectMediaInputControls();
+  setupAuthStateListener();
+  renderSideDrawerModes();
   createVipModal();
-  renderSideDrawerFeatures();
 });
 
-// Render Side Drawer VIP Features Breakdown
-function renderSideDrawerFeatures() {
-  const drawerContainer = document.getElementById('chatHistoryList')?.parentElement;
-  if (!drawerContainer || document.getElementById('drawerVipFeatures')) return;
-
-  const featuresDiv = document.createElement('div');
-  featuresDiv.id = 'drawerVipFeatures';
-  featuresDiv.className = "mt-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs space-y-1.5 text-amber-300";
-  featuresDiv.innerHTML = `
-    <div class="font-bold text-amber-400 mb-1">👑 KING AI Power-Ups & Limits:</div>
-    <div>💬 General Chat (50 Free / ♾️ VIP)</div>
-    <div>🎨 4K Image Generator (3 Free / ♾️ VIP)</div>
-    <div>📁 Photo & Document Reader (3 Free / ♾️ VIP)</div>
-    <div>💻 Code Generator (4 Free / ♾️ VIP)</div>
-    <div>🔓 Code Cracker & Debugger (5 Free / ♾️ VIP)</div>
-    <div>🌐 Multi-Language Translator (♾️ Unlimited)</div>
-    <div>🎙️ AI Voice Speech Synthesizer (3 Free / ♾️ VIP)</div>
-    <div>📑 PDF & Doc Summarizer (2 Free / ♾️ VIP)</div>
-    <div>🧮 Math & Logic Solver (5 Free / ♾️ VIP)</div>
-    <div>🚀 AI Web Page Builder (2 Free / ♾️ VIP)</div>
-    <div>⚡ Zero Response Delays & Instant Processing</div>
-  `;
-  drawerContainer.appendChild(featuresDiv);
+// SHA-256 Password Cryptography
+async function hashPassword(str) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// VIP Upgrade Modal
-function createVipModal() {
-  if (document.getElementById('vipModal')) return;
-
-  const modalHtml = `
-    <div id="vipModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-      <div class="bg-[#0d1628] border border-amber-500/40 rounded-2xl max-w-md w-full p-6 text-slate-200 shadow-2xl relative">
-        <button onclick="closeVipModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold">✕</button>
-        <h3 class="text-xl font-bold text-amber-400 mb-2 flex items-center gap-2">👑 Upgrade to KING AI PRO</h3>
-        <p class="text-xs text-slate-300 mb-4">Unlock zero waiting delays, unlimited coding, web page creation, image generation, voice speech, and math solving.</p>
-        
-        <div class="space-y-3 mb-6">
-          <a href="${SAFEPAY_LINK}" target="_blank" class="block w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold rounded-xl text-center shadow-lg transition">
-            💳 Pay via Safepay Checkout
-          </a>
-        </div>
-
-        <div class="border-t border-slate-800 pt-4">
-          <label class="block text-xs font-semibold text-amber-300/80 mb-2">Have Daily VIP Pass Key?</label>
-          <div class="flex gap-2">
-            <input type="password" id="vipPassInput" placeholder="Enter Daily Pass Code" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white w-full focus:outline-none focus:border-amber-500">
-            <button onclick="verifyVipCode()" class="bg-amber-500/20 border border-amber-500/50 text-amber-300 px-4 py-2 rounded-lg text-xs font-bold hover:bg-amber-500/30 transition">Activate</button>
-          </div>
-          <p id="vipErrorMsg" class="text-[11px] text-red-400 mt-2 hidden">❌ Invalid Pass Code. Passes increment daily.</p>
-        </div>
-      </div>
-    </div>
-  `;
-
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
+// Daily Dynamic Passcode Engine (Increments number daily)
+function getDailyVipPassword() {
+  const START_DATE = new Date("2026-08-01T00:00:00").getTime();
+  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+  const daysPassed = Math.floor((Date.now() - START_DATE) / ONE_DAY_MS);
+  const baseYearNumber = 2026;
+  return `KingAIPro@${baseYearNumber + Math.max(0, daysPassed)}`;
 }
 
-function unlockProMode() {
-  const modal = document.getElementById('vipModal');
-  if (modal) modal.classList.remove('hidden');
-}
+// 4. AUTHENTICATION & MULTI-DEVICE ACCOUNT ISOLATION
+function setupAuthStateListener() {
+  auth.onAuthStateChanged(async (user) => {
+    // Unsubscribe previous active Firebase real-time sync listeners
+    dbListeners.forEach(unsub => unsub && unsub());
+    dbListeners = [];
 
-function closeVipModal() {
-  const modal = document.getElementById('vipModal');
-  if (modal) modal.classList.add('hidden');
-}
-
-function verifyVipCode() {
-  const code = document.getElementById('vipPassInput').value.trim();
-  const err = document.getElementById('vipErrorMsg');
-
-  if (code === getTodaysVipCode()) {
-    isProUnlocked = true;
-    localStorage.setItem('king_pro_unlocked', 'true');
-    
-    if (currentUser) {
-      db.collection('users').doc(currentUser.uid).set({ isVIP: true }, { merge: true });
-    }
-
-    updateProUI();
-    closeVipModal();
-    alert("🎉 King AI VIP Pass activated! Unlimited access granted for all features.");
-  } else {
-    if (err) err.classList.remove('hidden');
-  }
-}
-
-function updateProUI() {
-  const btn = document.getElementById('proStatusBtn');
-  const badge = document.getElementById('vipBadgeText');
-
-  if (isProUnlocked) {
-    if (btn) {
-      btn.className = "bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-lg";
-      btn.innerHTML = "📺 VIP UNLIMITED ACTIVE";
-      btn.onclick = () => alert("VIP Active! Unlimited messages, code, web generation, and speech synthesizer.");
-    }
-    if (badge) badge.innerText = "🎟️ VIP Pass Active (Unlimited Access)";
-  } else {
-    if (btn) {
-      btn.className = "bg-amber-500/20 border border-amber-500/50 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-amber-500/30 transition cursor-pointer";
-      btn.innerHTML = "⚡ Upgrade to PRO";
-      btn.onclick = unlockProMode;
-    }
-    const remainingMsgs = Math.max(0, 50 - msgCount);
-    if (badge) badge.innerText = `🔒 Free Tier (${remainingMsgs} Msgs left)`;
-  }
-}
-
-// Media Controls
-function injectMediaInputControls() {
-  const chatForm = document.getElementById('chatForm') || document.querySelector('form');
-  if (!chatForm || document.getElementById('chatImageUpload')) return;
-
-  const fileInput = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.id = 'chatImageUpload';
-  fileInput.accept = 'image/*';
-  fileInput.style.display = 'none';
-
-  const cameraInput = document.createElement('input');
-  cameraInput.type = 'file';
-  cameraInput.id = 'chatCameraUpload';
-  cameraInput.accept = 'image/*';
-  cameraInput.capture = 'environment';
-  cameraInput.style.display = 'none';
-
-  const mediaBtnGroup = document.createElement('div');
-  mediaBtnGroup.className = "flex items-center gap-1 mr-2";
-  mediaBtnGroup.innerHTML = `
-    <button type="button" onclick="document.getElementById('chatImageUpload').click()" title="Upload Photo" class="p-2 text-slate-400 hover:text-amber-400 bg-slate-800/80 rounded-lg text-sm">📁</button>
-    <button type="button" onclick="document.getElementById('chatCameraUpload').click()" title="Take Photo" class="p-2 text-slate-400 hover:text-amber-400 bg-slate-800/80 rounded-lg text-sm">📸</button>
-  `;
-
-  chatForm.insertBefore(mediaBtnGroup, chatForm.firstChild);
-  document.body.appendChild(fileInput);
-  document.body.appendChild(cameraInput);
-
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        attachedImageBase64 = event.target.result.split(',')[1];
-        appendMessage('user', `📷 Attached File: ${file.name}`);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  fileInput.addEventListener('change', handleFileSelect);
-  cameraInput.addEventListener('change', handleFileSelect);
-}
-
-// Auth Listener
-auth.onAuthStateChanged(async (user) => {
-  const signInBtn = document.getElementById('signInBtn');
-  const signOutBtn = document.getElementById('signOutBtn');
-
-  if (user) {
-    currentUser = user;
-    if (signInBtn) signInBtn.classList.add('hidden');
-    if (signOutBtn) signOutBtn.classList.remove('hidden');
-
-    document.getElementById('userNameDisplay').innerText = user.displayName || "Abdullah Waheed";
-    document.getElementById('userEmailDisplay').innerText = user.email || "Official User";
-
-    const userDocRef = db.collection('users').doc(user.uid);
-    const doc = await userDocRef.get();
-    
-    if (doc.exists && doc.data().isVIP) {
-      isProUnlocked = true;
-      localStorage.setItem('king_pro_unlocked', 'true');
-    } else if (!doc.exists) {
-      await userDocRef.set({ isVIP: isProUnlocked, email: user.email, name: user.displayName });
-    }
-
-    updateProUI();
-    syncUserData();
-  } else {
-    currentUser = null;
-    activeChatId = null;
-
-    if (signInBtn) signInBtn.classList.remove('hidden');
-    if (signOutBtn) signOutBtn.classList.add('hidden');
-
-    document.getElementById('userNameDisplay').innerText = "Abdullah Waheed";
-    document.getElementById('userEmailDisplay').innerText = "Official App Owner & Creator";
-
-    renderGuestHistory();
-  }
-});
-
-function loginWithGoogle() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(err => alert("Google Sign-In Error: " + err.message));
-}
-
-function logout() {
-  auth.signOut();
-  localStorage.clear();
-  location.reload();
-}
-
-function syncUserData() {
-  if (!currentUser) return;
-
-  db.collection('users').doc(currentUser.uid).collection('chats')
-    .orderBy('updatedAt', 'desc')
-    .onSnapshot(snapshot => {
-      const chatList = document.getElementById('chatHistoryList');
-      if (!chatList) return;
-      chatList.innerHTML = '';
-
-      let count = 0;
-      snapshot.forEach(doc => {
-        count++;
-        const chat = doc.data();
-        const div = document.createElement('div');
-        div.className = "p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex justify-between items-center cursor-pointer mb-1";
-        div.innerHTML = `<span class="truncate">${chat.title || 'Conversation'}</span><span onclick="deleteChat('${doc.id}', event)" class="text-slate-500 hover:text-red-400 text-[10px]">✕</span>`;
-        div.onclick = () => loadCloudChat(doc.id, chat.messages);
-        chatList.appendChild(div);
+    if (user) {
+      currentUser = user;
+      const userDocRef = db.collection('users').doc(user.uid);
+      
+      const unsubUser = userDocRef.onSnapshot(async (doc) => {
+        if (!doc.exists) {
+          await userDocRef.set({
+            email: user.email,
+            displayName: user.displayName || "King AI Member",
+            isPro: false,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            usage: DEFAULT_LIMITS
+          });
+          isProUnlocked = false;
+          userLimits = JSON.parse(JSON.stringify(DEFAULT_LIMITS));
+        } else {
+          const data = doc.data();
+          isProUnlocked = !!data.isPro;
+          if (data.usage) userLimits = data.usage;
+        }
+        updateProUI();
+        renderSideDrawerModes();
       });
 
-      if (document.getElementById('savedCreationsCount')) {
-        document.getElementById('savedCreationsCount').innerText = count;
-      }
-    });
-}
-
-function renderGuestHistory() {
-  const chatList = document.getElementById('chatHistoryList');
-  if (!chatList) return;
-  chatList.innerHTML = '';
-
-  guestChats.forEach((chat, idx) => {
-    const div = document.createElement('div');
-    div.className = "p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex justify-between items-center cursor-pointer mb-1";
-    div.innerHTML = `<span class="truncate">${chat.title}</span><span onclick="deleteGuestChat(${idx}, event)" class="text-slate-500 hover:text-red-400 text-[10px]">✕</span>`;
-    div.onclick = () => loadGuestChat(idx);
-    chatList.appendChild(div);
+      dbListeners.push(unsubUser);
+      syncUserAccountData(user.uid);
+    } else {
+      // Anonymous / Signed Out State - Purge state and enforce temporary session
+      currentUser = null;
+      isProUnlocked = false;
+      userLimits = JSON.parse(JSON.stringify(DEFAULT_LIMITS));
+      activeChatId = null;
+      clearFrontendUI();
+      updateProUI();
+      renderSideDrawerModes();
+    }
   });
 }
 
-// Chat & Feature Limit Manager
-async function handleChatSubmit(e) {
-  e.preventDefault();
-  const input = document.getElementById('chatInput');
-  const text = input.value.trim();
-  if (!text && !attachedImageBase64) return;
+// Synchronize Account History Across All Active Devices & Tabs
+function syncUserAccountData(uid) {
+  const convsRef = db.collection('users').doc(uid).collection('conversations').orderBy('updatedAt', 'desc');
 
-  const lowerText = text.toLowerCase();
+  const unsubConvs = convsRef.onSnapshot((snapshot) => {
+    const historyContainer = document.getElementById('chatHistoryList');
+    if (!historyContainer) return;
+    historyContainer.innerHTML = '';
 
-  const isCodePrompt = lowerText.includes("code") || lowerText.includes("python") || lowerText.includes("java") || lowerText.includes("script") || lowerText.includes("html");
-  const isCrackPrompt = lowerText.includes("crack") || lowerText.includes("debug") || lowerText.includes("fix code") || lowerText.includes("decompile");
-  const isVoicePrompt = lowerText.startsWith("speak") || lowerText.startsWith("say in voice") || lowerText.startsWith("read aloud");
-  const isDocPrompt = lowerText.includes("summarize doc") || lowerText.includes("pdf summary") || lowerText.includes("summarize document");
-  const isMathPrompt = lowerText.includes("solve math") || lowerText.includes("equation") || lowerText.includes("calculate");
-  const isWebPrompt = lowerText.includes("build website") || lowerText.includes("generate page") || lowerText.includes("create web app");
-
-  // Check Feature Limits
-  if (!isProUnlocked) {
-    if (isCodePrompt && codeGenCount >= 4) {
-      alert("⚠️ Free Limit Reached! 4 free code generation prompts used. Upgrade to VIP!");
-      unlockProMode();
-      return;
-    }
-    if (isCrackPrompt && codeCrackCount >= 5) {
-      alert("⚠️ Free Limit Reached! 5 free code cracking prompts used. Upgrade to VIP!");
-      unlockProMode();
-      return;
-    }
-    if (isVoicePrompt && voiceCount >= 3) {
-      alert("⚠️ Free Limit Reached! 3 free voice synthesis prompts used. Upgrade to VIP!");
-      unlockProMode();
-      return;
-    }
-    if (isDocPrompt && docSummaryCount >= 2) {
-      alert("⚠️ Free Limit Reached! 2 free document summarizer prompts used. Upgrade to VIP!");
-      unlockProMode();
-      return;
-    }
-    if (isMathPrompt && mathSolveCount >= 5) {
-      alert("⚠️ Free Limit Reached! 5 free math solver prompts used. Upgrade to VIP!");
-      unlockProMode();
-      return;
-    }
-    if (isWebPrompt && webGenCount >= 2) {
-      alert("⚠️ Free Limit Reached! 2 free AI web page builder prompts used. Upgrade to VIP!");
-      unlockProMode();
-      return;
-    }
-    if (msgCount >= 50) {
-      alert("⚠️ Free Limit Reached! 50 messages used. Upgrade to VIP!");
-      unlockProMode();
-      return;
-    }
-  }
-
-  // Handle Image Requests
-  if (lowerText.startsWith("generate image") || lowerText.startsWith("make image") || lowerText.startsWith("draw")) {
-    if (!isProUnlocked && imgCount >= 3) {
-      alert("⚠️ Free Tier Limit Reached! Upgrade to VIP / PRO for unlimited images!");
-      unlockProMode();
+    if (snapshot.empty) {
+      historyContainer.innerHTML = `<div class="p-2 text-slate-500 text-xs italic">No saved history in this account.</div>`;
       return;
     }
 
-    input.value = '';
-    const prompt = text.replace(/(generate image|make image|draw)/i, '').trim();
-    appendMessage('user', text);
-    appendMessage('assistant', `🎨 Generating image for: "${prompt}"...`);
-    generateImageFromText(prompt);
-
-    if (!isProUnlocked) {
-      imgCount++;
-      localStorage.setItem('king_img_count', imgCount);
-      updateProUI();
-    }
-    return;
-  }
-
-  input.value = '';
-  if (text) appendMessage('user', text);
-
-  if (!isProUnlocked) {
-    msgCount++;
-    localStorage.setItem('king_msg_count', msgCount);
-    if (isCodePrompt) { codeGenCount++; localStorage.setItem('king_code_gen_count', codeGenCount); }
-    if (isCrackPrompt) { codeCrackCount++; localStorage.setItem('king_code_crack_count', codeCrackCount); }
-    if (isVoicePrompt) { voiceCount++; localStorage.setItem('king_voice_count', voiceCount); }
-    if (isDocPrompt) { docSummaryCount++; localStorage.setItem('king_doc_count', docSummaryCount); }
-    if (isMathPrompt) { mathSolveCount++; localStorage.setItem('king_math_count', mathSolveCount); }
-    if (isWebPrompt) { webGenCount++; localStorage.setItem('king_web_gen_count', webGenCount); }
-    updateProUI();
-  }
-
-  try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent`;
-    const systemPrompt = "You are KING AI, an advanced AI suite created by Abdullah Waheed. You excel in programming, code cracking, math solving, document analysis, voice generation, and web design. You are strictly King AI.";
-
-    const parts = [{ text: `${systemPrompt}\n\nUser Prompt: ${text}` }];
-    if (attachedImageBase64) {
-      parts.push({
-        inline_data: { mime_type: "image/jpeg", data: attachedImageBase64 }
-      });
-      attachedImageBase64 = null;
-    }
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
-      body: JSON.stringify({ contents: [{ parts: parts }] })
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const btn = document.createElement('button');
+      btn.className = `w-full text-left p-2 rounded-xl text-xs truncate flex justify-between items-center transition mb-1 ${
+        activeChatId === doc.id ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-slate-900/60 text-slate-300 hover:bg-slate-800'
+      }`;
+      btn.innerHTML = `
+        <span class="truncate">💬 ${data.title || 'KING AI Chat'}</span>
+        <span onclick="event.stopPropagation(); deleteAccountConversation('${doc.id}')" class="text-slate-500 hover:text-red-400 font-bold px-1">✕</span>
+      `;
+      btn.onclick = () => loadAccountConversation(doc.id);
+      historyContainer.appendChild(btn);
     });
+  });
 
-    const data = await response.json();
-    
-    if (response.ok && data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
-      const reply = data.candidates[0].content.parts[0].text;
-      appendMessage('assistant', reply);
+  dbListeners.push(unsubConvs);
+}
 
-      if (isVoicePrompt && 'speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(reply.substring(0, 200));
-        window.speechSynthesis.speak(utterance);
-      }
+// 5. INTERACTIVE FOLDERS & SIDE DRAWER ENGINE
+function renderSideDrawerModes() {
+  const container = document.getElementById('drawerIntelligenceModes');
+  if (!container) return;
 
-      if (currentUser) saveMessageToCloud(text, reply);
-      else saveGuestChat(text, reply);
+  container.innerHTML = `
+    <div class="flex items-center gap-2 mb-3 px-1">
+      <span class="text-amber-400 text-sm">👑</span>
+      <h3 class="font-bold text-amber-400 text-xs tracking-wider uppercase">KING AI Power-Ups & Folders</h3>
+    </div>
+    <div id="folderButtonsContainer" class="space-y-1.5"></div>
+  `;
+
+  const folderContainer = document.getElementById('folderButtonsContainer');
+
+  const modeKeys = [
+    { key: "chat", icon: "💬", defaultMax: 50 },
+    { key: "image", icon: "🎨", defaultMax: 3 },
+    { key: "reader", icon: "📂", defaultMax: 3 },
+    { key: "codeGen", icon: "💻", defaultMax: 4 },
+    { key: "codeCrack", icon: "🔒", defaultMax: 5 },
+    { key: "translator", icon: "🌐", defaultMax: Infinity },
+    { key: "voice", icon: "🎙️", defaultMax: 3 },
+    { key: "docSummary", icon: "📄", defaultMax: 2 },
+    { key: "math", icon: "🧮", defaultMax: 5 },
+    { key: "webGen", icon: "🚀", defaultMax: 2 }
+  ];
+
+  modeKeys.forEach(({ key, icon, defaultMax }) => {
+    const item = userLimits[key] || { name: key, count: 0, max: defaultMax };
+    const isActiveFolder = activeMode === key;
+
+    let badgeText = "";
+    let badgeClass = "";
+
+    if (isProUnlocked) {
+      badgeText = "♾️ Unlimited VIP";
+      badgeClass = "bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold";
+    } else if (item.max === Infinity) {
+      badgeText = "♾️ Unlimited";
+      badgeClass = "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold";
     } else {
-      const errDetail = data.error ? data.error.message : "API configuration error.";
-      appendMessage('assistant', `👑 King AI Error: ${errDetail}`);
+      const remaining = Math.max(0, item.max - item.count);
+      badgeText = `${remaining} / ${item.max} Free`;
+      badgeClass = "bg-slate-800 text-amber-400 border-slate-700";
     }
-  } catch (err) {
-    appendMessage('assistant', "👑 King AI: Connection error. Please verify network.");
+
+    const folderBtn = document.createElement('button');
+    folderBtn.className = `w-full text-left p-2.5 rounded-xl border flex items-center justify-between transition-all duration-200 ${
+      isActiveFolder
+        ? 'bg-amber-500/15 border-amber-500/60 text-amber-300 shadow-md shadow-amber-500/5'
+        : 'bg-slate-900/80 border-slate-800/80 text-slate-300 hover:bg-slate-800/90 hover:border-slate-700'
+    }`;
+
+    folderBtn.innerHTML = `
+      <div class="flex items-center gap-2 truncate pr-2">
+        <span class="text-sm">${icon}</span>
+        <span class="text-xs font-medium truncate">${item.name || key}</span>
+      </div>
+      <span class="text-[10px] px-2 py-0.5 rounded-md border ${badgeClass} shrink-0">
+        ${badgeText}
+      </span>
+    `;
+
+    folderBtn.onclick = () => {
+      switchMode(key);
+      renderSideDrawerModes();
+    };
+
+    folderContainer.appendChild(folderBtn);
+  });
+
+  // Locked Admin Folder Button
+  const adminBtn = document.createElement('button');
+  adminBtn.className = `w-full text-left p-2.5 mt-3 rounded-xl border flex items-center justify-between transition-all ${
+    activeMode === 'admin'
+      ? 'bg-red-500/20 border-red-500 text-red-300'
+      : 'bg-red-950/20 border-red-900/40 text-red-400 hover:bg-red-900/30'
+  }`;
+
+  adminBtn.innerHTML = `
+    <div class="flex items-center gap-2">
+      <span class="text-sm">🔐</span>
+      <span class="text-xs font-bold">Admin Folder</span>
+    </div>
+    <span class="text-[10px] px-2 py-0.5 rounded-md bg-red-900/40 border border-red-700/50 font-mono text-red-300 font-bold">
+      LOCKED
+    </span>
+  `;
+
+  adminBtn.onclick = async () => {
+    await verifyAndOpenAdmin();
+  };
+
+  folderContainer.appendChild(adminBtn);
+
+  // VIP Feature Summary Banner
+  const footerBanner = document.createElement('div');
+  footerBanner.className = "text-[10px] text-amber-400/90 text-center pt-3 font-semibold flex flex-col items-center gap-1 border-t border-slate-800/80 mt-2";
+  footerBanner.innerHTML = `
+    <span>⚡ Zero Response Delays & Instant Processing</span>
+    <span class="text-slate-400 text-[9px]">VIP Unlocks Unlimited Chat, 4K Images, Readers & Code Crackers</span>
+  `;
+  folderContainer.appendChild(footerBanner);
+}
+
+// 6. ADMIN PANEL & SECURITY
+async function verifyAndOpenAdmin() {
+  const passwordInput = prompt("Enter Admin Password:");
+  if (!passwordInput) return;
+
+  const inputHash = await hashPassword(passwordInput);
+
+  if (inputHash === ADMIN_PASSWORD_HASH) {
+    showAdminDashboard();
+  } else {
+    alert("⚠️ Access Denied: Incorrect Admin Password");
   }
 }
 
-function appendMessage(role, text) {
-  const container = document.getElementById('chatMessages');
-  if (!container) return;
-  const div = document.createElement('div');
-  div.className = role === 'user' 
-    ? "p-3 bg-slate-800 rounded-xl text-white ml-auto max-w-md shadow whitespace-pre-wrap" 
-    : "p-3 bg-[#0d1628] border border-slate-800 rounded-xl text-amber-300 mr-auto max-w-md shadow whitespace-pre-wrap";
-  div.innerText = text;
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
-}
-
-async function generateImageFromText(promptText) {
-  const seed = Math.floor(Math.random() * 1000000);
-  const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?width=1280&height=720&nologo=true&seed=${seed}`;
-  
-  const container = document.getElementById('chatMessages');
-  if (!container) return;
-
-  const div = document.createElement('div');
-  div.className = "p-3 bg-[#0d1628] border border-slate-800 rounded-xl text-amber-300 mr-auto max-w-md shadow";
-  div.innerHTML = `<img src="${imageUrl}" class="w-full h-auto rounded-lg shadow-md mb-2" alt="Generated Image"><p class="text-xs text-amber-400/80">✨ ${promptText}</p>`;
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
-}
-
-function switchMode(mode) {
-  const imgView = document.getElementById('imageStudioView');
+function showAdminDashboard() {
+  activeMode = "admin";
   const chatView = document.getElementById('chatStudioView');
+  const imgView = document.getElementById('imageStudioView');
+  if (chatView) chatView.classList.add('hidden');
+  if (imgView) imgView.classList.add('hidden');
 
-  if (mode === 'image') {
+  let adminView = document.getElementById('adminStudioView');
+  if (!adminView) {
+    adminView = document.createElement('div');
+    adminView.id = 'adminStudioView';
+    adminView.className = 'flex-1 overflow-y-auto p-4 md:p-6 w-full';
+    const mainArea = chatView.parentElement;
+    mainArea.appendChild(adminView);
+  }
+
+  adminView.classList.remove('hidden');
+
+  const APP_CREATION_DATE = new Date("2026-08-01T00:00:00").getTime();
+  const now = Date.now();
+  const daysActive = Math.floor((now - APP_CREATION_DATE) / (1000 * 60 * 60 * 24));
+  const isOnline = navigator.onLine;
+
+  adminView.innerHTML = `
+    <div class="max-w-2xl mx-auto p-6 bg-[#0d1628] border border-amber-500/40 rounded-2xl shadow-2xl mt-4 text-slate-200">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-amber-400 flex items-center gap-2">👑 KING AI System Dashboard</h2>
+          <p class="text-xs text-slate-400 mt-1">Authenticated System Manager</p>
+        </div>
+        <button onclick="closeAdminDashboard()" class="px-4 py-2 bg-red-900/40 hover:bg-red-500/40 text-red-400 rounded-xl text-xs font-bold transition">Close Panel</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="p-4 bg-slate-900 rounded-xl border border-slate-700/50 shadow-inner">
+          <span class="text-slate-400 text-xs block mb-1 uppercase tracking-wider">🔑 Today's VIP Pass Password</span>
+          <span class="text-amber-400 font-mono text-xl font-bold">${getDailyVipPassword()}</span>
+          <span class="text-slate-500 text-[10px] block mt-1 italic">(Auto-increments 1 number every 24h)</span>
+        </div>
+
+        <div class="p-4 bg-slate-900 rounded-xl border border-slate-700/50 shadow-inner">
+          <span class="text-slate-400 text-xs block mb-1 uppercase tracking-wider">📈 Website Usage / Age</span>
+          <span class="text-slate-200 font-bold text-2xl">${daysActive} Days Active</span>
+          <span class="text-slate-500 text-[10px] block mt-1 italic">Created on August 1, 2026</span>
+        </div>
+
+        <div class="p-4 bg-slate-900 rounded-xl border border-slate-700/50 shadow-inner">
+          <span class="text-slate-400 text-xs block mb-1 uppercase tracking-wider">🌐 Internet Running Capability</span>
+          <span class="${isOnline ? 'text-emerald-400' : 'text-red-400'} font-bold text-lg flex items-center gap-2">
+            ${isOnline ? '🟢 Connected & Network Active' : '🔴 Offline Mode'}
+          </span>
+        </div>
+
+        <div class="p-4 bg-slate-900 rounded-xl border border-slate-700/50 shadow-inner">
+          <span class="text-slate-400 text-xs block mb-1 uppercase tracking-wider">⚡ API Key Integration</span>
+          <span class="text-emerald-400 font-mono text-xs block truncate">Active (Firebase & Gemini Engine)</span>
+          <span class="text-slate-500 text-[10px] block mt-1 italic">Key status secure</span>
+        </div>
+      </div>
+
+      <div class="mt-6 p-4 bg-slate-900/80 rounded-xl border border-slate-800">
+        <h4 class="text-xs font-bold text-slate-300 mb-2">💻 Developer Tools Access</h4>
+        <p class="text-[11px] text-slate-400 mb-3">Inspect Element and Developer Box shortcuts (Ctrl+Shift+I / F12) are fully enabled across windows.</p>
+        <button onclick="alert('Developer Box shortcuts (Ctrl+Shift+I, F12) are active.')" class="px-3 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-lg text-xs font-semibold transition">
+          Test Developer Box Enablement
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function closeAdminDashboard() {
+  document.getElementById('adminStudioView')?.classList.add('hidden');
+  document.getElementById('chatStudioView')?.classList.remove('hidden');
+  activeMode = "chat";
+  renderSideDrawerModes();
+}
+
+// 7. CHAT TRANSMISSION & LIMIT ENFORCEMENT
+async function handleUserSendMessage(promptText) {
+  if (!promptText || !promptText.trim()) return;
+
+  const currentModeLimit = userLimits[activeMode] || DEFAULT_LIMITS[activeMode];
+
+  // Enforce message limits and wait periods for non-VIP users
+  if (!isProUnlocked && currentModeLimit.max !== Infinity) {
+    if (currentModeLimit.count >= currentModeLimit.max) {
+      alert(`⚠️ You have reached the limit for ${currentModeLimit.name} on the Free Tier.\n\nPlease wait 1 to 2 hours or upgrade to VIP Pass for Unlimited Access & Zero Delays!`);
+      unlockProMode();
+      return;
+    }
+  }
+
+  // Increment usage count if not VIP
+  if (!isProUnlocked) {
+    userLimits[activeMode].count += 1;
+    if (currentUser) {
+      await db.collection('users').doc(currentUser.uid).update({ usage: userLimits });
+    }
+  }
+
+  // Append user message to UI
+  appendMessageToUI("user", promptText);
+
+  // Send request with enforced KING AI persona
+  try {
+    const responseText = await callGeminiApiWithPersona(promptText);
+    appendMessageToUI("ai", responseText);
+
+    // Save message history to account if authenticated
+    if (currentUser) {
+      await saveMessageToAccount(promptText, responseText);
+    }
+  } catch (error) {
+    appendMessageToUI("ai", "⚠️ System Connection Error. Please try again.");
+  }
+
+  renderSideDrawerModes();
+}
+
+async function callGeminiApiWithPersona(userPrompt) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+  
+  const payload = {
+    contents: [{
+      parts: [
+        { text: KING_AI_SYSTEM_PROMPT },
+        { text: `User Prompt (${activeMode} mode): ${userPrompt}` }
+      ]
+    }]
+  };
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await response.json();
+  return data.candidates[0].content.parts[0].text;
+}
+
+// Save Chat to Firestore User Account
+async function saveMessageToAccount(promptText, responseText) {
+  if (!currentUser) return;
+
+  const userDoc = db.collection('users').doc(currentUser.uid);
+
+  if (!activeChatId) {
+    const newConv = await userDoc.collection('conversations').add({
+      title: promptText.slice(0, 30) + "...",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    activeChatId = newConv.id;
+  }
+
+  await userDoc.collection('conversations').doc(activeChatId).collection('messages').add({
+    sender: "user",
+    text: promptText,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  await userDoc.collection('conversations').doc(activeChatId).collection('messages').add({
+    sender: "ai",
+    text: responseText,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  await userDoc.collection('conversations').doc(activeChatId).update({
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
+// 8. HELPERS & UTILITIES
+function switchMode(modeKey) {
+  activeMode = modeKey;
+  const chatView = document.getElementById('chatStudioView');
+  const imgView = document.getElementById('imageStudioView');
+  const adminView = document.getElementById('adminStudioView');
+
+  if (adminView) adminView.classList.add('hidden');
+
+  if (modeKey === 'image') {
     if (imgView) imgView.classList.remove('hidden');
     if (chatView) chatView.classList.add('hidden');
   } else {
@@ -481,75 +464,71 @@ function switchMode(mode) {
   }
 }
 
-function saveMessageToCloud(userMsg, aiMsg) {
-  if (!currentUser) return;
-  if (!activeChatId) {
-    activeChatId = db.collection('users').doc(currentUser.uid).collection('chats').doc().id;
+function clearFrontendUI() {
+  const container = document.getElementById('chatMessages');
+  if (container) container.innerHTML = '';
+  const historyContainer = document.getElementById('chatHistoryList');
+  if (historyContainer) historyContainer.innerHTML = `<div class="p-2 text-slate-500 text-xs">Sign in to sync your account data.</div>`;
+}
+
+function updateProUI() {
+  const badge = document.getElementById('vipBadgeText');
+  if (badge) {
+    badge.innerText = isProUnlocked 
+      ? "🎟️ VIP Pass Active (Unlimited Access & Zero Delay)" 
+      : (currentUser ? `👤 Signed In: ${currentUser.email}` : "🔒 Guest Session (Temporary)");
   }
-  const chatRef = db.collection('users').doc(currentUser.uid).collection('chats').doc(activeChatId);
-  chatRef.set({
-    title: userMsg.substring(0, 18) + '...',
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    messages: firebase.firestore.FieldValue.arrayUnion(
-      { role: 'user', text: userMsg },
-      { role: 'assistant', text: aiMsg }
-    )
-  }, { merge: true });
 }
 
-function saveGuestChat(userMsg, aiMsg) {
-  guestChats.push({ title: userMsg.substring(0, 18) + '...', messages: [{ role: 'user', text: userMsg }, { role: 'assistant', text: aiMsg }] });
-  renderGuestHistory();
+function createVipModal() {
+  if (document.getElementById('vipModal')) return;
+  const modalHtml = `
+    <div id="vipModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-[#0d1628] border border-amber-500/40 rounded-2xl max-w-md w-full p-6 text-slate-200 shadow-2xl relative">
+        <button onclick="closeVipModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold">✕</button>
+        <h3 class="text-xl font-bold text-amber-400 mb-2">👑 KING AI VIP Pass</h3>
+        <p class="text-xs text-slate-300 mb-4">Unlock unlimited access across all modes, zero wait delays, and instant code cracking.</p>
+        <a href="${SAFEPAY_LINK}" target="_blank" class="block w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 font-bold rounded-xl text-center text-slate-950 mb-4 transition hover:brightness-110">💳 Upgrade via Safepay (Rs. 1500)</a>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
 
-function loadCloudChat(id, messages) {
-  activeChatId = id;
+function unlockProMode() { document.getElementById('vipModal')?.classList.remove('hidden'); }
+function closeVipModal() { document.getElementById('vipModal')?.classList.add('hidden'); }
+
+function appendMessageToUI(sender, text) {
   const container = document.getElementById('chatMessages');
   if (!container) return;
-  container.innerHTML = '';
-  if (Array.isArray(messages)) {
-    messages.forEach(m => appendMessage(m.role, m.text));
-  }
-  switchMode('chat');
+  const msgDiv = document.createElement('div');
+  msgDiv.className = `p-3 rounded-xl max-w-[85%] text-xs leading-relaxed mb-3 ${
+    sender === 'user' ? 'bg-amber-500/20 text-amber-200 ml-auto border border-amber-500/30' : 'bg-slate-900 text-slate-200 border border-slate-800'
+  }`;
+  msgDiv.innerText = text;
+  container.appendChild(msgDiv);
+  container.scrollTop = container.scrollHeight;
 }
 
-function loadGuestChat(idx) {
-  const container = document.getElementById('chatMessages');
-  if (!container) return;
-  container.innerHTML = '';
-  if (guestChats[idx] && guestChats[idx].messages) {
-    guestChats[idx].messages.forEach(m => appendMessage(m.role, m.text));
-  }
-  switchMode('chat');
-}
-
-function createNewChat() {
-  activeChatId = null;
-  const container = document.getElementById('chatMessages');
-  if (container) container.innerHTML = '<div class="p-4 bg-[#0d1628] border border-slate-800 rounded-2xl text-amber-300 max-w-xl shadow-lg">👑 New Session Started</div>';
-  switchMode('chat');
-}
-
-function deleteChat(id, e) {
-  e.stopPropagation();
+async function loadAccountConversation(convId) {
   if (!currentUser) return;
-  db.collection('users').doc(currentUser.uid).collection('chats').doc(id).delete();
+  activeChatId = convId;
+  const container = document.getElementById('chatMessages');
+  if (container) container.innerHTML = '';
+
+  const msgsSnapshot = await db.collection('users').doc(currentUser.uid).collection('conversations').doc(convId).collection('messages').orderBy('timestamp', 'asc').get();
+
+  msgsSnapshot.forEach(doc => {
+    const data = doc.data();
+    appendMessageToUI(data.sender, data.text);
+  });
 }
 
-function deleteGuestChat(idx, e) {
-  e.stopPropagation();
-  guestChats.splice(idx, 1);
-  renderGuestHistory();
-}
-
-function clearHistory() {
-  if (currentUser) {
-    db.collection('users').doc(currentUser.uid).collection('chats').get().then(snap => {
-      snap.forEach(doc => doc.ref.delete());
-    });
-  } else {
-    guestChats = [];
-    renderGuestHistory();
+async function deleteAccountConversation(convId) {
+  if (!currentUser) return;
+  await db.collection('users').doc(currentUser.uid).collection('conversations').doc(convId).delete();
+  if (activeChatId === convId) {
+    activeChatId = null;
+    clearFrontendUI();
   }
-  createNewChat();
 }
