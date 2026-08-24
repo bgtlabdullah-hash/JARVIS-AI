@@ -23,18 +23,74 @@ let activeChatId = null;
 let guestChats = [];
 let attachedImageBase64 = null;
 
-// Track usage in LocalStorage
+// LocalStorage Tracking Counters
 let msgCount = parseInt(localStorage.getItem('king_msg_count') || '0', 10);
 let imgCount = parseInt(localStorage.getItem('king_img_count') || '0', 10);
+let codeGenCount = parseInt(localStorage.getItem('king_code_gen_count') || '0', 10);
+let codeCrackCount = parseInt(localStorage.getItem('king_code_crack_count') || '0', 10);
+let voiceCount = parseInt(localStorage.getItem('king_voice_count') || '0', 10);
+let docSummaryCount = parseInt(localStorage.getItem('king_doc_count') || '0', 10);
+let mathSolveCount = parseInt(localStorage.getItem('king_math_count') || '0', 10);
+let webGenCount = parseInt(localStorage.getItem('king_web_gen_count') || '0', 10);
 let isProUnlocked = localStorage.getItem('king_pro_unlocked') === 'true';
 
+// Calculate Daily Password Increment (Base: KingAI@2026)
+function getTodaysVipCode() {
+  const baseYear = 2026;
+  const startDate = new Date(2026, 7, 24);
+  const today = new Date();
+  const diffDays = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+  const dynamicYear = baseYear + (diffDays > 0 ? diffDays : 0);
+  return `KingAI@${dynamicYear}`;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  if (!auth.currentUser) {
+    localStorage.removeItem('king_msg_count');
+    localStorage.removeItem('king_img_count');
+    localStorage.removeItem('king_code_gen_count');
+    localStorage.removeItem('king_code_crack_count');
+    localStorage.removeItem('king_voice_count');
+    localStorage.removeItem('king_doc_count');
+    localStorage.removeItem('king_math_count');
+    localStorage.removeItem('king_web_gen_count');
+    localStorage.removeItem('king_pro_unlocked');
+    msgCount = imgCount = codeGenCount = codeCrackCount = voiceCount = docSummaryCount = mathSolveCount = webGenCount = 0;
+    isProUnlocked = false;
+  }
+
   updateProUI();
   injectMediaInputControls();
   createVipModal();
+  renderSideDrawerFeatures();
 });
 
-// Create Interactive VIP Modal Interface
+// Render Side Drawer VIP Features Breakdown
+function renderSideDrawerFeatures() {
+  const drawerContainer = document.getElementById('chatHistoryList')?.parentElement;
+  if (!drawerContainer || document.getElementById('drawerVipFeatures')) return;
+
+  const featuresDiv = document.createElement('div');
+  featuresDiv.id = 'drawerVipFeatures';
+  featuresDiv.className = "mt-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs space-y-1.5 text-amber-300";
+  featuresDiv.innerHTML = `
+    <div class="font-bold text-amber-400 mb-1">👑 KING AI Power-Ups & Limits:</div>
+    <div>💬 General Chat (50 Free / ♾️ VIP)</div>
+    <div>🎨 4K Image Generator (3 Free / ♾️ VIP)</div>
+    <div>📁 Photo & Document Reader (3 Free / ♾️ VIP)</div>
+    <div>💻 Code Generator (4 Free / ♾️ VIP)</div>
+    <div>🔓 Code Cracker & Debugger (5 Free / ♾️ VIP)</div>
+    <div>🌐 Multi-Language Translator (♾️ Unlimited)</div>
+    <div>🎙️ AI Voice Speech Synthesizer (3 Free / ♾️ VIP)</div>
+    <div>📑 PDF & Doc Summarizer (2 Free / ♾️ VIP)</div>
+    <div>🧮 Math & Logic Solver (5 Free / ♾️ VIP)</div>
+    <div>🚀 AI Web Page Builder (2 Free / ♾️ VIP)</div>
+    <div>⚡ Zero Response Delays & Instant Processing</div>
+  `;
+  drawerContainer.appendChild(featuresDiv);
+}
+
+// VIP Upgrade Modal
 function createVipModal() {
   if (document.getElementById('vipModal')) return;
 
@@ -43,7 +99,7 @@ function createVipModal() {
       <div class="bg-[#0d1628] border border-amber-500/40 rounded-2xl max-w-md w-full p-6 text-slate-200 shadow-2xl relative">
         <button onclick="closeVipModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold">✕</button>
         <h3 class="text-xl font-bold text-amber-400 mb-2 flex items-center gap-2">👑 Upgrade to KING AI PRO</h3>
-        <p class="text-xs text-slate-300 mb-4">Unlock unlimited chat messages, unlimited 4K image generations, and priority processing.</p>
+        <p class="text-xs text-slate-300 mb-4">Unlock zero waiting delays, unlimited coding, web page creation, image generation, voice speech, and math solving.</p>
         
         <div class="space-y-3 mb-6">
           <a href="${SAFEPAY_LINK}" target="_blank" class="block w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold rounded-xl text-center shadow-lg transition">
@@ -52,12 +108,12 @@ function createVipModal() {
         </div>
 
         <div class="border-t border-slate-800 pt-4">
-          <label class="block text-xs font-semibold text-amber-300/80 mb-2">Already have a VIP Pass Code?</label>
+          <label class="block text-xs font-semibold text-amber-300/80 mb-2">Have Daily VIP Pass Key?</label>
           <div class="flex gap-2">
-            <input type="password" id="vipPassInput" placeholder="Enter VIP Pass Code" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white w-full focus:outline-none focus:border-amber-500">
+            <input type="password" id="vipPassInput" placeholder="Enter Daily Pass Code" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white w-full focus:outline-none focus:border-amber-500">
             <button onclick="verifyVipCode()" class="bg-amber-500/20 border border-amber-500/50 text-amber-300 px-4 py-2 rounded-lg text-xs font-bold hover:bg-amber-500/30 transition">Activate</button>
           </div>
-          <p id="vipErrorMsg" class="text-[11px] text-red-400 mt-2 hidden">❌ Invalid Pass Code. Try again!</p>
+          <p id="vipErrorMsg" class="text-[11px] text-red-400 mt-2 hidden">❌ Invalid Pass Code. Passes increment daily.</p>
         </div>
       </div>
     </div>
@@ -80,12 +136,17 @@ function verifyVipCode() {
   const code = document.getElementById('vipPassInput').value.trim();
   const err = document.getElementById('vipErrorMsg');
 
-  if (code === "KingAI@2026") {
+  if (code === getTodaysVipCode()) {
     isProUnlocked = true;
     localStorage.setItem('king_pro_unlocked', 'true');
+    
+    if (currentUser) {
+      db.collection('users').doc(currentUser.uid).set({ isVIP: true }, { merge: true });
+    }
+
     updateProUI();
     closeVipModal();
-    alert("🎉 King AI PRO / VIP Pass activated successfully! Unlimited access granted.");
+    alert("🎉 King AI VIP Pass activated! Unlimited access granted for all features.");
   } else {
     if (err) err.classList.remove('hidden');
   }
@@ -99,9 +160,9 @@ function updateProUI() {
     if (btn) {
       btn.className = "bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-lg";
       btn.innerHTML = "📺 VIP UNLIMITED ACTIVE";
-      btn.onclick = () => alert("VIP Pass active! You have unlimited messages and image generations.");
+      btn.onclick = () => alert("VIP Active! Unlimited messages, code, web generation, and speech synthesizer.");
     }
-    if (badge) badge.innerText = "🎟️ VIP Pass Active (Unlimited)";
+    if (badge) badge.innerText = "🎟️ VIP Pass Active (Unlimited Access)";
   } else {
     if (btn) {
       btn.className = "bg-amber-500/20 border border-amber-500/50 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-amber-500/30 transition cursor-pointer";
@@ -109,15 +170,14 @@ function updateProUI() {
       btn.onclick = unlockProMode;
     }
     const remainingMsgs = Math.max(0, 50 - msgCount);
-    const remainingImgs = Math.max(0, 3 - imgCount);
-    if (badge) badge.innerText = `🔒 Free Tier (${remainingMsgs} Msgs, ${remainingImgs} Imgs left)`;
+    if (badge) badge.innerText = `🔒 Free Tier (${remainingMsgs} Msgs left)`;
   }
 }
 
-// Inject Upload & Camera buttons beside Chat Input
+// Media Controls
 function injectMediaInputControls() {
   const chatForm = document.getElementById('chatForm') || document.querySelector('form');
-  if (!chatForm) return;
+  if (!chatForm || document.getElementById('chatImageUpload')) return;
 
   const fileInput = document.createElement('input');
   fileInput.type = 'file';
@@ -149,7 +209,7 @@ function injectMediaInputControls() {
       const reader = new FileReader();
       reader.onload = (event) => {
         attachedImageBase64 = event.target.result.split(',')[1];
-        appendMessage('user', `📷 Attached Image: ${file.name}`);
+        appendMessage('user', `📷 Attached File: ${file.name}`);
       };
       reader.readAsDataURL(file);
     }
@@ -159,7 +219,7 @@ function injectMediaInputControls() {
   cameraInput.addEventListener('change', handleFileSelect);
 }
 
-// Authentication Listener
+// Auth Listener
 auth.onAuthStateChanged(async (user) => {
   const signInBtn = document.getElementById('signInBtn');
   const signOutBtn = document.getElementById('signOutBtn');
@@ -174,9 +234,15 @@ auth.onAuthStateChanged(async (user) => {
 
     const userDocRef = db.collection('users').doc(user.uid);
     const doc = await userDocRef.get();
-    if (!doc.exists) {
-      await userDocRef.set({ isVIP: false, email: user.email, name: user.displayName });
+    
+    if (doc.exists && doc.data().isVIP) {
+      isProUnlocked = true;
+      localStorage.setItem('king_pro_unlocked', 'true');
+    } else if (!doc.exists) {
+      await userDocRef.set({ isVIP: isProUnlocked, email: user.email, name: user.displayName });
     }
+
+    updateProUI();
     syncUserData();
   } else {
     currentUser = null;
@@ -199,6 +265,8 @@ function loginWithGoogle() {
 
 function logout() {
   auth.signOut();
+  localStorage.clear();
+  location.reload();
 }
 
 function syncUserData() {
@@ -242,17 +310,65 @@ function renderGuestHistory() {
   });
 }
 
-// Direct Chat & Generation Handler
+// Chat & Feature Limit Manager
 async function handleChatSubmit(e) {
   e.preventDefault();
   const input = document.getElementById('chatInput');
   const text = input.value.trim();
   if (!text && !attachedImageBase64) return;
 
-  // Handle Image Creation Requests
-  if (text.toLowerCase().startsWith("generate image") || text.toLowerCase().startsWith("make image") || text.toLowerCase().startsWith("draw")) {
+  const lowerText = text.toLowerCase();
+
+  const isCodePrompt = lowerText.includes("code") || lowerText.includes("python") || lowerText.includes("java") || lowerText.includes("script") || lowerText.includes("html");
+  const isCrackPrompt = lowerText.includes("crack") || lowerText.includes("debug") || lowerText.includes("fix code") || lowerText.includes("decompile");
+  const isVoicePrompt = lowerText.startsWith("speak") || lowerText.startsWith("say in voice") || lowerText.startsWith("read aloud");
+  const isDocPrompt = lowerText.includes("summarize doc") || lowerText.includes("pdf summary") || lowerText.includes("summarize document");
+  const isMathPrompt = lowerText.includes("solve math") || lowerText.includes("equation") || lowerText.includes("calculate");
+  const isWebPrompt = lowerText.includes("build website") || lowerText.includes("generate page") || lowerText.includes("create web app");
+
+  // Check Feature Limits
+  if (!isProUnlocked) {
+    if (isCodePrompt && codeGenCount >= 4) {
+      alert("⚠️ Free Limit Reached! 4 free code generation prompts used. Upgrade to VIP!");
+      unlockProMode();
+      return;
+    }
+    if (isCrackPrompt && codeCrackCount >= 5) {
+      alert("⚠️ Free Limit Reached! 5 free code cracking prompts used. Upgrade to VIP!");
+      unlockProMode();
+      return;
+    }
+    if (isVoicePrompt && voiceCount >= 3) {
+      alert("⚠️ Free Limit Reached! 3 free voice synthesis prompts used. Upgrade to VIP!");
+      unlockProMode();
+      return;
+    }
+    if (isDocPrompt && docSummaryCount >= 2) {
+      alert("⚠️ Free Limit Reached! 2 free document summarizer prompts used. Upgrade to VIP!");
+      unlockProMode();
+      return;
+    }
+    if (isMathPrompt && mathSolveCount >= 5) {
+      alert("⚠️ Free Limit Reached! 5 free math solver prompts used. Upgrade to VIP!");
+      unlockProMode();
+      return;
+    }
+    if (isWebPrompt && webGenCount >= 2) {
+      alert("⚠️ Free Limit Reached! 2 free AI web page builder prompts used. Upgrade to VIP!");
+      unlockProMode();
+      return;
+    }
+    if (msgCount >= 50) {
+      alert("⚠️ Free Limit Reached! 50 messages used. Upgrade to VIP!");
+      unlockProMode();
+      return;
+    }
+  }
+
+  // Handle Image Requests
+  if (lowerText.startsWith("generate image") || lowerText.startsWith("make image") || lowerText.startsWith("draw")) {
     if (!isProUnlocked && imgCount >= 3) {
-      alert("⚠️ Free Tier Limit Reached! You have used your 3 free image creations. Upgrade to PRO for unlimited images!");
+      alert("⚠️ Free Tier Limit Reached! Upgrade to VIP / PRO for unlimited images!");
       unlockProMode();
       return;
     }
@@ -271,46 +387,36 @@ async function handleChatSubmit(e) {
     return;
   }
 
-  // Handle Chat Message Limits
-  if (!isProUnlocked && msgCount >= 50) {
-    alert("⚠️ Free Tier Limit Reached! You have used all 50 free messages. Upgrade to PRO for unlimited access!");
-    unlockProMode();
-    return;
-  }
-
   input.value = '';
   if (text) appendMessage('user', text);
 
   if (!isProUnlocked) {
     msgCount++;
     localStorage.setItem('king_msg_count', msgCount);
+    if (isCodePrompt) { codeGenCount++; localStorage.setItem('king_code_gen_count', codeGenCount); }
+    if (isCrackPrompt) { codeCrackCount++; localStorage.setItem('king_code_crack_count', codeCrackCount); }
+    if (isVoicePrompt) { voiceCount++; localStorage.setItem('king_voice_count', voiceCount); }
+    if (isDocPrompt) { docSummaryCount++; localStorage.setItem('king_doc_count', docSummaryCount); }
+    if (isMathPrompt) { mathSolveCount++; localStorage.setItem('king_math_count', mathSolveCount); }
+    if (isWebPrompt) { webGenCount++; localStorage.setItem('king_web_gen_count', webGenCount); }
     updateProUI();
-  }
-
-  if (text.toLowerCase().includes("route") || text.toLowerCase().includes("map") || text.toLowerCase().includes("directions to")) {
-    appendLocationCard(text);
   }
 
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent`;
-    
-    const parts = [{ text: `You are KING AI PRO created by Abdullah Waheed. ${text}` }];
+    const systemPrompt = "You are KING AI, an advanced AI suite created by Abdullah Waheed. You excel in programming, code cracking, math solving, document analysis, voice generation, and web design. You are strictly King AI.";
+
+    const parts = [{ text: `${systemPrompt}\n\nUser Prompt: ${text}` }];
     if (attachedImageBase64) {
       parts.push({
-        inline_data: {
-          mime_type: "image/jpeg",
-          data: attachedImageBase64
-        }
+        inline_data: { mime_type: "image/jpeg", data: attachedImageBase64 }
       });
       attachedImageBase64 = null;
     }
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'x-goog-api-key': GEMINI_API_KEY
-      },
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
       body: JSON.stringify({ contents: [{ parts: parts }] })
     });
 
@@ -320,17 +426,19 @@ async function handleChatSubmit(e) {
       const reply = data.candidates[0].content.parts[0].text;
       appendMessage('assistant', reply);
 
-      if (currentUser) {
-        saveMessageToCloud(text, reply);
-      } else {
-        saveGuestChat(text, reply);
+      if (isVoicePrompt && 'speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(reply.substring(0, 200));
+        window.speechSynthesis.speak(utterance);
       }
+
+      if (currentUser) saveMessageToCloud(text, reply);
+      else saveGuestChat(text, reply);
     } else {
       const errDetail = data.error ? data.error.message : "API configuration error.";
       appendMessage('assistant', `👑 King AI Error: ${errDetail}`);
     }
   } catch (err) {
-    appendMessage('assistant', "👑 King AI: Connection error. Please verify your network setup.");
+    appendMessage('assistant', "👑 King AI: Connection error. Please verify network.");
   }
 }
 
@@ -339,34 +447,9 @@ function appendMessage(role, text) {
   if (!container) return;
   const div = document.createElement('div');
   div.className = role === 'user' 
-    ? "p-3 bg-slate-800 rounded-xl text-white ml-auto max-w-md shadow" 
-    : "p-3 bg-[#0d1628] border border-slate-800 rounded-xl text-amber-300 mr-auto max-w-md shadow";
+    ? "p-3 bg-slate-800 rounded-xl text-white ml-auto max-w-md shadow whitespace-pre-wrap" 
+    : "p-3 bg-[#0d1628] border border-slate-800 rounded-xl text-amber-300 mr-auto max-w-md shadow whitespace-pre-wrap";
   div.innerText = text;
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
-}
-
-function appendLocationCard(queryText) {
-  const container = document.getElementById('chatMessages');
-  if (!container) return;
-
-  const destination = encodeURIComponent(queryText.replace(/(route to|map|directions to|location)/gi, '').trim());
-  
-  const div = document.createElement('div');
-  div.className = "p-4 bg-[#0a1120] border border-amber-500/30 rounded-2xl text-slate-200 mr-auto max-w-lg shadow-xl my-2";
-  
-  div.innerHTML = `
-    <div class="font-bold text-amber-400 mb-2 flex items-center gap-2">📍 Navigation Router</div>
-    <p class="text-xs text-slate-300 mb-3">Routes for: <strong>${decodeURIComponent(destination)}</strong></p>
-    <div class="grid grid-cols-4 gap-2 mb-3">
-      <a href="https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving" target="_blank" class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-center text-amber-300 text-xs font-semibold">🚗 Drive</a>
-      <a href="https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=bicycling" target="_blank" class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-center text-amber-300 text-xs font-semibold">🏍️ Bike</a>
-      <a href="https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=walking" target="_blank" class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-center text-amber-300 text-xs font-semibold">🚶 Walk</a>
-      <a href="https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=transit" target="_blank" class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-center text-amber-300 text-xs font-semibold">✈️ Transit</a>
-    </div>
-    <iframe width="100%" height="200" style="border:0; border-radius: 12px;" loading="lazy" allowfullscreen src="https://maps.google.com/maps?q=${destination}&t=&z=13&ie=UTF8&iwloc=&output=embed"></iframe>
-  `;
-
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
 }
@@ -383,36 +466,6 @@ async function generateImageFromText(promptText) {
   div.innerHTML = `<img src="${imageUrl}" class="w-full h-auto rounded-lg shadow-md mb-2" alt="Generated Image"><p class="text-xs text-amber-400/80">✨ ${promptText}</p>`;
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
-}
-
-async function generateImage() {
-  if (!isProUnlocked && imgCount >= 3) {
-    alert("⚠️ Free Limit Reached! You have used your 3 free image creations. Upgrade to PRO!");
-    unlockProMode();
-    return;
-  }
-
-  const promptInput = document.getElementById('imagePrompt');
-  if (!promptInput) return;
-  const prompt = promptInput.value.trim();
-  if (!prompt) return;
-
-  const overlay = document.getElementById('loadingOverlay');
-  const img = document.getElementById('generatedImage');
-  if (overlay) overlay.classList.remove('hidden');
-
-  const seed = Math.floor(Math.random() * 1000000);
-  const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1280&height=720&nologo=true&seed=${seed}`;
-  
-  img.src = imageUrl;
-  img.onload = () => {
-    if (overlay) overlay.classList.add('hidden');
-    if (!isProUnlocked) {
-      imgCount++;
-      localStorage.setItem('king_img_count', imgCount);
-      updateProUI();
-    }
-  };
 }
 
 function switchMode(mode) {
