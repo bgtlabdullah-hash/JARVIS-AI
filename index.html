@@ -100,7 +100,7 @@
 
     </aside>
 
-    <!-- MAIN CHAT & STUDIO WORKSPACE -->
+    <!-- MAIN WORKSPACE -->
     <main class="flex-1 flex flex-col bg-[#050b14] relative overflow-hidden">
       
       <!-- CHAT STUDIO VIEW -->
@@ -132,10 +132,126 @@
         </div>
       </div>
 
+      <!-- ADMIN DASHBOARD FOLDER VIEW -->
+      <div id="adminDashboardView" class="flex-1 overflow-y-auto p-6 hidden bg-[#050b14]">
+        <div class="max-w-4xl mx-auto space-y-6">
+          
+          <!-- Header -->
+          <div class="flex items-center justify-between p-4 bg-[#0d1628] border border-red-500/30 rounded-2xl">
+            <div class="flex items-center gap-3">
+              <div class="text-3xl">🔐</div>
+              <div>
+                <h2 class="text-lg font-bold text-red-400">KING AI Admin Control Folder</h2>
+                <p class="text-xs text-slate-400">System Monitoring, Custom Friend Passcodes & Developer Settings</p>
+              </div>
+            </div>
+            <button onclick="switchMode('chat')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-xl transition">
+              ✕ Close Admin
+            </button>
+          </div>
+
+          <!-- System Overview Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-4 bg-[#0d1628] border border-slate-800 rounded-2xl space-y-1">
+              <div class="text-xs text-slate-400">Today's System VIP Passcode</div>
+              <div id="adminVipDisplay" class="text-sm font-mono font-bold text-amber-400">Loading...</div>
+            </div>
+            <div class="p-4 bg-[#0d1628] border border-slate-800 rounded-2xl space-y-1">
+              <div class="text-xs text-slate-400">System Status</div>
+              <div class="text-sm font-bold text-emerald-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Operational
+              </div>
+            </div>
+            <div class="p-4 bg-[#0d1628] border border-slate-800 rounded-2xl space-y-1">
+              <div class="text-xs text-slate-400">Core AI Engine</div>
+              <div class="text-sm font-bold text-amber-300 font-mono">Gemini 3.6 Flash</div>
+            </div>
+          </div>
+
+          <!-- NEW: CUSTOM FRIEND PASSCODE GENERATOR -->
+          <div class="bg-[#0d1628] border border-amber-500/30 rounded-2xl p-5 space-y-4">
+            <h3 class="text-sm font-bold text-amber-400 border-b border-slate-800 pb-2 flex items-center gap-2">
+              <span>🎁</span> Create Custom Friend Passcode
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label class="text-[11px] text-slate-400 block mb-1">Custom Passcode String</label>
+                <input type="text" id="customCodeInput" placeholder="e.g. AliSpecialPass" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+              </div>
+
+              <div>
+                <label class="text-[11px] text-slate-400 block mb-1">Passcode Time Limit / Duration</label>
+                <select id="customDurationInput" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+                  <option value="1h">1 Hour</option>
+                  <option value="1time">1 Time (Single Use)</option>
+                  <option value="1d">1 Day</option>
+                  <option value="2d">2 Days</option>
+                  <option value="5d">5 Days</option>
+                  <option value="1y">1 Year</option>
+                </select>
+              </div>
+
+              <div class="flex items-end">
+                <button onclick="generateCustomFriendPasscode()" class="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-bold text-xs rounded-xl shadow transition">
+                  + Create Friend Passcode
+                </button>
+              </div>
+            </div>
+
+            <!-- ACTIVE CUSTOM PASSCODES TABLE -->
+            <div class="pt-2">
+              <div class="text-xs font-bold text-slate-300 mb-2">Active Generated Passcodes</div>
+              <div class="overflow-x-auto border border-slate-800 rounded-xl bg-slate-950">
+                <table class="w-full text-left text-xs text-slate-300">
+                  <thead class="bg-slate-900 border-b border-slate-800 text-slate-400 text-[10px] uppercase">
+                    <tr>
+                      <th class="p-2.5">Passcode</th>
+                      <th class="p-2.5">Duration</th>
+                      <th class="p-2.5">Expires / Limit</th>
+                      <th class="p-2.5 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="customPasscodesTableBody">
+                    <tr>
+                      <td colspan="4" class="p-3 text-center text-slate-500 italic text-[11px]">No custom passcodes created yet.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick System Controls -->
+          <div class="bg-[#0d1628] border border-slate-800 rounded-2xl p-5 space-y-4">
+            <h3 class="text-sm font-bold text-slate-200 border-b border-slate-800 pb-2">Developer Operations</h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2">
+                <div class="text-xs font-bold text-slate-300">Grant Instant VIP Status</div>
+                <p class="text-[11px] text-slate-400">Force unlock all 10 intelligence modes without requiring a passcode prompt.</p>
+                <button onclick="forceUnlockVip()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs rounded-lg transition">
+                  Unlock VIP Mode Now
+                </button>
+              </div>
+
+              <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2">
+                <div class="text-xs font-bold text-slate-300">Reset System Limits</div>
+                <p class="text-[11px] text-slate-400">Reset usage quotas and limits across guest tier sessions.</p>
+                <button onclick="resetAllLimits()" class="w-full py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg transition">
+                  Reset Free Quotas
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
     </main>
   </div>
 
-  <!-- SIGN IN / AUTHENTICATION MODAL -->
+  <!-- SIGN IN MODAL -->
   <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-[#0d1628] border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-slate-200 shadow-2xl relative space-y-4">
       <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold">✕</button>
@@ -160,13 +276,13 @@
       <button onclick="closeVipModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold">✕</button>
       <h3 class="text-xl font-bold text-amber-400">👑 Upgrade to KING PRO</h3>
       <p class="text-xs text-slate-300 leading-relaxed">
-        Unlock <strong>Unlimited</strong> messages, 8K image generation, code crackers, and eliminate all 1–2 hour wait cooldowwns across all features!
+        Unlock <strong>Unlimited</strong> messages, 8K image generation, code crackers, and eliminate all wait cooldowwns across all features!
       </p>
 
       <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-2 text-xs">
         <div class="font-bold text-amber-400">Have a VIP Passcode?</div>
         <div class="flex gap-2">
-          <input type="password" id="vipPasscodeInput" placeholder="Enter Daily Passcode..." class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+          <input type="password" id="vipPasscodeInput" placeholder="Enter Daily or Friend Passcode..." class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
           <button onclick="verifyVipPasscode()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg transition">Apply</button>
         </div>
       </div>
@@ -199,6 +315,10 @@
     let activeChatId = null;
     let activeMode = "chat";
     let isProUnlocked = false;
+    let isAdminUnlocked = false;
+
+    // Local Storage Data Store for Custom Passcodes
+    let customPasscodes = JSON.parse(localStorage.getItem('kingai_custom_passcodes')) || {};
 
     const DEFAULT_LIMITS = {
       chat: { count: 0, max: 50, name: "King AI Chat PRO", tag: "3.6 Flash" },
@@ -299,23 +419,37 @@
         container.appendChild(btn);
       });
 
-      // Admin Folder Button with Plain-Text Password Check
+      // Admin Folder Button
       const adminBtn = document.createElement('button');
-      adminBtn.className = `w-full text-left p-2.5 mt-2 rounded-xl border flex items-center justify-between bg-red-950/20 border-red-900/40 text-red-400 hover:bg-red-900/30 transition`;
+      adminBtn.className = `w-full text-left p-2.5 mt-2 rounded-xl border flex items-center justify-between transition-all ${
+        activeMode === 'admin' 
+          ? 'bg-red-500/20 border-red-500/50 text-red-300' 
+          : 'bg-red-950/20 border-red-900/40 text-red-400 hover:bg-red-900/30'
+      }`;
+      
       adminBtn.innerHTML = `
         <span class="text-xs font-bold flex items-center gap-1.5">🔐 Admin Folder</span>
-        <span class="text-[9px] bg-red-900/40 px-1.5 py-0.5 rounded font-bold">LOCKED</span>
+        <span class="text-[9px] ${isAdminUnlocked ? 'bg-emerald-900/40 text-emerald-400' : 'bg-red-900/40 text-red-300'} px-1.5 py-0.5 rounded font-bold">
+          ${isAdminUnlocked ? 'UNLOCKED' : 'LOCKED'}
+        </span>
       `;
-      adminBtn.onclick = verifyAndOpenAdmin;
+      adminBtn.onclick = handleAdminFolderClick;
       container.appendChild(adminBtn);
     }
 
-    function verifyAndOpenAdmin() {
+    function handleAdminFolderClick() {
+      if (isAdminUnlocked) {
+        switchMode('admin');
+        return;
+      }
+
       const pwd = prompt("Enter Admin Password:");
       if (!pwd) return;
       
       if (pwd.trim() === "abdullahwaheed123123098098") {
-        alert(`👑 KING AI Admin Panel Authenticated!\n\n• Today's VIP Password: ${getDailyVipPassword()}\n• Status: Online & Operational\n• Developer Mode: Full Access Granted`);
+        isAdminUnlocked = true;
+        switchMode('admin');
+        renderSideDrawerModes();
       } else {
         alert("⚠️ Access Denied: Incorrect Admin Password");
       }
@@ -325,13 +459,171 @@
       activeMode = key;
       const chatView = document.getElementById('chatStudioView');
       const imgView = document.getElementById('imageStudioView');
+      const adminView = document.getElementById('adminDashboardView');
+
+      chatView.classList.add('hidden');
+      imgView.classList.add('hidden');
+      adminView.classList.add('hidden');
+
       if (key === 'image') {
         imgView.classList.remove('hidden');
-        chatView.classList.add('hidden');
+      } else if (key === 'admin') {
+        adminView.classList.remove('hidden');
+        document.getElementById('adminVipDisplay').innerText = getDailyVipPassword();
+        renderCustomPasscodesTable();
       } else {
-        imgView.classList.add('hidden');
         chatView.classList.remove('hidden');
       }
+    }
+
+    // CUSTOM FRIEND PASSCODE LOGIC
+    function generateCustomFriendPasscode() {
+      const codeInput = document.getElementById('customCodeInput');
+      const code = codeInput.value.trim();
+      const duration = document.getElementById('customDurationInput').value;
+
+      if (!code) {
+        alert("⚠️ Please enter a passcode string.");
+        return;
+      }
+
+      const now = Date.now();
+      let expireTime = null;
+      let usesLeft = null;
+
+      if (duration === '1h') expireTime = now + (1 * 60 * 60 * 1000);
+      else if (duration === '1time') usesLeft = 1;
+      else if (duration === '1d') expireTime = now + (24 * 60 * 60 * 1000);
+      else if (duration === '2d') expireTime = now + (2 * 24 * 60 * 60 * 1000);
+      else if (duration === '5d') expireTime = now + (5 * 24 * 60 * 60 * 1000);
+      else if (duration === '1y') expireTime = now + (365 * 24 * 60 * 60 * 1000);
+
+      customPasscodes[code] = {
+        type: duration,
+        expiresAt: expireTime,
+        usesLeft: usesLeft,
+        createdOn: new Date().toLocaleDateString()
+      };
+
+      localStorage.setItem('kingai_custom_passcodes', JSON.stringify(customPasscodes));
+      codeInput.value = '';
+      alert(`🎉 Friend Passcode "${code}" created with duration [${duration}]!`);
+      renderCustomPasscodesTable();
+    }
+
+    function renderCustomPasscodesTable() {
+      const tbody = document.getElementById('customPasscodesTableBody');
+      if (!tbody) return;
+
+      const keys = Object.keys(customPasscodes);
+      if (keys.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-slate-500 italic text-[11px]">No custom passcodes created yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      const now = Date.now();
+
+      keys.forEach((code) => {
+        const item = customPasscodes[code];
+        let status = "Active";
+        let statusClass = "text-emerald-400 font-bold";
+
+        if (item.usesLeft !== null) {
+          status = `${item.usesLeft} Use Remaining`;
+          if (item.usesLeft <= 0) {
+            status = "Used / Expired";
+            statusClass = "text-red-400";
+          }
+        } else if (item.expiresAt && now > item.expiresAt) {
+          status = "Expired";
+          statusClass = "text-red-400";
+        } else if (item.expiresAt) {
+          const diffHours = Math.round((item.expiresAt - now) / (1000 * 60 * 60));
+          status = diffHours > 24 ? `Expires in ${Math.round(diffHours / 24)} Days` : `Expires in ${diffHours} Hours`;
+        }
+
+        const tr = document.createElement('tr');
+        tr.className = "border-b border-slate-900 hover:bg-slate-900/50";
+        tr.innerHTML = `
+          <td class="p-2.5 font-mono font-bold text-amber-400">${code}</td>
+          <td class="p-2.5 text-slate-300 font-semibold">${item.type}</td>
+          <td class="p-2.5 ${statusClass}">${status}</td>
+          <td class="p-2.5 text-right">
+            <button onclick="revokeCustomPasscode('${code}')" class="px-2 py-1 bg-red-950 hover:bg-red-900 text-red-300 border border-red-800/50 rounded text-[10px] font-bold">
+              Revoke
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function revokeCustomPasscode(code) {
+      delete customPasscodes[code];
+      localStorage.setItem('kingai_custom_passcodes', JSON.stringify(customPasscodes));
+      renderCustomPasscodesTable();
+    }
+
+    function verifyVipPasscode() {
+      const code = document.getElementById('vipPasscodeInput').value.trim();
+      const now = Date.now();
+
+      // Check Daily System Passcode
+      if (code === getDailyVipPassword()) {
+        isProUnlocked = true;
+        alert("🎉 Daily VIP Passcode Validated! All limits unlocked.");
+        closeVipModal();
+        renderSideDrawerModes();
+        return;
+      }
+
+      // Check Custom Friend Passcodes
+      if (customPasscodes[code]) {
+        const passcodeData = customPasscodes[code];
+
+        // Validate Single Use
+        if (passcodeData.usesLeft !== null) {
+          if (passcodeData.usesLeft > 0) {
+            passcodeData.usesLeft--;
+            localStorage.setItem('kingai_custom_passcodes', JSON.stringify(customPasscodes));
+            isProUnlocked = true;
+            alert("🎉 1-Time Custom Passcode Redeemed Successfully!");
+            closeVipModal();
+            renderSideDrawerModes();
+            return;
+          } else {
+            alert("⚠️ This 1-Time Passcode has already been used.");
+            return;
+          }
+        }
+
+        // Validate Time Limits (1h, 1d, 2d, 5d, 1y)
+        if (passcodeData.expiresAt && now < passcodeData.expiresAt) {
+          isProUnlocked = true;
+          alert(`🎉 Custom Friend Passcode Validated! PRO features unlocked.`);
+          closeVipModal();
+          renderSideDrawerModes();
+          return;
+        } else {
+          alert("⚠️ This Custom Friend Passcode has expired.");
+          return;
+        }
+      }
+
+      alert("⚠️ Invalid Passcode. Please verify with the Admin or buy via Safepay.");
+    }
+
+    function forceUnlockVip() {
+      isProUnlocked = true;
+      renderSideDrawerModes();
+      alert("👑 VIP PRO Status forced active across all modes!");
+    }
+
+    function resetAllLimits() {
+      userLimits = JSON.parse(JSON.stringify(DEFAULT_LIMITS));
+      renderSideDrawerModes();
+      alert("✅ All mode limits reset to defaults!");
     }
 
     async function sendUserPrompt() {
@@ -341,7 +633,7 @@
 
       const currentLimit = userLimits[activeMode] || DEFAULT_LIMITS[activeMode];
       if (!isProUnlocked && currentLimit.max !== Infinity && currentLimit.count >= currentLimit.max) {
-        alert(`⚠️ Waiting Limit Reached for ${currentLimit.name}.\n\nPlease wait 1 to 2 hours or unlock VIP PRO for unlimited access with zero delays!`);
+        alert(`⚠️ Limit Reached for ${currentLimit.name}.\n\nPlease wait 1 to 2 hours or unlock VIP PRO for unlimited access!`);
         openVipModal();
         return;
       }
@@ -381,18 +673,6 @@
 
     function openVipModal() { document.getElementById('vipModal').classList.remove('hidden'); }
     function closeVipModal() { document.getElementById('vipModal').classList.add('hidden'); }
-
-    function verifyVipPasscode() {
-      const code = document.getElementById('vipPasscodeInput').value.trim();
-      if (code === getDailyVipPassword()) {
-        isProUnlocked = true;
-        alert("🎉 VIP PRO UNLOCKED SUCCESSFULLY! All limits removed.");
-        closeVipModal();
-        renderSideDrawerModes();
-      } else {
-        alert("⚠️ Invalid Passcode. Please check today's password or upgrade via Safepay.");
-      }
-    }
 
     function createNewChatSession() {
       document.getElementById('chatMessages').innerHTML = '';
