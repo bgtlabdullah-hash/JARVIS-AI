@@ -193,7 +193,6 @@
     const db = firebase.firestore();
 
     const GEMINI_API_KEY = atob("QVEuQWI4Uk42SkhUY2NBYUNlV3FKaEJOV3hTenEtaDZ0NVBVYy1Mc2FwbWV4NGFUa0tUWEE=");
-    const ADMIN_PASSWORD_HASH = "81bc5171e2ef64d081fdb4977457bd7eece106edacff8cbb94cdd88d30d19ca7";
     const KING_AI_SYSTEM_PROMPT = "You are KING AI, an advanced AI application created by the King AI Program. You must strictly identify as KING AI. Never say you are Gemini, ChatGPT, or any other model provider.";
 
     let currentUser = null;
@@ -220,11 +219,6 @@
       setupAuthStateListener();
       renderSideDrawerModes();
     });
-
-    async function hashPassword(str) {
-      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-    }
 
     function getDailyVipPassword() {
       const START_DATE = new Date("2026-08-01T00:00:00").getTime();
@@ -305,7 +299,7 @@
         container.appendChild(btn);
       });
 
-      // Secret Admin Folder Button
+      // Admin Folder Button with Plain-Text Password Check
       const adminBtn = document.createElement('button');
       adminBtn.className = `w-full text-left p-2.5 mt-2 rounded-xl border flex items-center justify-between bg-red-950/20 border-red-900/40 text-red-400 hover:bg-red-900/30 transition`;
       adminBtn.innerHTML = `
@@ -316,10 +310,11 @@
       container.appendChild(adminBtn);
     }
 
-    async function verifyAndOpenAdmin() {
+    function verifyAndOpenAdmin() {
       const pwd = prompt("Enter Admin Password:");
       if (!pwd) return;
-      if (await hashPassword(pwd) === ADMIN_PASSWORD_HASH) {
+      
+      if (pwd.trim() === "abdullahwaheed123123098098") {
         alert(`👑 KING AI Admin Panel Authenticated!\n\n• Today's VIP Password: ${getDailyVipPassword()}\n• Status: Online & Operational\n• Developer Mode: Full Access Granted`);
       } else {
         alert("⚠️ Access Denied: Incorrect Admin Password");
