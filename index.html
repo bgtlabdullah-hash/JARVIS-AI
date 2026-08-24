@@ -81,7 +81,7 @@
       <div class="p-2.5 bg-emerald-950/30 border border-emerald-500/30 rounded-xl flex items-center justify-between">
         <div>
           <div id="vipBadgeText" class="text-xs font-bold text-emerald-400">🔒 Guest Session (Temporary)</div>
-          <div class="text-[9px] text-slate-400">Gemini Engine</div>
+          <div class="text-[9px] text-slate-400">King AI Engine</div>
         </div>
       </div>
 
@@ -95,7 +95,7 @@
       <div class="p-2.5 bg-slate-900/60 rounded-xl border border-slate-800/60 text-[11px] space-y-1">
         <div class="flex justify-between items-center text-slate-400">
           <span>VIP UNLIMITED</span>
-          <span class="text-amber-400 font-mono font-bold">Gemini 3.6 Flash</span>
+          <span class="text-amber-400 font-mono font-bold">King AI 8.0 Flash</span>
         </div>
         <div class="flex justify-between items-center">
           <span class="text-slate-400">💬 Messages:</span>
@@ -147,13 +147,16 @@
 
       <!-- IMAGE STUDIO VIEW -->
       <div id="imageStudioView" class="flex-1 flex flex-col items-center justify-center p-6 hidden">
-        <div class="max-w-md w-full bg-[#0d1628] border border-slate-800 p-6 rounded-2xl text-center space-y-4">
+        <div class="max-w-xl w-full bg-[#0d1628] border border-slate-800 p-6 rounded-2xl text-center space-y-4">
           <div class="text-3xl">🎨</div>
           <h3 class="text-amber-400 font-bold text-base">8K Image Generation Studio</h3>
           <p class="text-slate-400 text-xs">Enter a descriptive scene prompt below to generate high-definition visual assets.</p>
-          <input type="text" id="imagePromptInput" placeholder="A futuristic vehicle in a Cyberpunk city..." class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+          <input type="text" id="imagePromptInput" placeholder="A futuristic car in a Cyberpunk city..." onkeydown="if(event.key === 'Enter') generate8kImage()" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
           <button onclick="generate8kImage()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 font-bold text-slate-950 text-xs rounded-xl shadow hover:brightness-110 transition">Generate Image</button>
-          <div id="imageOutputArea" class="mt-4 min-h-[150px] border border-dashed border-slate-800 rounded-xl flex items-center justify-center text-slate-600 text-xs">Image Preview Area</div>
+          
+          <div id="imageOutputArea" class="mt-4 min-h-[250px] border border-dashed border-slate-800 rounded-xl flex items-center justify-center text-slate-600 text-xs overflow-hidden">
+            Image Preview Area
+          </div>
         </div>
       </div>
 
@@ -189,7 +192,7 @@
             </div>
             <div class="p-4 bg-[#0d1628] border border-slate-800 rounded-2xl space-y-1">
               <div class="text-xs text-slate-400">Core AI Engine</div>
-              <div class="text-sm font-bold text-amber-300 font-mono">Gemini 3.6 Flash</div>
+              <div class="text-sm font-bold text-amber-300 font-mono">King AI 8.0 Flash</div>
             </div>
           </div>
 
@@ -333,8 +336,8 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    const GEMINI_API_KEY = atob("QVEuQWI4Uk42SkhUY2NBYUNlV3FKaEJOV3hTenEtaDZ0NVBVYy1Mc2FwbWV4NGFUa0tUWEE=");
-    const KING_AI_SYSTEM_PROMPT = "You are KING AI, an advanced AI application created by the King AI Program. You must strictly identify as KING AI. Never say you are Gemini, ChatGPT, or any other model provider.";
+    const GEMINI_API_KEY = atob("QVEuQWI4Uk42SkhUY2NBYUNlV3FKaEJOV3hTenEtaDZ0NVBVYy1Mc2FwbWV4NGFUa0tUWAA=");
+    const KING_AI_SYSTEM_PROMPT = "You are KING AI, an advanced AI application created by Abdullah Waheed. You must strictly identify as KING AI. Never say you are Gemini, ChatGPT, or any other model provider.";
 
     let currentUser = null;
     let activeChatId = null;
@@ -346,16 +349,15 @@
     let customPasscodes = JSON.parse(localStorage.getItem('kingai_custom_passcodes')) || {};
 
     const DEFAULT_LIMITS = {
-      chat: { count: 0, max: 50, name: "King AI Chat PRO", tag: "3.6 Flash" },
-      image: { count: 0, max: 3, name: "8K Image Studio", tag: "Flux 8K" },
+      chat: { count: 0, max: 50, name: "King AI Chat PRO", tag: "8.0 Flash" },
+      image: { count: 0, max: 3, name: "8K Image Studio", tag: "King AI Diffusion" },
       reader: { count: 0, max: 3, name: "Photo & Document Reader", tag: "Vision" },
       codeGen: { count: 0, max: 4, name: "Python & Java Code Writer", tag: "Dev Studio" },
       codeCrack: { count: 0, max: 5, name: "Code Cracker & Debugger", tag: "Crack AI" },
       translator: { count: 0, max: Infinity, name: "All-Language Translator", tag: "PolyGlot" },
       voice: { count: 0, max: 3, name: "Voice Speech Synthesizer", tag: "TTS Pro" },
       docSummary: { count: 0, max: 2, name: "Document & PDF Summarizer", tag: "DocuAI" },
-      math: { count: 0, max: 5, name: "Math & Logic Solver", tag: "LogicX" },
-      webGen: { count: 0, max: 2, name: "AI Web Page Builder", tag: "HTML/JS" }
+      math: { count: 0, max: 5, name: "Math & Logic Solver", tag: "LogicX" }
     };
 
     let userLimits = JSON.parse(JSON.stringify(DEFAULT_LIMITS));
@@ -607,7 +609,6 @@
       if (customPasscodes[code]) {
         const passcodeData = customPasscodes[code];
 
-        // Validate Single Use
         if (passcodeData.usesLeft !== null) {
           if (passcodeData.usesLeft > 0) {
             passcodeData.usesLeft--;
@@ -623,7 +624,6 @@
           }
         }
 
-        // Validate Time Limits (1h, 1d, 2d, 5d, 1y)
         if (passcodeData.expiresAt && now < passcodeData.expiresAt) {
           isProUnlocked = true;
           alert(`🎉 Custom Friend Passcode Validated! PRO features unlocked.`);
@@ -721,14 +721,47 @@
       });
     }
 
+    // REAL AI TEXT-TO-IMAGE GENERATOR
     async function generate8kImage() {
-      const p = document.getElementById('imagePromptInput').value;
+      const input = document.getElementById('imagePromptInput');
+      const p = input.value.trim();
       if (!p) return;
+
+      const currentLimit = userLimits['image'] || DEFAULT_LIMITS['image'];
+      if (!isProUnlocked && currentLimit.max !== Infinity && currentLimit.count >= currentLimit.max) {
+        alert(`⚠️ Limit Reached for 8K Image Studio.\n\nPlease unlock VIP PRO for unlimited image generation!`);
+        openVipModal();
+        return;
+      }
+
+      if (!isProUnlocked) userLimits['image'].count++;
+      renderSideDrawerModes();
+
       const out = document.getElementById('imageOutputArea');
-      out.innerText = "🎨 Generating 8K Visual... Please wait...";
-      setTimeout(() => {
-        out.innerHTML = `<img src="https://picsum.photos/600/400?random=${Math.random()}" class="rounded-xl w-full h-auto object-cover border border-amber-500/30">`;
-      }, 1500);
+      out.innerHTML = `
+        <div class="p-6 text-center space-y-2">
+          <div class="inline-block animate-spin text-2xl">⚡</div>
+          <div class="text-amber-400 font-bold text-xs">King AI 8.0 Generating Image...</div>
+          <div class="text-slate-500 text-[10px]">Rendering: "${p}"</div>
+        </div>
+      `;
+
+      const encodedPrompt = encodeURIComponent(p);
+      const randomSeed = Math.floor(Math.random() * 999999);
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${randomSeed}&nologo=true`;
+
+      const img = new Image();
+      img.src = imageUrl;
+      img.className = "rounded-xl w-full h-auto object-cover border border-amber-500/30 shadow-2xl";
+
+      img.onload = () => {
+        out.innerHTML = '';
+        out.appendChild(img);
+      };
+
+      img.onerror = () => {
+        out.innerHTML = `<div class="text-red-400 text-xs p-4">⚠️ Image generation failed. Please try a different prompt.</div>`;
+      };
     }
   </script>
 </body>
