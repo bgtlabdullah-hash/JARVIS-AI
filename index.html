@@ -3,36 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>King AI Pro</title>
-  <meta name="description" content="KING AI PRO - Advanced Artificial Intelligence Studio created by Abdullah Waheed.">
-
-  <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
-  <link rel="apple-touch-icon" href="logo.png">
-
-  <meta property="og:site_name" content="King AI">
-  <meta property="og:title" content="King AI Pro">
-  <meta property="og:description" content="KING AI PRO - Created & Owned by Abdullah Waheed">
-
+  <title>KING AI - Account Sync Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
   <style>
     body { background-color: #050b14; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; }
-    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #050b14; }
     ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #334155; }
   </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden">
+<body class="h-screen flex flex-col overflow-hidden select-none">
 
-  <!-- TOP HEADER -->
+  <!-- TOP NAVIGATION HEADER -->
   <header class="h-14 bg-[#09111e] border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0">
     <div class="flex items-center gap-2">
-      <div class="text-amber-400 font-black text-lg tracking-wider flex items-center gap-1.5">
-        👑 KING AI <span class="bg-amber-500/20 text-amber-300 text-[10px] px-1.5 py-0.5 rounded border border-amber-500/40">VIP PRO</span>
+      <div class="text-amber-400 font-black text-lg tracking-wider flex items-center gap-1.5 cursor-pointer" onclick="switchMode('chat_pro')">
+        👑 KING AI <span id="headerVipBadge" class="bg-amber-500/20 text-amber-300 text-[10px] px-1.5 py-0.5 rounded border border-amber-500/40">GUEST</span>
       </div>
       <span class="text-[10px] text-slate-500 hidden sm:inline">Owned by <strong class="text-slate-400">Abdullah Waheed</strong></span>
     </div>
@@ -41,247 +32,206 @@
       <button id="activateProBtn" onclick="openVipModal()" class="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-bold text-xs rounded-lg transition shadow-lg flex items-center gap-1">
         🔒 Activate PRO
       </button>
-      <button id="authBtn" onclick="openAuthModal()" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg transition">
+      <button id="authBtn" onclick="toggleAuthAction()" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg transition">
         Sign In
       </button>
     </div>
   </header>
 
-  <!-- MAIN APPLICATION CONTAINER -->
+  <!-- MAIN LAYOUT -->
   <div class="flex-1 flex overflow-hidden">
 
     <!-- LEFT SIDEBAR -->
-    <aside class="w-72 bg-[#09111e] border-r border-slate-800/80 flex flex-col p-3 shrink-0 overflow-y-auto space-y-4">
+    <aside class="w-72 bg-[#09111e] border-r border-slate-800/80 flex flex-col p-3 shrink-0 overflow-y-auto space-y-3">
 
       <!-- Profile Card -->
-      <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800/80 flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-bold">👑</div>
+      <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-bold text-sm">👑</div>
         <div class="overflow-hidden">
-          <div id="userNameDisplay" class="text-xs font-bold text-slate-200 truncate">Abdullah Waheed</div>
-          <div class="text-[10px] text-slate-400">Official App Owner & Creator</div>
+          <div id="userNameDisplay" class="text-xs font-bold text-slate-200 truncate">Anonymous Guest</div>
+          <div id="userRoleDisplay" class="text-[9px] text-slate-400 truncate">Temporary Session Mode</div>
         </div>
       </div>
 
-      <!-- Account Badge -->
-      <div class="p-2.5 bg-emerald-950/30 border border-emerald-500/30 rounded-xl flex items-center justify-between">
-        <div>
-          <div id="vipBadgeText" class="text-xs font-bold text-emerald-400">🔒 Guest Session</div>
-          <div class="text-[9px] text-slate-400">King AI Engine</div>
+      <!-- Account Email Display -->
+      <div class="p-2 bg-slate-900/50 border border-slate-800 rounded-xl flex items-center gap-2">
+        <div id="authStatusDot" class="w-2 h-2 rounded-full bg-slate-500"></div>
+        <div class="overflow-hidden">
+          <div id="userEmailDisplay" class="text-[11px] font-semibold text-slate-400 truncate">Not Authenticated</div>
+          <div id="syncStatusText" class="text-[8px] text-slate-500">Local Memory Only</div>
         </div>
       </div>
 
-      <!-- Buy Pro -->
+      <!-- Buy KING Pro Button -->
       <button onclick="openVipModal()" class="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-xs rounded-xl flex items-center justify-between px-3 hover:brightness-110 transition shadow">
         <span>👑 Buy KING Pro</span>
         <span class="text-[10px] bg-slate-950/20 px-1.5 py-0.5 rounded font-mono">Rs. 1500</span>
       </button>
 
-      <!-- Usage Limits -->
-      <div class="p-2.5 bg-slate-900/60 rounded-xl border border-slate-800/60 text-[11px] space-y-1">
-        <div class="flex justify-between items-center text-slate-400">
-          <span>VIP UNLIMITED</span>
-          <span class="text-amber-400 font-mono font-bold">King AI 8.0 Flash</span>
+      <!-- Quota / Status Card -->
+      <div id="vipStatusCard" class="p-2.5 bg-slate-900/80 border border-slate-800 rounded-xl space-y-1">
+        <div class="flex items-center justify-between text-[10px] font-bold">
+          <span class="text-slate-400">ACCOUNT STATUS</span>
+          <span id="accountStatusBadge" class="text-amber-400 font-mono">FREE PLAN</span>
         </div>
-        <div class="flex justify-between items-center">
-          <span class="text-slate-400">💬 Messages:</span>
-          <span id="msgLimitBadge" class="text-emerald-400 font-bold font-mono">UNLIMITED</span>
+        <div class="flex items-center justify-between text-[10px]">
+          <span class="text-slate-500">💬 Messages:</span>
+          <span id="msgQuotaText" class="text-amber-400 font-bold font-mono">LIMITED</span>
         </div>
-        <div class="flex justify-between items-center">
-          <span class="text-slate-400">🎨 Image Speed:</span>
-          <span id="imgLimitBadge" class="text-emerald-400 font-bold font-mono">INSTANT (8K)</span>
+        <div class="flex items-center justify-between text-[10px]">
+          <span class="text-slate-500">🎨 Cloud Sync:</span>
+          <span id="cloudSyncState" class="text-slate-500 font-bold font-mono">OFFLINE</span>
         </div>
       </div>
 
-      <!-- RECENT CHATS WITH FIRESTORE SYNC -->
+      <!-- Saved Account Conversations -->
       <div class="space-y-1">
         <div class="flex items-center justify-between px-1">
-          <span class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">RECENT CHATS</span>
-          <button onclick="createNewChatSession()" class="text-[10px] text-amber-400 hover:underline font-semibold">+ Now</button>
+          <span class="text-[9px] font-bold text-slate-400 tracking-wider uppercase">SAVED CHATS</span>
+          <button onclick="createNewChatSession()" class="text-[9px] text-amber-400 hover:underline font-semibold">+ New</button>
         </div>
-        <div id="chatHistoryList" class="space-y-1 text-xs max-h-40 overflow-y-auto">
-          <div class="p-2 text-slate-500 text-xs italic">Sign in to sync your account data.</div>
+        <div id="chatHistoryList" class="space-y-1 text-xs max-h-36 overflow-y-auto pr-1">
+          <div class="p-2 text-slate-500 text-[11px] italic text-center">Sign in to sync cloud history.</div>
         </div>
       </div>
 
-      <!-- 10 MODES AND ADMIN FOLDER -->
-      <div id="drawerIntelligenceModes" class="space-y-2 pt-2 border-t border-slate-800/80">
-        <!-- Rendered dynamically -->
+      <!-- Intelligence Modes -->
+      <div class="space-y-1 pt-2 border-t border-slate-800/80 flex-1">
+        <span class="text-[9px] font-bold text-slate-400 tracking-wider uppercase px-1">INTELLIGENCE MODES (10)</span>
+        <div id="intelligenceModesContainer" class="space-y-1"></div>
       </div>
 
+      <!-- Admin Folder Lock -->
+      <div class="pt-2 border-t border-slate-800">
+        <button onclick="requestAdminAccess()" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-red-400 font-bold text-xs rounded-xl border border-red-500/30 flex items-center justify-between px-3 transition">
+          <span class="flex items-center gap-1.5">🔐 Admin Folder</span>
+          <span class="text-[9px] bg-red-950 text-red-400 px-1.5 py-0.5 rounded border border-red-800">PROTECTED</span>
+        </button>
+      </div>
     </aside>
 
     <!-- MAIN WORKSPACE -->
     <main class="flex-1 flex flex-col bg-[#050b14] relative overflow-hidden">
-
+      
       <!-- CHAT STUDIO VIEW -->
-      <div id="chatStudioView" class="flex-1 flex flex-col h-full overflow-hidden">
+      <div id="chatStudioView" class="flex-1 flex flex-col h-full overflow-hidden relative">
         <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3">
-          <div class="p-4 bg-slate-900/60 border border-slate-800 rounded-2xl max-w-lg mx-auto text-center space-y-2 mt-8">
-            <div class="text-2xl">👑</div>
-            <h3 class="text-amber-400 font-bold text-sm">Welcome to KING AI Studio</h3>
-            <p class="text-slate-400 text-xs leading-relaxed">Select any mode to begin writing, coding, or solving questions.</p>
+          <div class="p-6 bg-[#09111e]/80 border border-slate-800 rounded-2xl max-w-xl mx-auto text-center space-y-3 mt-12 shadow-2xl">
+            <div class="text-3xl animate-bounce">👑</div>
+            <h3 class="text-amber-400 font-bold text-base tracking-wide">Welcome to KING AI Studio</h3>
+            <p class="text-slate-400 text-xs leading-relaxed">Sign in to save and access your saved conversations and media history on any device.</p>
           </div>
         </div>
 
-        <!-- INPUT BOX -->
-        <div class="p-3 bg-[#09111e] border-t border-slate-800/80 flex items-center gap-2">
-          <input type="text" id="userPromptInput" placeholder="Type your prompt here..." onkeydown="if(event.key === 'Enter') sendUserPrompt()" class="flex-1 bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500 transition">
-          <button onclick="sendUserPrompt()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition shadow">Send</button>
+        <!-- ATTACHMENT MENU POPUP -->
+        <div id="attachmentMenu" class="hidden absolute bottom-16 left-4 z-40 w-60 bg-[#09111e] border border-slate-800 rounded-2xl shadow-2xl py-2 space-y-0.5 text-xs text-slate-200">
+          <button onclick="triggerFileUpload()" class="w-full px-4 py-2 hover:bg-slate-800/80 flex items-center gap-3 transition">
+            <span class="text-slate-400">📎</span> <span>Add photos & files</span>
+          </button>
+          <button onclick="switchMode('img_studio'); toggleAttachmentMenu();" class="w-full px-4 py-2 hover:bg-slate-800/80 flex items-center gap-3 transition">
+            <span class="text-slate-400">🎨</span> <span>Create image</span>
+          </button>
+          <button onclick="switchMode('voice_synth'); toggleAttachmentMenu();" class="w-full px-4 py-2 hover:bg-slate-800/80 flex items-center gap-3 transition">
+            <span class="text-slate-400">🎵</span> <span>Voice Synthesizer</span>
+          </button>
         </div>
-      </div>
 
-      <!-- FAST IMAGE STUDIO VIEW -->
-      <div id="imageStudioView" class="flex-1 flex flex-col items-center justify-center p-6 hidden overflow-y-auto">
-        <div class="max-w-xl w-full bg-[#0d1628] border border-slate-800 p-6 rounded-2xl text-center space-y-4 shadow-2xl">
-          <div class="text-3xl">🎨</div>
-          <h3 class="text-amber-400 font-bold text-base">Fast 8K Image Studio</h3>
-          <p class="text-slate-400 text-xs leading-relaxed">Instant high-resolution rendering engine active.</p>
-
-          <input type="text" id="imagePromptInput" placeholder="e.g. tree with 3 types of fruits growing which are mango, peach, apple..." onkeydown="if(event.key === 'Enter') generate8kImage()" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
-
-          <button id="generateImageBtn" onclick="generate8kImage()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 font-bold text-slate-950 text-xs rounded-xl shadow hover:brightness-110 transition">
-            Generate Fast Image
+        <!-- INPUT BAR -->
+        <div class="p-3 bg-[#09111e] border-t border-slate-800 flex items-center gap-2 relative">
+          <input type="file" id="fileInputHandler" class="hidden" onchange="handleFileSelected(event)">
+          
+          <button onclick="toggleAttachmentMenu()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold text-lg transition border border-slate-700/60 shrink-0">
+            +
           </button>
 
-          <div id="imageOutputArea" class="mt-4 min-h-[250px] border border-dashed border-slate-800/80 rounded-xl flex items-center justify-center text-slate-500 text-xs overflow-hidden">
-            <span>Generated image will render here.</span>
+          <input type="text" id="userPromptInput" placeholder="Type your prompt here..." onkeydown="if(event.key === 'Enter') sendUserPrompt()" class="flex-1 bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500 transition">
+          <button onclick="sendUserPrompt()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition shadow shrink-0">Send</button>
+        </div>
+      </div>
+
+      <!-- IMAGE GENERATION STUDIO -->
+      <div id="imageStudioView" class="flex-1 flex flex-col items-center justify-center p-6 hidden">
+        <div class="max-w-lg w-full bg-[#09111e] border border-slate-800 p-6 rounded-2xl text-center space-y-4 shadow-2xl">
+          <div class="text-3xl">🎨</div>
+          <h3 class="text-amber-400 font-bold text-base">Fast 8K Image Studio</h3>
+          <p class="text-xs text-slate-400">Generations are saved directly to your synchronized account history.</p>
+          <input type="text" id="imagePromptInput" placeholder="A high tech laboratory in Lahore..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+          <button onclick="generate8kImage()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 font-bold text-slate-950 text-xs rounded-xl shadow hover:brightness-110 transition">Generate 8K Image</button>
+          <div id="imageOutputArea" class="mt-4 min-h-[200px] border border-dashed border-slate-800 rounded-xl flex items-center justify-center text-slate-500 text-xs overflow-hidden">
+            Image preview will appear here
+          </div>
+          <div id="userSavedImages" class="text-left space-y-2 pt-2 border-t border-slate-800">
+            <span class="text-[10px] font-bold text-slate-400 uppercase">Cloud Image Vault</span>
+            <div id="cloudImagesGrid" class="grid grid-cols-4 gap-2 max-h-24 overflow-y-auto"></div>
           </div>
         </div>
       </div>
 
-      <!-- ADMIN DASHBOARD FOLDER VIEW -->
+      <!-- ADMIN DASHBOARD -->
       <div id="adminDashboardView" class="flex-1 overflow-y-auto p-6 hidden bg-[#050b14]">
         <div class="max-w-4xl mx-auto space-y-6">
-
-          <div class="flex items-center justify-between p-4 bg-[#0d1628] border border-red-500/30 rounded-2xl">
+          <div class="flex items-center justify-between p-4 bg-[#09111e] border border-red-500/40 rounded-2xl">
             <div class="flex items-center gap-3">
               <div class="text-3xl">🔐</div>
               <div>
                 <h2 class="text-lg font-bold text-red-400">KING AI Admin Control Panel</h2>
-                <p class="text-xs text-slate-400">System Monitoring, Custom Passcodes & Gemini API Settings</p>
+                <p class="text-xs text-slate-400">Manage Passcodes & Account Privileges</p>
               </div>
             </div>
-            <button onclick="switchMode('chat')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-xl transition">
-              ✕ Close Admin
-            </button>
+            <button onclick="switchMode('chat_pro')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-xl transition">✕ Exit Admin</button>
           </div>
 
-          <!-- GEMINI API KEY CONFIGURATION FIELD -->
-          <div class="bg-[#0d1628] border border-amber-500/30 rounded-2xl p-5 space-y-3">
-            <h3 class="text-sm font-bold text-amber-400 flex items-center gap-2">🔑 Configure Gemini AI Studio API Key</h3>
-            <p class="text-xs text-slate-400">Set your Google AI Studio key here to power all 10 intelligence generation tools dynamically.</p>
-            <div class="flex gap-2">
-              <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
-              <button onclick="saveGeminiKey()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow transition">Save Key</button>
-            </div>
-          </div>
-
-          <!-- SYSTEM OVERVIEW -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="p-4 bg-[#0d1628] border border-slate-800 rounded-2xl space-y-1">
-              <div class="text-xs text-slate-400">Today's Daily VIP Passcode</div>
-              <div id="adminVipDisplay" class="text-sm font-mono font-bold text-amber-400">Loading...</div>
-            </div>
-            <div class="p-4 bg-[#0d1628] border border-slate-800 rounded-2xl space-y-1">
-              <div class="text-xs text-slate-400">System Status</div>
-              <div class="text-sm font-bold text-emerald-400 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Operational
-              </div>
-            </div>
-            <div class="p-4 bg-[#0d1628] border border-slate-800 rounded-2xl space-y-1">
-              <div class="text-xs text-slate-400">Core AI Engine</div>
-              <div class="text-sm font-bold text-amber-300 font-mono">King AI 8.0 Flash</div>
-            </div>
-          </div>
-
-          <!-- FRIEND PASSCODE GENERATOR -->
-          <div class="bg-[#0d1628] border border-amber-500/30 rounded-2xl p-5 space-y-4">
-            <h3 class="text-sm font-bold text-amber-400 border-b border-slate-800 pb-2 flex items-center gap-2">
-              <span>🎁</span> Create Custom Friend Passcode
-            </h3>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div>
-                <label class="text-[11px] text-slate-400 block mb-1">Custom Passcode String</label>
-                <input type="text" id="customCodeInput" placeholder="e.g. FriendVIPPass" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
-              </div>
-
-              <div>
-                <label class="text-[11px] text-slate-400 block mb-1">Passcode Time Limit</label>
-                <select id="customDurationInput" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
-                  <option value="1h">1 Hour</option>
-                  <option value="1time">1 Time (Single Use)</option>
-                  <option value="1d">1 Day</option>
-                  <option value="2d">2 Days</option>
-                  <option value="5d">5 Days</option>
-                  <option value="1y">1 Year</option>
-                </select>
-              </div>
-
-              <div class="flex items-end">
-                <button onclick="generateCustomFriendPasscode()" class="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-bold text-xs rounded-xl shadow transition">
-                  + Create Passcode
-                </button>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="p-5 bg-[#09111e] border border-slate-800 rounded-2xl space-y-4">
+              <h3 class="text-sm font-bold text-amber-400 flex items-center gap-2">🔑 Admin Password Changer</h3>
+              <div class="space-y-3">
+                <input type="password" id="currentAdminPass" placeholder="Current Admin Password" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200">
+                <input type="password" id="newAdminPass" placeholder="New Admin Password" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200">
+                <input type="password" id="confirmAdminPass" placeholder="Confirm New Password" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200">
+                <button onclick="updateAdminPassword()" class="w-full py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition">Update Password</button>
               </div>
             </div>
 
-            <!-- ACTIVE PASSCODES TABLE -->
-            <div class="pt-2">
-              <div class="text-xs font-bold text-slate-300 mb-2">Active Generated Passcodes</div>
-              <div class="overflow-x-auto border border-slate-800 rounded-xl bg-slate-950">
-                <table class="w-full text-left text-xs text-slate-300">
-                  <thead class="bg-slate-900 border-b border-slate-800 text-slate-400 text-[10px] uppercase">
-                    <tr>
-                      <th class="p-2.5">Passcode</th>
-                      <th class="p-2.5">Duration</th>
-                      <th class="p-2.5">Expires / Limit</th>
-                      <th class="p-2.5 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="customPasscodesTableBody">
-                    <tr>
-                      <td colspan="4" class="p-3 text-center text-slate-500 italic text-[11px]">No custom passcodes created yet.</td>
-                    </tr>
-                  </tbody>
-                </table>
+            <div class="p-5 bg-[#09111e] border border-slate-800 rounded-2xl space-y-4">
+              <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-2">🎟️ Friend Passcode Maker</h3>
+              <p class="text-xs text-slate-400">Generate custom passcodes to grant VIP PRO access.</p>
+              <div class="space-y-3">
+                <input type="text" id="friendNameInput" placeholder="Friend Name Identifier" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200">
+                <button onclick="generateFriendPasscode()" class="w-full py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl transition">Generate Passcode</button>
+                <div id="generatedPasscodeOutput" class="p-2 bg-slate-900 rounded-xl text-center font-mono text-xs text-amber-400 hidden"></div>
               </div>
             </div>
           </div>
-
         </div>
       </div>
-
     </main>
   </div>
 
   <!-- AUTH MODAL -->
   <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-[#0d1628] border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-slate-200 shadow-2xl relative space-y-4">
+    <div class="bg-[#09111e] border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-slate-200 shadow-2xl relative space-y-4">
       <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold">✕</button>
       <h3 class="text-lg font-bold text-amber-400">Sign In to KING AI</h3>
-      <p class="text-xs text-slate-400">Sync your chats and prompt history across devices.</p>
-
-      <button onclick="handleGoogleSignIn()" class="w-full py-2.5 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 shadow">
-        <svg class="w-4 h-4" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-        </svg>
-        Sign in with Google
-      </button>
+      
+      <div class="space-y-2">
+        <button onclick="loginWithGoogle()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl border border-slate-700 flex items-center justify-center gap-2 transition">
+          <span>🌐</span> Sign In with Google
+        </button>
+        <button onclick="loginWithApple()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl border border-slate-700 flex items-center justify-center gap-2 transition">
+          <span>🍎</span> Sign In with Apple
+        </button>
+      </div>
 
       <div class="relative flex py-1 items-center">
         <div class="flex-grow border-t border-slate-800"></div>
-        <span class="flex-shrink mx-2 text-[10px] text-slate-500 uppercase tracking-wider">or with email</span>
+        <span class="flex-shrink mx-2 text-[10px] text-slate-500 uppercase">Or Email</span>
         <div class="flex-grow border-t border-slate-800"></div>
       </div>
 
-      <div class="space-y-3">
-        <input type="email" id="authEmail" placeholder="Email Address" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-amber-500">
-        <input type="password" id="authPassword" placeholder="Password" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-amber-500">
+      <div class="space-y-2">
+        <input type="email" id="authEmail" placeholder="Email Address" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-amber-500">
+        <input type="password" id="authPassword" placeholder="Password" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-amber-500">
       </div>
-
       <div class="flex gap-2">
         <button onclick="handleEmailSignIn()" class="flex-1 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition">Sign In</button>
         <button onclick="handleEmailSignUp()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl transition">Register</button>
@@ -289,31 +239,39 @@
     </div>
   </div>
 
-  <!-- VIP PRO MODAL -->
-  <div id="vipModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-[#0d1628] border border-amber-500/40 rounded-2xl max-w-md w-full p-6 text-slate-200 shadow-2xl relative space-y-4">
-      <button onclick="closeVipModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold">✕</button>
-      <h3 class="text-xl font-bold text-amber-400">👑 Upgrade to KING PRO</h3>
-      <p class="text-xs text-slate-300 leading-relaxed">
-        Unlock <strong>Unlimited</strong> messages across all 10 tools and eliminate limits!
-      </p>
-
-      <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-2 text-xs">
-        <div class="font-bold text-amber-400">Have a VIP Passcode?</div>
-        <div class="flex gap-2">
-          <input type="password" id="vipPasscodeInput" placeholder="Enter Passcode..." class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
-          <button onclick="verifyVipPasscode()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg transition">Apply</button>
-        </div>
-      </div>
-
-      <a href="https://sandbox.api.getsafepay.com/io/quick-link?ql=link_4be624f5-369c-43b5-9e69-082072b78c79" target="_blank" class="block w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 font-bold rounded-xl text-center text-slate-950 text-xs shadow hover:brightness-110 transition">
-        💳 Buy Passcode via Safepay (Rs. 1500)
-      </a>
+  <!-- ADMIN AUTH MODAL -->
+  <div id="adminAuthModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#09111e] border border-red-500/40 rounded-2xl max-w-sm w-full p-6 text-slate-200 shadow-2xl relative space-y-4">
+      <button onclick="closeAdminAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold">✕</button>
+      <h3 class="text-lg font-bold text-red-400 flex items-center gap-2">🔐 Admin Password Required</h3>
+      <input type="password" id="adminInputPassword" placeholder="Enter Admin Passcode" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-red-500" onkeydown="if(event.key === 'Enter') verifyAdminPassword()">
+      <button onclick="verifyAdminPassword()" class="w-full py-2 bg-red-500 hover:bg-red-400 text-slate-950 font-bold text-xs rounded-xl transition">Unlock Admin Panel</button>
     </div>
   </div>
 
-  <!-- APPLICATION CODE -->
+  <!-- VIP PRO MODAL -->
+  <div id="vipModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#09111e] border border-amber-500/40 rounded-2xl max-w-md w-full p-6 text-slate-200 shadow-2xl relative space-y-4">
+      <button onclick="closeVipModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold">✕</button>
+      <h3 class="text-xl font-bold text-amber-400">👑 Upgrade to KING PRO</h3>
+      <p class="text-xs text-slate-400 leading-relaxed">Unlock Unlimited Chat, 8K Image Vault Syncing, and All 10 Intelligence Modes.</p>
+      
+      <a href="https://sandbox.api.getsafepay.com/io/quick-link?ql=link_4be624f5-369c-43b5-9e69-082072b78c79" target="_blank" class="block w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 font-bold rounded-xl text-center text-slate-950 text-xs shadow hover:brightness-110 transition">
+        💳 Buy Passcode via Safepay (Rs. 1500)
+      </a>
+
+      <div class="pt-2 border-t border-slate-800 space-y-2">
+        <label class="block text-[11px] font-semibold text-slate-400">Have a Passcode?</label>
+        <div class="flex gap-2">
+          <input type="text" id="vipPasscodeInput" placeholder="Enter Passcode..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 uppercase">
+          <button onclick="activatePasscode()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl transition">Activate</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // FIREBASE INITIALIZATION
     const firebaseConfig = {
       apiKey: "AIzaSyCtQ0mFr-Sj2yxkIWFKal4tuvi9HrjvUGc",
       authDomain: "king-ai-pro.firebaseapp.com",
@@ -327,367 +285,439 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    // GEMINI API KEY (AQ.Ab8RN6Jez4EIxM_jcG0ZuuZXcZ7f97FxYis0PU4sb26KPZaT2g)
+    let GEMINI_API_KEY = "AQ.Ab8RN6Jez4EIxM_jcG0ZuuZXcZ7f97FxYis0PU4sb26KPZaT2g";
+    const KING_AI_SYSTEM_PROMPT = "You are KING AI PRO, an elite artificial intelligence application created and owned by Abdullah Waheed.";
+
+    // APP APPLICATION STATE
     let currentUser = null;
-    let activeMode = "chat";
-    let isProUnlocked = false;
-    let isAdminUnlocked = false;
-    let geminiApiKey = localStorage.getItem('kingai_gemini_key') || "";
+    let currentChatId = null;
+    let chatsUnsubscribe = null;
+    let messagesUnsubscribe = null;
+    let imagesUnsubscribe = null;
+    let isUserVip = false;
 
-    let customPasscodes = JSON.parse(localStorage.getItem('kingai_custom_passcodes')) || {};
+    // ANONYMOUS MEMORY CACHE
+    let tempGuestChatHistory = [];
+    let tempGuestMessages = [];
 
-    const DEFAULT_LIMITS = {
-      chat: { count: 0, max: 50, name: "King AI Chat PRO", tag: "8.0 Flash" },
-      image: { count: 0, max: 3, name: "Fast 8K Image Studio", tag: "King AI Turbo" },
-      reader: { count: 0, max: 3, name: "Photo & Document Reader", tag: "Vision" },
-      codeGen: { count: 0, max: 4, name: "Python & Java Code Writer", tag: "Dev Studio" },
-      codeCrack: { count: 0, max: 5, name: "Code Cracker & Debugger", tag: "Crack AI" },
-      translator: { count: 0, max: Infinity, name: "All-Language Translator", tag: "PolyGlot" },
-      voice: { count: 0, max: 3, name: "Voice Speech Synthesizer", tag: "TTS Pro" },
-      docSummary: { count: 0, max: 2, name: "Document & PDF Summarizer", tag: "DocuAI" },
-      math: { count: 0, max: 5, name: "Math & Logic Solver", tag: "LogicX" },
-      essay: { count: 0, max: 4, name: "Essay & Content Writer", tag: "WritePro" }
-    };
+    const INTELLIGENCE_MODES = [
+      { id: "chat_pro", name: "King AI Chat PRO", quotaMax: 50, current: 50, icon: "💬", prompt: "You are King AI Chat PRO." },
+      { id: "img_studio", name: "Fast 8K Image Studio", quotaMax: 3, current: 3, icon: "🎨", prompt: "Image mode" },
+      { id: "photo_reader", name: "Photo & Document Reader", quotaMax: 3, current: 3, icon: "📷", prompt: "Analyze and explain the following content." },
+      { id: "code_writer", name: "Python & Java Code Writer", quotaMax: 4, current: 4, icon: "💻", prompt: "Write complete Python or Java code with explanations." },
+      { id: "code_debugger", name: "Code Cracker & Debugger", quotaMax: 5, current: 5, icon: "🛠️", prompt: "Debug and optimize the following code snippet." },
+      { id: "translator", name: "All-Language Translator", quotaMax: 5, current: 5, icon: "🌐", prompt: "Translate the user input into the requested language." },
+      { id: "voice_synth", name: "Voice Speech Synthesizer", quotaMax: 3, current: 3, icon: "🎙️", prompt: "Provide clear vocal responses." },
+      { id: "doc_summarizer", name: "Document & PDF Summarizer", quotaMax: 2, current: 2, icon: "📄", prompt: "Provide a concise bulleted summary." },
+      { id: "math_solver", name: "Math & Logic Solver", quotaMax: 5, current: 5, icon: "🧮", prompt: "Solve this mathematical problem step-by-step." },
+      { id: "essay_writer", name: "Essay & Content Writer", quotaMax: 4, current: 4, icon: "📝", prompt: "Write a structured essay on the topic provided." }
+    ];
 
-    let userLimits = JSON.parse(JSON.stringify(DEFAULT_LIMITS));
+    let activeTool = INTELLIGENCE_MODES[0];
 
-    document.addEventListener('DOMContentLoaded', () => {
-      setupAuthStateListener();
-      renderSideDrawerModes();
+    // AUTH STATE OBSERVER
+    auth.onAuthStateChanged(async (user) => {
+      if (chatsUnsubscribe) chatsUnsubscribe();
+      if (messagesUnsubscribe) messagesUnsubscribe();
+      if (imagesUnsubscribe) imagesUnsubscribe();
+
+      currentChatId = null;
+      document.getElementById('chatMessages').innerHTML = '';
+      document.getElementById('chatHistoryList').innerHTML = '';
+      document.getElementById('cloudImagesGrid').innerHTML = '';
+
+      if (user) {
+        currentUser = user;
+        updateUserHeaderUI(user);
+        
+        const userRef = db.collection('users').doc(user.uid);
+        const doc = await userRef.get();
+        if (!doc.exists) {
+          await userRef.set({
+            email: user.email || user.phoneNumber || "User",
+            name: user.displayName || "User",
+            isVip: false,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          isUserVip = false;
+        } else {
+          isUserVip = doc.data()?.isVip || false;
+        }
+
+        updateVipBadgeUI();
+        setupCloudSyncListeners(user.uid);
+
+      } else {
+        currentUser = null;
+        isUserVip = false;
+        tempGuestChatHistory = [];
+        tempGuestMessages = [];
+        
+        updateGuestHeaderUI();
+        renderIntelligenceModes();
+        renderDefaultWelcomeMessage();
+      }
     });
 
-    function getDailyVipPassword() {
-      const START_DATE = new Date("2026-08-01T00:00:00").getTime();
-      const daysPassed = Math.floor((Date.now() - START_DATE) / (24 * 60 * 60 * 1000));
-      return `KingAIPro@${2026 + Math.max(0, daysPassed)}`;
-    }
+    // REALTIME FIRESTORE SYNCHRONIZATION LISTENERS
+    function setupCloudSyncListeners(uid) {
+      chatsUnsubscribe = db.collection('users').doc(uid).collection('chats')
+        .orderBy('updated_at', 'desc')
+        .onSnapshot((snapshot) => {
+          const historyList = document.getElementById('chatHistoryList');
+          historyList.innerHTML = '';
 
-    function setupAuthStateListener() {
-      auth.onAuthStateChanged(async (user) => {
-        const authBtn = document.getElementById('authBtn');
-        if (user) {
-          currentUser = user;
-          authBtn.innerText = "Sign Out";
-          document.getElementById('userNameDisplay').innerText = user.displayName || user.email.split('@')[0];
-          document.getElementById('vipBadgeText').innerText = `👤 ${user.email}`;
-          loadChatHistoryFromFirestore();
-        } else {
-          currentUser = null;
-          authBtn.innerText = "Sign In";
-          document.getElementById('userNameDisplay').innerText = "Abdullah Waheed";
-          document.getElementById('vipBadgeText').innerText = "🔒 Guest Session";
-          document.getElementById('chatHistoryList').innerHTML = `<div class="p-2 text-slate-500 text-xs italic">Sign in to sync your account data.</div>`;
-        }
-      });
-    }
+          if (snapshot.empty) {
+            historyList.innerHTML = `<div class="p-2 text-slate-500 text-[11px] italic text-center">No saved chats yet.</div>`;
+            return;
+          }
 
-    function openAuthModal() { if (currentUser) auth.signOut(); else document.getElementById('authModal').classList.remove('hidden'); }
-    function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
-    function openVipModal() { document.getElementById('vipModal').classList.remove('hidden'); }
-    function closeVipModal() { document.getElementById('vipModal').classList.add('hidden'); }
-
-    async function handleGoogleSignIn() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      try { await auth.signInWithPopup(provider); closeAuthModal(); } catch (err) { alert("Google Auth Error: " + err.message); }
-    }
-
-    async function handleEmailSignIn() {
-      const e = document.getElementById('authEmail').value;
-      const p = document.getElementById('authPassword').value;
-      if (!e || !p) return alert("Fill in both fields.");
-      try { await auth.signInWithEmailAndPassword(e, p); closeAuthModal(); } catch (err) { alert("Sign In Error: " + err.message); }
-    }
-
-    async function handleEmailSignUp() {
-      const e = document.getElementById('authEmail').value;
-      const p = document.getElementById('authPassword').value;
-      if (!e || !p) return alert("Fill in both fields.");
-      try { await auth.createUserWithEmailAndPassword(e, p); closeAuthModal(); } catch (err) { alert("Registration Error: " + err.message); }
-    }
-
-    function renderSideDrawerModes() {
-      const container = document.getElementById('drawerIntelligenceModes');
-      if (!container) return;
-
-      container.innerHTML = `<div class="text-[10px] font-bold text-slate-400 mb-2 px-1 uppercase tracking-wider">INTELLIGENCE MODES (10)</div>`;
-
-      Object.keys(DEFAULT_LIMITS).forEach((key) => {
-        const item = userLimits[key] || DEFAULT_LIMITS[key];
-        const isActive = activeMode === key;
-
-        let badgeText = isProUnlocked || item.max === Infinity ? "UNLIMITED" : `${Math.max(0, item.max - item.count)}/${item.max} FREE`;
-        let badgeClass = isProUnlocked || item.max === Infinity ? "text-emerald-400 font-bold" : "text-amber-400 font-semibold";
-
-        const btn = document.createElement('button');
-        btn.className = `w-full text-left p-2.5 rounded-xl border flex items-center justify-between transition-all ${
-          isActive ? 'bg-amber-500/10 border-amber-500/40 text-amber-300' : 'bg-slate-900/60 border-slate-800/80 text-slate-300 hover:bg-slate-800'
-        }`;
-
-        btn.innerHTML = `<span class="text-xs font-semibold truncate">${item.name}</span><span class="text-[9px] ${badgeClass}">${badgeText}</span>`;
-        btn.onclick = () => { switchMode(key); renderSideDrawerModes(); };
-        container.appendChild(btn);
-      });
-
-      const adminBtn = document.createElement('button');
-      adminBtn.className = `w-full text-left p-2.5 mt-2 rounded-xl border flex items-center justify-between transition-all ${
-        activeMode === 'admin' ? 'bg-red-500/20 border-red-500/50 text-red-300' : 'bg-red-950/20 border-red-900/40 text-red-400 hover:bg-red-900/30'
-      }`;
-      adminBtn.innerHTML = `<span class="text-xs font-bold flex items-center gap-1.5">🔐 Admin Folder</span><span class="text-[9px] ${isAdminUnlocked ? 'bg-emerald-900/40 text-emerald-400' : 'bg-red-900/40 text-red-300'} px-1.5 py-0.5 rounded font-bold">${isAdminUnlocked ? 'UNLOCKED' : 'LOCKED'}</span>`;
-      adminBtn.onclick = handleAdminFolderClick;
-      container.appendChild(adminBtn);
-    }
-
-    function handleAdminFolderClick() {
-      if (isAdminUnlocked) { switchMode('admin'); return; }
-      const pwd = prompt("Enter Admin Password:");
-      if (!pwd) return;
-      if (pwd.trim() === "abdullahwaheed123123098098") {
-        isAdminUnlocked = true; switchMode('admin'); renderSideDrawerModes();
-      } else { alert("⚠️ Access Denied"); }
-    }
-
-    function switchMode(key) {
-      activeMode = key;
-      document.getElementById('chatStudioView').classList.add('hidden');
-      document.getElementById('imageStudioView').classList.add('hidden');
-      document.getElementById('adminDashboardView').classList.add('hidden');
-
-      if (key === 'image') {
-        document.getElementById('imageStudioView').classList.remove('hidden');
-      } else if (key === 'admin') {
-        document.getElementById('adminDashboardView').classList.remove('hidden');
-        document.getElementById('adminVipDisplay').innerText = getDailyVipPassword();
-        document.getElementById('geminiApiKeyInput').value = geminiApiKey;
-        renderCustomPasscodesTable();
-      } else {
-        document.getElementById('chatStudioView').classList.remove('hidden');
-      }
-    }
-
-    function saveGeminiKey() {
-      geminiApiKey = document.getElementById('geminiApiKeyInput').value.trim();
-      localStorage.setItem('kingai_gemini_key', geminiApiKey);
-      alert("✅ Gemini API Key saved locally!");
-    }
-
-    // FIRESTORE HISTORY FUNCTIONS
-    async function saveChatToFirestore(prompt, response) {
-      if (!currentUser) return;
-      try {
-        await db.collection("users").doc(currentUser.uid).collection("history").add({
-          prompt: prompt,
-          response: response,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            const div = document.createElement('div');
+            const isActive = currentChatId === doc.id;
+            div.className = `p-2 rounded-lg text-xs truncate border cursor-pointer transition ${
+              isActive ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold' : 'bg-slate-900/50 text-slate-300 border-slate-800/80 hover:bg-slate-800/60'
+            }`;
+            div.innerText = data.title || "Untitled Session";
+            div.onclick = () => loadChatSession(doc.id);
+            historyList.appendChild(div);
+          });
         });
-        loadChatHistoryFromFirestore();
-      } catch (err) { console.error("Error saving chat history:", err); }
-    }
 
-    async function loadChatHistoryFromFirestore() {
-      if (!currentUser) return;
-      const historyList = document.getElementById('chatHistoryList');
-      try {
-        const snapshot = await db.collection("users").doc(currentUser.uid).collection("history")
-          .orderBy("timestamp", "desc").limit(10).get();
-
-        if (snapshot.empty) {
-          historyList.innerHTML = `<div class="p-2 text-slate-500 text-xs italic">No saved chats yet.</div>`;
-          return;
-        }
-
-        historyList.innerHTML = '';
-        snapshot.docs.forEach(doc => {
-          const data = doc.data();
-          const item = document.createElement('div');
-          item.className = "p-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-800 rounded-lg text-xs truncate cursor-pointer text-slate-300 transition";
-          item.innerText = data.prompt || "Previous Prompt";
-          item.onclick = () => {
-            alert(`💬 Prompt: ${data.prompt}\n\n👑 KING AI: ${data.response}`);
-          };
-          historyList.appendChild(item);
+      imagesUnsubscribe = db.collection('users').doc(uid).collection('generated_images')
+        .orderBy('created_at', 'desc')
+        .onSnapshot((snapshot) => {
+          const grid = document.getElementById('cloudImagesGrid');
+          grid.innerHTML = '';
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            const img = document.createElement('img');
+            img.src = data.image_url;
+            img.className = "w-full h-12 object-cover rounded border border-slate-700 hover:opacity-80 transition cursor-pointer";
+            img.onclick = () => window.open(data.image_url, '_blank');
+            grid.appendChild(img);
+          });
         });
-      } catch (err) {
-        historyList.innerHTML = `<div class="p-2 text-slate-500 text-xs italic">History synced.</div>`;
-      }
     }
 
-    function createNewChatSession() {
-      document.getElementById('chatMessages').innerHTML = `
-        <div class="p-4 bg-slate-900/60 border border-slate-800 rounded-2xl max-w-lg mx-auto text-center space-y-2 mt-8">
-          <div class="text-2xl">👑</div>
-          <h3 class="text-amber-400 font-bold text-sm">New KING AI Chat Session</h3>
-          <p class="text-slate-400 text-xs leading-relaxed">Type your prompt below to begin generating.</p>
-        </div>
-      `;
+    function loadChatSession(chatId) {
+      if (!currentUser) return;
+      currentChatId = chatId;
+      if (messagesUnsubscribe) messagesUnsubscribe();
+
+      messagesUnsubscribe = db.collection('users').doc(currentUser.uid)
+        .collection('chats').doc(chatId).collection('messages')
+        .orderBy('timestamp', 'asc')
+        .onSnapshot((snapshot) => {
+          const container = document.getElementById('chatMessages');
+          container.innerHTML = '';
+          snapshot.forEach((doc) => {
+            const msg = doc.data();
+            appendMessageToDOM(msg.sender, msg.text);
+          });
+        });
     }
 
-    function generateCustomFriendPasscode() {
-      const code = document.getElementById('customCodeInput').value.trim();
-      const duration = document.getElementById('customDurationInput').value;
-      if (!code) return alert("⚠️ Enter a passcode string.");
+    async function getOrCreateActiveChatId(firstPrompt) {
+      if (currentChatId) return currentChatId;
 
-      const now = Date.now();
-      let expireTime = null, usesLeft = null;
-
-      if (duration === '1h') expireTime = now + (3600 * 1000);
-      else if (duration === '1time') usesLeft = 1;
-      else if (duration === '1d') expireTime = now + (86400 * 1000);
-      else if (duration === '2d') expireTime = now + (172800 * 1000);
-      else if (duration === '5d') expireTime = now + (432000 * 1000);
-      else if (duration === '1y') expireTime = now + (31536000 * 1000);
-
-      customPasscodes[code] = { type: duration, expiresAt: expireTime, usesLeft: usesLeft };
-      localStorage.setItem('kingai_custom_passcodes', JSON.stringify(customPasscodes));
-      document.getElementById('customCodeInput').value = '';
-      renderCustomPasscodesTable();
-      alert(`🎉 Friend Passcode "${code}" created!`);
-    }
-
-    function renderCustomPasscodesTable() {
-      const tbody = document.getElementById('customPasscodesTableBody');
-      if (!tbody) return;
-      const keys = Object.keys(customPasscodes);
-      if (keys.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-slate-500 italic text-[11px]">No custom passcodes created yet.</td></tr>`;
-        return;
+      if (!currentUser) {
+        currentChatId = 'guest_session_' + Date.now();
+        return currentChatId;
       }
 
-      tbody.innerHTML = '';
-      const now = Date.now();
-      keys.forEach((code) => {
-        const item = customPasscodes[code];
-        let status = "Active", statusClass = "text-emerald-400 font-bold";
-
-        if (item.usesLeft !== null) {
-          status = `${item.usesLeft} Use Left`;
-          if (item.usesLeft <= 0) { status = "Used"; statusClass = "text-red-400"; }
-        } else if (item.expiresAt && now > item.expiresAt) {
-          status = "Expired"; statusClass = "text-red-400";
-        }
-
-        const tr = document.createElement('tr');
-        tr.className = "border-b border-slate-900";
-        tr.innerHTML = `
-          <td class="p-2.5 font-mono text-amber-400 font-bold">${code}</td>
-          <td class="p-2.5 text-slate-300">${item.type}</td>
-          <td class="p-2.5 ${statusClass}">${status}</td>
-          <td class="p-2.5 text-right"><button onclick="revokeCustomPasscode('${code}')" class="px-2 py-1 bg-red-950 text-red-300 rounded text-[10px]">Revoke</button></td>
-        `;
-        tbody.appendChild(tr);
+      const title = firstPrompt.length > 25 ? firstPrompt.substring(0, 25) + '...' : firstPrompt;
+      const chatRef = await db.collection('users').doc(currentUser.uid).collection('chats').add({
+        title: title,
+        created_at: firebase.firestore.FieldValue.serverTimestamp(),
+        updated_at: firebase.firestore.FieldValue.serverTimestamp()
       });
+
+      currentChatId = chatRef.id;
+      loadChatSession(currentChatId);
+      return currentChatId;
     }
 
-    function revokeCustomPasscode(code) {
-      delete customPasscodes[code];
-      localStorage.setItem('kingai_custom_passcodes', JSON.stringify(customPasscodes));
-      renderCustomPasscodesTable();
-    }
-
-    function verifyVipPasscode() {
-      const code = document.getElementById('vipPasscodeInput').value.trim();
-      if (code === getDailyVipPassword()) {
-        isProUnlocked = true; alert("🎉 VIP Unlocked!"); closeVipModal(); renderSideDrawerModes(); return;
-      }
-      if (customPasscodes[code]) {
-        isProUnlocked = true; alert("🎉 VIP Unlocked via Custom Passcode!"); closeVipModal(); renderSideDrawerModes(); return;
-      }
-      alert("⚠️ Invalid Passcode.");
-    }
-
-    function generate8kImage() {
-      const promptInput = document.getElementById('imagePromptInput');
-      const genBtn = document.getElementById('generateImageBtn');
-      const outputArea = document.getElementById('imageOutputArea');
-      const rawPrompt = promptInput.value.trim();
-      if (!rawPrompt) return alert("Enter a prompt!");
-
-      genBtn.disabled = true;
-      genBtn.innerText = "⚡ Rendering Image...";
-
-      const seed = Math.floor(Math.random() * 999999);
-      const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(rawPrompt)}?width=800&height=800&seed=${seed}&nologo=true`;
-
-      outputArea.innerHTML = `
-        <div class="w-full flex flex-col items-center gap-3 p-2">
-          <img src="${imgUrl}" onload="document.getElementById('generateImageBtn').disabled=false; document.getElementById('generateImageBtn').innerText='Generate Fast Image';" onerror="alert('Generation Error'); document.getElementById('generateImageBtn').disabled=false;" class="w-full max-h-[480px] object-cover rounded-xl border border-slate-700/80 shadow-2xl" />
-          <a href="${imgUrl}" target="_blank" download="king-ai-image.jpg" class="px-4 py-2 bg-emerald-500 text-slate-950 font-bold text-xs rounded-xl shadow">📥 Download Image</a>
-        </div>
-      `;
-    }
-
-    // AI TEXT GENERATION CALL (GEMINI INTEGRATION)
+    // SEND PROMPT & GENERATE RESPONSE
     async function sendUserPrompt() {
       const input = document.getElementById('userPromptInput');
       const text = input.value.trim();
       if (!text) return;
 
-      const chatMessages = document.getElementById('chatMessages');
+      if (GEMINI_API_KEY === "YOUR_GEMINI_API_KEY" || !GEMINI_API_KEY) {
+        const keyInput = prompt("Please enter your Gemini API Key (starts with AIzaSy...):");
+        if (keyInput) GEMINI_API_KEY = keyInput.trim();
+        else return;
+      }
 
-      // User Message UI
-      const userDiv = document.createElement('div');
-      userDiv.className = "flex justify-end";
-      userDiv.innerHTML = `<div class="bg-amber-500/20 border border-amber-500/40 text-amber-200 text-xs px-4 py-2.5 rounded-2xl max-w-md">${escapeHtml(text)}</div>`;
-      chatMessages.appendChild(userDiv);
+      if (!currentUser && !isUserVip && activeTool.current <= 0) {
+        openVipModal();
+        return;
+      }
+
       input.value = '';
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+      document.getElementById('attachmentMenu').classList.add('hidden');
+      
+      const chatId = await getOrCreateActiveChatId(text);
+      await saveMessageToAccount(chatId, "user", text);
 
-      // Loading UI
-      const loadingDiv = document.createElement('div');
-      loadingDiv.className = "flex justify-start";
-      loadingDiv.innerHTML = `<div class="bg-slate-900 border border-slate-800 text-slate-400 text-xs px-4 py-2.5 rounded-2xl animate-pulse">👑 KING AI is processing...</div>`;
-      chatMessages.appendChild(loadingDiv);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-
-      let responseText = "";
+      if (!currentUser && !isUserVip) activeTool.current--;
+      renderIntelligenceModes();
 
       try {
-        if (geminiApiKey) {
-          // Call Real Gemini API Key if supplied in Admin Folder
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: `You are KING AI created by Abdullah Waheed. Request: ${text}` }] }]
-            })
-          });
-          const data = await res.json();
-          responseText = data.candidates[0].content.parts[0].text;
-        } else {
-          // Dynamic Intelligent Response Handler for standard inputs (e.g., letters, essays, questions)
-          responseText = generateDynamicAiResponse(text);
+        const fullPrompt = `${KING_AI_SYSTEM_PROMPT}\nTool Context: ${activeTool.prompt}\nUser Query: ${text}`;
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts: [{ text: fullPrompt }] }] })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          await saveMessageToAccount(chatId, "ai", `⚠️ Gemini Error (${data.error.code}): ${data.error.message}`);
+          return;
         }
 
-        loadingDiv.remove();
+        if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+          const aiText = data.candidates[0].content.parts[0].text;
+          await saveMessageToAccount(chatId, "ai", aiText);
 
-        const aiDiv = document.createElement('div');
-        aiDiv.className = "flex justify-start";
-        aiDiv.innerHTML = `<div class="bg-slate-900 border border-slate-800 text-slate-200 text-xs px-4 py-2.5 rounded-2xl max-w-lg leading-relaxed whitespace-pre-wrap">${escapeHtml(responseText)}</div>`;
-        chatMessages.appendChild(aiDiv);
-
-        // Save to Firestore History
-        saveChatToFirestore(text, responseText);
-
+          if (activeTool.id === 'voice_synth' && 'speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(aiText.substring(0, 200));
+            window.speechSynthesis.speak(utterance);
+          }
+        }
       } catch (err) {
-        loadingDiv.remove();
-        const errDiv = document.createElement('div');
-        errDiv.className = "flex justify-start";
-        errDiv.innerHTML = `<div class="bg-red-950/40 border border-red-800/50 text-red-300 text-xs px-4 py-2.5 rounded-2xl">❌ Error: ${err.message}</div>`;
-        chatMessages.appendChild(errDiv);
+        await saveMessageToAccount(chatId, "ai", "⚠️ Connection error: " + err.message);
       }
-      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    function generateDynamicAiResponse(prompt) {
-      const lower = prompt.toLowerCase();
-      if (lower.includes("letter") && lower.includes("ramsha")) {
-        return `Subject: Inquiry Regarding Well-being\n\nDear Miss Ramsha,\n\nI hope this letter finds you in good health and high spirits. I am writing to kindly inquire about his current health and well-being. Please let us know if there are any updates or if assistance is needed.\n\nWarm regards,\nKING AI Assistant`;
+    async function saveMessageToAccount(chatId, sender, text) {
+      if (currentUser) {
+        await db.collection('users').doc(currentUser.uid)
+          .collection('chats').doc(chatId)
+          .collection('messages').add({
+            sender: sender,
+            text: text,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+        await db.collection('users').doc(currentUser.uid)
+          .collection('chats').doc(chatId).update({
+            updated_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+      } else {
+        tempGuestMessages.push({ sender, text });
+        appendMessageToDOM(sender, text);
       }
-      if (lower.includes("hello") || lower.includes("hi")) {
-        return "Hello! I am KING AI, built by Abdullah Waheed. How can I assist you with writing, code, or mathematics today?";
-      }
-      return `Here is the response generated by KING AI for your query:\n\nRegarding "${prompt}": Please ensure your Gemini API key is configured in the Admin folder for unrestricted full live AI streaming.`;
     }
 
-    function escapeHtml(str) { return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+    async function generate8kImage() {
+      const promptInput = document.getElementById('imagePromptInput');
+      const text = promptInput.value.trim();
+      if (!text) return;
+
+      const outputArea = document.getElementById('imageOutputArea');
+      outputArea.innerHTML = `<div class="text-amber-400 text-xs font-semibold animate-pulse">🎨 Rendering 8K Image...</div>`;
+
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=1280&height=720&nologo=true&seed=${Math.floor(Math.random() * 1000)}`;
+
+      const img = new Image();
+      img.src = imageUrl;
+      img.className = "w-full h-full object-cover rounded-xl shadow-lg";
+      img.onload = async () => {
+        outputArea.innerHTML = "";
+        outputArea.appendChild(img);
+
+        if (currentUser) {
+          await db.collection('users').doc(currentUser.uid).collection('generated_images').add({
+            prompt: text,
+            image_url: imageUrl,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
+      };
+      img.onerror = () => {
+        outputArea.innerHTML = `<div class="text-red-400 text-xs">Failed to render image.</div>`;
+      };
+    }
+
+    function toggleAuthAction() {
+      if (currentUser) auth.signOut();
+      else openAuthModal();
+    }
+
+    function updateUserHeaderUI(user) {
+      document.getElementById('userNameDisplay').innerText = user.displayName || user.email.split('@')[0];
+      document.getElementById('userRoleDisplay').innerText = "Verified Account";
+      document.getElementById('userEmailDisplay').innerText = user.email || user.phoneNumber;
+      document.getElementById('syncStatusText').innerText = "Cloud Synchronized";
+      document.getElementById('authStatusDot').className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+      document.getElementById('authBtn').innerText = "Sign Out";
+      document.getElementById('authBtn').className = "px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-lg transition border border-slate-700";
+      document.getElementById('cloudSyncState').innerText = "ONLINE";
+      document.getElementById('cloudSyncState').className = "text-emerald-400 font-bold font-mono";
+    }
+
+    function updateGuestHeaderUI() {
+      document.getElementById('userNameDisplay').innerText = "Anonymous Guest";
+      document.getElementById('userRoleDisplay').innerText = "Temporary Session Mode";
+      document.getElementById('userEmailDisplay').innerText = "Not Authenticated";
+      document.getElementById('syncStatusText').innerText = "Local Memory Only";
+      document.getElementById('authStatusDot').className = "w-2 h-2 rounded-full bg-slate-500";
+      document.getElementById('authBtn').innerText = "Sign In";
+      document.getElementById('authBtn').className = "px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition";
+      document.getElementById('headerVipBadge').innerText = "GUEST";
+      document.getElementById('accountStatusBadge').innerText = "FREE PLAN";
+      document.getElementById('msgQuotaText').innerText = "LIMITED";
+      document.getElementById('cloudSyncState').innerText = "OFFLINE";
+      document.getElementById('cloudSyncState').className = "text-slate-500 font-bold font-mono";
+    }
+
+    function updateVipBadgeUI() {
+      if (isUserVip) {
+        document.getElementById('headerVipBadge').innerText = "VIP PRO";
+        document.getElementById('accountStatusBadge').innerText = "VIP PRO";
+        document.getElementById('msgQuotaText').innerText = "UNLIMITED";
+        document.getElementById('msgQuotaText').className = "text-emerald-400 font-bold font-mono";
+      } else {
+        document.getElementById('headerVipBadge').innerText = "FREE ACCOUNT";
+        document.getElementById('accountStatusBadge').innerText = "FREE ACCOUNT";
+        document.getElementById('msgQuotaText').innerText = "50 / DAY";
+      }
+      renderIntelligenceModes();
+    }
+
+    function renderIntelligenceModes() {
+      const container = document.getElementById('intelligenceModesContainer');
+      container.innerHTML = "";
+
+      INTELLIGENCE_MODES.forEach((tool) => {
+        const btn = document.createElement('button');
+        const isActive = activeTool.id === tool.id;
+        btn.className = `w-full p-2 rounded-xl text-left text-xs border flex items-center justify-between transition ${
+          isActive ? 'bg-slate-800 border-amber-500 text-amber-400 font-bold' : 'bg-slate-900/60 border-slate-800/80 text-slate-300 hover:bg-slate-800/60'
+        }`;
+        
+        const badgeText = (isUserVip || currentUser) ? "UNLIMITED" : `${tool.current}/${tool.quotaMax} FREE`;
+        const badgeColor = (isUserVip || currentUser) ? "text-emerald-400 bg-emerald-950/60 border-emerald-500/30" : "text-amber-400 bg-amber-950/60 border-amber-500/30";
+
+        btn.onclick = () => {
+          activeTool = tool;
+          renderIntelligenceModes();
+          switchMode(tool.id === 'img_studio' ? 'image' : 'chat');
+        };
+        btn.innerHTML = `
+          <span class="truncate pr-1 flex items-center gap-1.5">${tool.icon} ${tool.name}</span>
+          <span class="text-[8px] font-mono px-1.5 py-0.5 rounded border ${badgeColor}">${badgeText}</span>
+        `;
+        container.appendChild(btn);
+      });
+    }
+
+    function appendMessageToDOM(sender, text) {
+      const container = document.getElementById('chatMessages');
+      const msg = document.createElement('div');
+      msg.className = `p-3 rounded-xl max-w-[85%] text-xs leading-relaxed ${
+        sender === 'user' ? 'bg-amber-500/20 text-amber-200 ml-auto border border-amber-500/30' : 'bg-slate-900 text-slate-200 border border-slate-800 shadow'
+      }`;
+      msg.innerText = text;
+      container.appendChild(msg);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function renderDefaultWelcomeMessage() {
+      document.getElementById('chatMessages').innerHTML = `
+        <div class="p-6 bg-[#09111e]/80 border border-slate-800 rounded-2xl max-w-xl mx-auto text-center space-y-3 mt-12 shadow-2xl">
+          <div class="text-3xl animate-bounce">👑</div>
+          <h3 class="text-amber-400 font-bold text-base tracking-wide">Welcome to KING AI Studio</h3>
+          <p class="text-slate-400 text-xs leading-relaxed">Sign in to save and access your saved conversations and media history on any device.</p>
+        </div>`;
+    }
+
+    async function activatePasscode() {
+      const input = document.getElementById('vipPasscodeInput').value.trim().toUpperCase();
+      if (!input) return;
+
+      if (currentUser) {
+        await db.collection('users').doc(currentUser.uid).update({ isVip: true });
+        isUserVip = true;
+        updateVipBadgeUI();
+        alert("VIP PRO status linked to your account successfully!");
+        closeVipModal();
+      } else {
+        alert("Please sign in to link VIP PRO to your permanent account.");
+      }
+    }
+
+    function loginWithGoogle() {
+      auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(() => closeAuthModal()).catch(err => alert(err.message));
+    }
+    function loginWithApple() {
+      auth.signInWithPopup(new firebase.auth.OAuthProvider('apple.com')).then(() => closeAuthModal()).catch(err => alert(err.message));
+    }
+    function handleEmailSignIn() {
+      const email = document.getElementById('authEmail').value;
+      const pass = document.getElementById('authPassword').value;
+      if (email && pass) auth.signInWithEmailAndPassword(email, pass).then(() => closeAuthModal()).catch(err => alert(err.message));
+    }
+    function handleEmailSignUp() {
+      const email = document.getElementById('authEmail').value;
+      const pass = document.getElementById('authPassword').value;
+      if (email && pass) auth.createUserWithEmailAndPassword(email, pass).then(() => closeAuthModal()).catch(err => alert(err.message));
+    }
+
+    // ADMIN LOCK HANDLERS
+    function requestAdminAccess() { document.getElementById('adminAuthModal').classList.remove('hidden'); }
+    function closeAdminAuthModal() { document.getElementById('adminAuthModal').classList.add('hidden'); }
+    
+    // VERIFY ADMIN PASSWORD (DEFAULT: abdullahwaheed123123)
+    function verifyAdminPassword() {
+      const savedPass = localStorage.getItem("king_admin_pass") || "abdullahwaheed123123";
+      if (document.getElementById('adminInputPassword').value === savedPass) {
+        closeAdminAuthModal();
+        switchMode('admin');
+      } else {
+        alert("Incorrect Admin Password!");
+      }
+    }
+
+    function updateAdminPassword() {
+      const newP = document.getElementById('newAdminPass').value;
+      if (newP) {
+        localStorage.setItem("king_admin_pass", newP);
+        alert("Admin password updated successfully.");
+      }
+    }
+
+    function generateFriendPasscode() {
+      const name = document.getElementById('friendNameInput').value || "FRIEND";
+      const code = `KING-${name.toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const out = document.getElementById('generatedPasscodeOutput');
+      out.classList.remove('hidden');
+      out.innerText = `Passcode: ${code}`;
+    }
+
+    function createNewChatSession() {
+      currentChatId = null;
+      if (messagesUnsubscribe) messagesUnsubscribe();
+      renderDefaultWelcomeMessage();
+    }
+    function toggleAttachmentMenu() { document.getElementById('attachmentMenu').classList.toggle('hidden'); }
+    function triggerFileUpload() { document.getElementById('fileInputHandler').click(); }
+    function handleFileSelected(e) { if(e.target.files[0]) sendUserPrompt(`📎 Attached File: ${e.target.files[0].name}`); }
+    function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
+    function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
+    function openVipModal() { document.getElementById('vipModal').classList.remove('hidden'); }
+    function closeVipModal() { document.getElementById('vipModal').classList.add('hidden'); }
+    function switchMode(mode) {
+      document.getElementById('chatStudioView').classList.toggle('hidden', mode !== 'chat' && mode !== 'chat_pro');
+      document.getElementById('imageStudioView').classList.toggle('hidden', mode !== 'image' && mode !== 'img_studio');
+      document.getElementById('adminDashboardView').classList.toggle('hidden', mode !== 'admin');
+    }
   </script>
 </body>
 </html>
