@@ -1,989 +1,698 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>KING AI - Workspace, Quota Engine & Account Sync</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-  <style>
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #070a12; }
-    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #334155; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JARVIS AI HUB - Multi-Workspace</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <style>
+        body { background-color: #04060b; font-family: system-ui, -apple-system, sans-serif; color: #e2e8f0; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+        .folder-card { transition: all 0.15s ease-in-out; }
+        .folder-card:hover { transform: translateX(3px); }
+        .active-folder { background-color: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.4); color: #fcd34d; }
+    </style>
 </head>
-<body class="bg-[#070a12] text-slate-100 font-sans min-h-screen flex flex-col overflow-x-hidden selection:bg-amber-500 selection:text-slate-950">
+<body class="flex h-screen overflow-hidden select-none">
 
-  <header class="bg-[#0c101d] border-b border-slate-800/80 px-5 py-3 flex items-center justify-between shadow-lg sticky top-0 z-30">
-    <div class="flex items-center space-x-3">
-      <div class="flex items-center space-x-2 cursor-pointer" onclick="switchWorkspace('chat')">
-        <span class="text-xl">👑</span>
-        <h1 class="text-lg font-black tracking-wider text-amber-400">KING AI HUB</h1>
-      </div>
-      <span id="activeWorkspaceBadge" class="bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-bold px-2.5 py-0.5 rounded uppercase tracking-wider">
-        King AI Chat PRO
-      </span>
-    </div>
-
-    <div class="flex items-center space-x-3">
-      <div id="userHeaderBadge" class="hidden items-center space-x-2 bg-slate-900 border border-slate-800 rounded-lg px-3 py-1 text-xs">
-        <i class="fa-solid fa-circle-user text-amber-400"></i>
-        <span id="userHeaderEmail" class="text-slate-300 font-semibold">user@domain.com</span>
-      </div>
-      
-      <button onclick="openVipModal()" class="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg flex items-center space-x-1 shadow transition">
-        <i class="fa-solid fa-key"></i>
-        <span>Activate PRO</span>
-      </button>
-
-      <button id="authBtn" onclick="toggleAuthModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-4 py-2 rounded-lg transition border border-slate-700">
-        Sign In
-      </button>
-    </div>
-  </header>
-
-  <div class="flex flex-1 overflow-hidden h-[calc(100vh-57px)]">
-    
-    <aside class="w-80 bg-[#0a0e1a] border-r border-slate-800/80 p-3.5 flex flex-col justify-between overflow-y-auto">
-      <div class="space-y-4">
-        
-        <div id="accountBox" class="bg-[#0c101d] border border-slate-800 rounded-xl p-3.5 space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-bold">
-                <i class="fa-solid fa-user"></i>
-              </div>
-              <div>
-                <div id="accountName" class="text-xs font-bold text-slate-200">Guest Session</div>
-                <div id="accountEmail" class="text-[10px] text-slate-400">Not Signed In</div>
-              </div>
-            </div>
-            <span id="accountBadge" class="text-[9px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded uppercase font-bold">Free Tier</span>
-          </div>
-
-          <div class="space-y-2 pt-2 border-t border-slate-800/80 text-[11px]">
-            <div class="flex justify-between items-center">
-              <span class="text-slate-400"><i class="fa-solid fa-comments text-amber-400 mr-1.5"></i>Chat Messages:</span>
-              <span id="chatQuotaBadge" class="font-bold text-slate-200">0 / 50</span>
-            </div>
-            <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
-              <div id="chatQuotaBar" class="bg-amber-400 h-1.5 rounded-full" style="width: 0%"></div>
+    <!-- SIDEBAR DRAWER -->
+    <aside class="w-80 bg-[#020408] border-r border-slate-800/80 flex flex-col justify-between shrink-0">
+        <div class="p-3.5 overflow-y-auto space-y-4 flex-1">
+            
+            <!-- Branding Header -->
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🤖</span>
+                    <h1 class="font-bold text-sm tracking-wide text-white">JARVIS AI HUB</h1>
+                </div>
+                <span id="activeModeTag" class="text-[9px] bg-amber-500/20 text-amber-300 font-bold px-2 py-0.5 rounded border border-amber-500/30 font-mono uppercase">
+                    JARVIS CHAT PRO
+                </span>
             </div>
 
-            <div class="flex justify-between items-center pt-1">
-              <span class="text-slate-400"><i class="fa-solid fa-screwdriver-wrench text-blue-400 mr-1.5"></i>AI Tools Usage:</span>
-              <span id="toolQuotaBadge" class="font-bold text-slate-200">0 / 5</span>
-            </div>
-            <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
-              <div id="toolQuotaBar" class="bg-blue-400 h-1.5 rounded-full" style="width: 0%"></div>
+            <!-- User Session & Limits Card -->
+            <div class="p-3 bg-[#070c18] rounded-xl border border-slate-800/80 space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                    <span id="userAccountLabel" class="font-bold text-slate-300">👤 Guest Session</span>
+                    <span id="userTierTag" class="text-[9px] text-amber-400 font-bold uppercase tracking-wider bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">FREE TIER</span>
+                </div>
+                <div class="text-[10px] text-slate-400 space-y-1">
+                    <div class="flex justify-between"><span>💬 Chat Messages:</span> <span id="chatUsageCount" class="text-slate-200 font-semibold">3 / 50</span></div>
+                    <div class="flex justify-between"><span>🛠️ AI Tools Usage:</span> <span id="toolsUsageCount" class="text-slate-200 font-semibold">0 / 5</span></div>
+                    <div class="flex justify-between"><span>🖼️ Max Image Limit:</span> <span class="text-slate-200 font-semibold">Max 3 Images</span></div>
+                    <div class="flex justify-between border-t border-slate-800/80 pt-1 text-emerald-400">
+                        <span>🎙️ Siri Voice Direct:</span> <span class="font-semibold">UNLIMITED (0 COUNTS)</span>
+                    </div>
+                </div>
+                <button onclick="openVipModal()" class="w-full mt-1 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-bold rounded-lg text-xs shadow transition flex items-center justify-center gap-1">
+                    👑 UPGRADE TO VIP / PRO (PKR 1500)
+                </button>
             </div>
 
-            <div class="flex justify-between items-center pt-1">
-              <span class="text-slate-400"><i class="fa-solid fa-image text-purple-400 mr-1.5"></i>Max Image Limit:</span>
-              <span id="imageQuotaBadge" class="font-bold text-slate-200">3 Images Max</span>
+            <!-- Saved Cloud History -->
+            <div>
+                <div class="flex justify-between items-center mb-1.5 px-1">
+                    <span class="text-[9px] font-bold text-slate-400 tracking-wider uppercase">SAVED CLOUD HISTORY</span>
+                    <button onclick="createNewChatSession()" class="text-[9px] font-bold text-amber-400 hover:text-amber-300">+ NEW CHAT</button>
+                </div>
+                <div id="chatHistoryList" class="space-y-1 max-h-20 overflow-y-auto">
+                    <div class="p-2 text-slate-500 text-[11px] italic">Sign in to sync saved history.</div>
+                </div>
             </div>
-          </div>
 
-          <button onclick="triggerVipPurchase()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 text-xs font-bold py-2 rounded-lg transition shadow flex items-center justify-center space-x-1">
-            <i class="fa-solid fa-crown"></i>
-            <span>UPGRADE TO VIP / PRO (UNLIMITED)</span>
-          </button>
+            <!-- 12 DISTINCT AI WORKSPACE FOLDERS -->
+            <div>
+                <div class="flex justify-between items-center mb-2 px-1">
+                    <span class="text-[9px] font-bold text-slate-400 tracking-wider uppercase">AI WORKSPACE FOLDERS</span>
+                    <span class="text-[9px] text-slate-500 font-mono">12 UNIQUE UI VIEWS</span>
+                </div>
+                <div id="workspaceFoldersContainer" class="space-y-1.5">
+                    <!-- Dynamic rendering of 12 distinct styled folder cards -->
+                </div>
+            </div>
         </div>
 
-        <div class="space-y-1.5">
-          <div class="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">
-            <span>Saved Cloud History</span>
-            <button onclick="createNewConversation()" class="text-amber-400 hover:text-amber-300 text-xs">+ New Chat</button>
-          </div>
-          <div id="savedConversationsList" class="space-y-1 max-h-32 overflow-y-auto pr-1">
-            <div class="text-[11px] text-slate-500 italic px-2 py-1">No saved cloud conversations</div>
-          </div>
+        <!-- Protected Admin Folder Button -->
+        <div class="p-3 border-t border-slate-800/80 bg-[#010204]">
+            <button onclick="openAdminPasswordModal()" class="w-full p-2.5 rounded-xl bg-red-950/30 border border-red-900/50 hover:bg-red-900/40 text-red-400 flex items-center justify-between transition group">
+                <div class="flex items-center gap-2">
+                    <span class="text-base group-hover:scale-110 transition-transform">🔒</span>
+                    <span class="text-xs font-bold">Admin Folder</span>
+                </div>
+                <span class="text-[9px] bg-red-900/60 text-red-300 px-2 py-0.5 rounded font-mono font-bold tracking-wider border border-red-700/50">PROTECTED</span>
+            </button>
         </div>
-
-        <div class="space-y-1">
-          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1 mb-1">10 AI Workspace Folders</div>
-          
-          <button onclick="switchWorkspace('chat')" id="nav-chat" class="w-full p-2.5 bg-amber-500/10 border border-amber-500/40 text-amber-300 font-bold rounded-xl flex items-center justify-between text-xs transition">
-            <div class="flex items-center space-x-2.5">
-              <i class="fa-solid fa-comments text-amber-400 w-4"></i>
-              <span>1. King Chat PRO</span>
-            </div>
-            <span class="text-[9px] bg-amber-500/20 px-1.5 py-0.5 rounded text-amber-300 font-mono">50/50</span>
-          </button>
-
-          <button onclick="switchWorkspace('image')" id="nav-image" class="w-full p-2.5 bg-slate-900/50 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl flex items-center justify-between text-xs transition">
-            <div class="flex items-center space-x-2.5">
-              <i class="fa-solid fa-wand-magic-sparkles text-amber-400 w-4"></i>
-              <span>2. Ultra 8K Image Studio</span>
-            </div>
-            <span class="text-[9px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400 font-mono">5/5</span>
-          </button>
-
-          <button onclick="switchWorkspace('reader')" id="nav-reader" class="w-full p-2.5 bg-slate-900/50 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl flex items-center justify-between text-xs transition">
-            <div class="flex items-center space-x-2.5">
-              <i class="fa-solid fa-file-invoice text-purple-400 w-4"></i>
-              <span>3. Photo & Document OCR</span>
-            </div>
-            <span class="text-[9px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400 font-mono">5/5</span>
-          </button>
-
-          <button onclick="switchWorkspace('coder')" id="nav-coder" class="w-full p-2.5 bg-slate-900/50 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl flex items-center justify-between text-xs transition">
-            <div class="flex items-center space-x-2.5">
-              <i class="fa-solid fa-code text-blue-400 w-4"></i>
-              <span>4. Python & Code Writer</span>
-            </div>
-            <span class="text-[9px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400 font-mono">5/5</span>
-          </button>
-
-          <button onclick="switchWorkspace('debugger')" id="nav-debugger" class="w-full p-2.5 bg-slate-900/50 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl flex items-center justify-between text-xs transition">
-            <div class="flex items-center space-x-2.5">
-              <i class="fa-solid fa-bug text-red-400 w-4"></i>
-              <span>5. Code Cracker & Debugger</span>
-            </div>
-            <span class="text-[9px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400 font-mono">5/5</span>
-          </button>
-
-          <button onclick="switchWorkspace('translator')" id="nav-translator" class="w-full p-2.5 bg-slate-900/50 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl flex items-center justify-between text-xs transition">
-            <div class="flex items-center space-x-2.5">
-              <i class="fa-solid fa-language text-emerald-400 w-4"></i>
-              <span>6. All-Language Translator</span>
-            </div>
-            <span class="text-[9px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400 font-mono">5/5</span>
-          </button>
-
-          <button onclick="switchWorkspace('voice')" id="nav-voice" class="w-full p-2.5 bg-slate-900/50 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl flex items-center justify-between text-xs transition">
-            <div class="flex items-center space-x-2.5">
-              <i class="fa-solid fa-microphone text-pink-400 w-4"></i>
-              <span>7. Voice Speech Synthesizer</span>
-            </div>
-            <span class="text-[9px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400 font-mono">5/5</span>
-          </button>
-
-          <button onclick="switchWorkspace('summarizer')" id="nav-summarizer" class="w-full p-2.5 bg-slate-900/50 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl flex items-center justify-between text-xs transition">
-            <div class="flex items-center space-x-2.5">
-              <i class="fa-solid fa-file-lines text-teal-400 w-4"></i>
-              <span>8. Document Summarizer</span>
-            </div>
-            <span class="text-[9px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400 font-mono">5/5</span>
-          </button>
-
-          <button onclick="switchWorkspace('math')" id="nav-math" class="w-full p-2.5 bg-slate-900/50 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl flex items-center justify-between text-xs transition">
-            <div class="flex items-center space-x-2.5">
-              <i class="fa-solid fa-calculator text-yellow-400 w-4"></i>
-              <span>9. Math & Logic Solver</span>
-            </div>
-            <span class="text-[9px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400 font-mono">5/5</span>
-          </button>
-
-          <button onclick="switchWorkspace('writer')" id="nav-writer" class="w-full p-2.5 bg-slate-900/50 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl flex items-center justify-between text-xs transition">
-            <div class="flex items-center space-x-2.5">
-              <i class="fa-solid fa-pen-nib text-indigo-400 w-4"></i>
-              <span>10. Essay & Content Writer</span>
-            </div>
-            <span class="text-[9px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400 font-mono">5/5</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="pt-3 border-t border-slate-800/80">
-        <button onclick="promptAdminLogin()" class="w-full p-2.5 bg-red-950/30 hover:bg-red-900/40 border border-red-800/50 text-red-400 font-bold rounded-xl flex items-center justify-between text-xs transition">
-          <div class="flex items-center space-x-2">
-            <i class="fa-solid fa-user-shield text-red-400"></i>
-            <span>Admin Folder</span>
-          </div>
-          <span class="text-[9px] bg-red-900/60 text-red-200 px-2 py-0.5 rounded font-mono uppercase tracking-wider">PROTECTED</span>
-        </button>
-      </div>
     </aside>
 
-    <main class="flex-1 bg-[#070a12] p-6 overflow-y-auto relative flex flex-col justify-between">
-      
-      <div id="ws-chat" class="workspace-panel space-y-4 max-w-4xl w-full mx-auto flex-1 flex flex-col justify-between">
-        <div id="chatBox" class="space-y-3 overflow-y-auto max-h-[65vh] pr-2 flex-1">
-          <div class="bg-[#0f1526] p-4 rounded-2xl border border-slate-800 text-xs flex justify-between items-start">
-            <div>
-              <span class="font-bold text-amber-400">👑 KING AI Engine:</span>
-              <p class="mt-1 text-slate-300">Welcome! Standard tier gets 50 Chat messages & 5 AI Tool requests. Upgrade to PRO / VIP for unlimited limits & image uploads.</p>
+    <!-- MAIN INTERFACE WITH DYNAMIC FOLDER WORKSPACE WORK AREA -->
+    <main class="flex-1 flex flex-col h-full bg-[#04060b] relative overflow-hidden">
+        
+        <!-- Top Header Navigation -->
+        <header class="h-14 border-b border-slate-800/80 px-5 flex items-center justify-between bg-[#020408]/90 backdrop-blur shrink-0">
+            <div class="flex items-center gap-2.5">
+                <span class="text-lg">🤖</span>
+                <span class="font-bold text-xs text-slate-100">JARVIS AI HUB</span>
+                <span id="activeFolderBadge" class="text-[10px] bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded font-mono font-semibold border border-amber-500/30">
+                    JARVIS CHAT PRO
+                </span>
             </div>
-            <button onclick="speakText('Welcome to King AI')" class="text-slate-500 hover:text-amber-400 text-xs"><i class="fa-solid fa-volume-high"></i></button>
-          </div>
-        </div>
-
-        <div class="space-y-2 bg-[#0a0e1a] p-2.5 rounded-2xl border border-slate-800 shadow-xl">
-          
-          <div id="imagePreviewContainer" class="flex flex-wrap gap-2 px-2 hidden"></div>
-
-          <div class="flex gap-2 items-center">
-            <label for="chatImageInput" class="cursor-pointer bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 p-2.5 rounded-xl transition flex items-center justify-center relative" title="Upload Images">
-              <i class="fa-solid fa-image text-amber-400 text-sm"></i>
-              <span id="imgCountBadge" class="absolute -top-1 -right-1 bg-amber-500 text-slate-950 font-extrabold text-[9px] w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
-            </label>
-            <input type="file" id="chatImageInput" accept="image/*" multiple class="hidden" onchange="handleImageUpload(event)" />
-
-            <input type="text" id="chatInput" placeholder="Type message or prompt..." class="flex-1 bg-transparent px-3 text-xs focus:outline-none text-slate-100" onkeypress="if(event.key==='Enter') runChat()"/>
             
-            <button onclick="runChat()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center space-x-1 transition">
-              <span>Send</span>
-              <i class="fa-solid fa-paper-plane text-[10px]"></i>
-            </button>
-          </div>
-        </div>
-      </div>
+            <div class="flex items-center gap-3">
+                <!-- Direct Voice Always Active Indicator (NO TOGGLE BUTTON) -->
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-emerald-950/40 border border-emerald-500/40 rounded-lg text-emerald-400 text-xs font-semibold shadow-inner">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>🎙️ Direct Voice Active ("Hi JARVIS")</span>
+                </div>
+                <button onclick="openVipModal()" class="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold rounded-lg text-xs hover:brightness-110 shadow transition">
+                    🔑 Activate PRO (1500 PKR)
+                </button>
+                <button id="authHeaderBtn" onclick="openAuthModal()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold rounded-lg text-xs transition">
+                    Sign In
+                </button>
+            </div>
+        </header>
 
-      <div id="ws-image" class="workspace-panel hidden space-y-4 max-w-4xl w-full mx-auto">
-        <div class="border border-slate-800 bg-[#0c101d] p-5 rounded-2xl space-y-4 shadow-xl">
-          <div class="flex justify-between items-center">
-            <h2 class="text-sm font-bold text-amber-400 flex items-center"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Ultra 8K Image Studio</h2>
-            <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">Consumes 1 AI Tool Limit</span>
-          </div>
-          <textarea id="imgPrompt" placeholder="Describe the ultra-detailed 8K prompt to render..." class="w-full h-24 bg-[#070a12] border border-slate-800 rounded-xl p-3 text-xs focus:outline-none focus:border-amber-500 text-slate-200"></textarea>
-          <div class="flex justify-between items-center">
-            <select id="imgRatio" class="bg-[#070a12] border border-slate-800 text-xs p-2.5 rounded-lg text-slate-300">
-              <option value="1024x1024">Square Aspect (1:1)</option>
-              <option value="1280x720">Widescreen Render (16:9)</option>
-            </select>
-            <button onclick="generateImage()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl text-xs transition">
-              Render Image
-            </button>
-          </div>
-        </div>
-        <div id="imageGallery" class="min-h-[280px] border border-dashed border-slate-800 bg-[#0a0e1a]/40 rounded-2xl flex items-center justify-center p-4">
-          <span class="text-xs text-slate-500">Rendered graphics will display here</span>
-        </div>
-      </div>
-
-      <div id="ws-reader" class="workspace-panel hidden space-y-4 max-w-4xl w-full mx-auto">
-        <h2 class="text-sm font-bold text-purple-400"><i class="fa-solid fa-file-invoice mr-2"></i>Photo & Document Reader (OCR)</h2>
-        <div class="border-2 border-dashed border-slate-800 hover:border-purple-500 p-8 rounded-2xl text-center cursor-pointer transition bg-[#0a0e1a]/50" onclick="document.getElementById('ocrFile').click()">
-          <i class="fa-solid fa-cloud-arrow-up text-3xl text-purple-400 mb-2"></i>
-          <p class="text-xs text-slate-300">Click or Drag Image/Document here</p>
-          <input type="file" id="ocrFile" class="hidden" onchange="previewOcrFile(event)" />
-        </div>
-        <div id="ocrOutput" class="bg-[#05070d] border border-slate-800 p-4 rounded-xl text-xs min-h-[180px] text-slate-300">
-          Extracted contents will render here...
-        </div>
-      </div>
-
-      <div id="ws-coder" class="workspace-panel hidden space-y-4 max-w-4xl w-full mx-auto">
-        <div class="flex justify-between items-center">
-          <h2 class="text-sm font-bold text-blue-400"><i class="fa-solid fa-code mr-2"></i>Code Writer</h2>
-          <select id="codeLang" class="bg-[#0c101d] border border-slate-800 text-xs p-2 rounded-lg text-slate-300">
-            <option value="Python">Python 3</option>
-            <option value="JavaScript">JavaScript</option>
-            <option value="HTML">HTML / CSS</option>
-          </select>
-        </div>
-        <textarea id="codePrompt" placeholder="Write code prompt..." class="w-full h-24 bg-[#0a0e1a] border border-slate-800 rounded-xl p-3 text-xs focus:outline-none text-slate-200"></textarea>
-        <button onclick="executeToolAction('coder', () => generateCode())" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition">Generate Code</button>
-        <pre id="codeOutput" class="bg-[#05070d] border border-slate-800 p-4 rounded-xl text-xs font-mono text-emerald-400 overflow-x-auto min-h-[180px]"><code>Code output will render here...</code></pre>
-      </div>
-
-      <div id="ws-debugger" class="workspace-panel hidden space-y-4 max-w-4xl w-full mx-auto">
-        <h2 class="text-sm font-bold text-red-400"><i class="fa-solid fa-bug mr-2"></i>Code Cracker & Debugger</h2>
-        <textarea id="brokenCode" placeholder="Paste broken code..." class="h-40 w-full bg-[#0a0e1a] border border-slate-800 rounded-xl p-3 text-xs font-mono focus:outline-none text-slate-200"></textarea>
-        <button onclick="executeToolAction('debugger', () => debugCode())" class="bg-red-600 hover:bg-red-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs w-full transition">Fix Code</button>
-        <div id="debugResult" class="bg-[#05070d] border border-slate-800 p-4 rounded-xl text-xs font-mono text-slate-300 min-h-[160px]">Debugger result...</div>
-      </div>
-
-      <div id="ws-translator" class="workspace-panel hidden space-y-4 max-w-4xl w-full mx-auto">
-        <h2 class="text-sm font-bold text-emerald-400"><i class="fa-solid fa-language mr-2"></i>All-Language Translator</h2>
-        <div class="grid grid-cols-2 gap-4">
-          <textarea id="transInput" placeholder="Text to translate..." class="w-full h-36 bg-[#0a0e1a] border border-slate-800 rounded-xl p-3 text-xs focus:outline-none text-slate-200"></textarea>
-          <div id="transOutput" class="w-full h-36 bg-[#05070d] border border-slate-800 rounded-xl p-3 text-xs text-emerald-300 overflow-y-auto">Translation...</div>
-        </div>
-        <button onclick="executeToolAction('translator', () => runTranslation())" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs w-full transition">Translate Now</button>
-      </div>
-
-      <div id="ws-voice" class="workspace-panel hidden space-y-4 max-w-4xl w-full mx-auto">
-        <h2 class="text-sm font-bold text-pink-400"><i class="fa-solid fa-microphone mr-2"></i>Voice Speech Synthesizer</h2>
-        <textarea id="voiceText" placeholder="Text for speech synthesis..." class="w-full h-32 bg-[#0a0e1a] border border-slate-800 rounded-xl p-3 text-xs focus:outline-none text-slate-200"></textarea>
-        <button onclick="executeToolAction('voice', () => speakVoiceText())" class="bg-pink-600 hover:bg-pink-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs flex items-center space-x-2 transition">
-          <i class="fa-solid fa-play"></i>
-          <span>Synthesize Speech</span>
-        </button>
-      </div>
-
-      <div id="ws-summarizer" class="workspace-panel hidden space-y-4 max-w-4xl w-full mx-auto">
-        <h2 class="text-sm font-bold text-teal-400"><i class="fa-solid fa-file-lines mr-2"></i>Document Summarizer</h2>
-        <textarea id="summaryText" placeholder="Paste article..." class="w-full h-32 bg-[#0a0e1a] border border-slate-800 rounded-xl p-3 text-xs focus:outline-none text-slate-200"></textarea>
-        <button onclick="executeToolAction('summarizer', () => runSummary())" class="bg-teal-600 hover:bg-teal-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition">Summarize Text</button>
-        <div id="summaryResult" class="bg-[#05070d] border border-slate-800 p-4 rounded-xl text-xs text-slate-300 min-h-[140px]">Summary result...</div>
-      </div>
-
-      <div id="ws-math" class="workspace-panel hidden space-y-4 max-w-4xl w-full mx-auto">
-        <h2 class="text-sm font-bold text-yellow-400"><i class="fa-solid fa-calculator mr-2"></i>Math & Logic Solver</h2>
-        <input type="text" id="mathInput" placeholder="Enter math equation (e.g., 2x + 10 = 50)" class="w-full bg-[#0a0e1a] border border-slate-800 rounded-xl p-3 text-xs focus:outline-none text-slate-200"/>
-        <button onclick="executeToolAction('math', () => solveMath())" class="bg-yellow-600 hover:bg-yellow-500 text-slate-950 font-bold px-6 py-2.5 rounded-xl text-xs transition">Solve Equation</button>
-        <div id="mathResult" class="bg-[#05070d] border border-slate-800 p-4 rounded-xl text-xs text-yellow-100 min-h-[140px]">Step-by-step solution...</div>
-      </div>
-
-      <div id="ws-writer" class="workspace-panel hidden space-y-4 max-w-4xl w-full mx-auto">
-        <h2 class="text-sm font-bold text-indigo-400"><i class="fa-solid fa-pen-nib mr-2"></i>Essay & Content Writer</h2>
-        <input type="text" id="writerTopic" placeholder="Essay Topic..." class="w-full bg-[#0a0e1a] border border-slate-800 rounded-xl p-3 text-xs focus:outline-none text-slate-200"/>
-        <button onclick="executeToolAction('writer', () => writeContent())" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs w-full transition">Generate Article</button>
-        <div id="writerResult" class="bg-[#05070d] border border-slate-800 p-4 rounded-xl text-xs text-slate-200 min-h-[200px]">Article output...</div>
-      </div>
+        <!-- Dynamic Main Workspace Container -->
+        <section id="workspaceMainArea" class="flex-1 flex flex-col overflow-hidden relative">
+            <!-- Rendered Folder Content UI dynamically loads here -->
+        </section>
 
     </main>
-  </div>
 
-  <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-[#0c101d] border border-slate-800 w-full max-w-md rounded-2xl p-6 space-y-5 shadow-2xl relative">
-      <button onclick="toggleAuthModal()" class="absolute top-4 right-4 text-slate-500 hover:text-slate-300 text-sm">✕</button>
-      <div class="space-y-1">
-        <h3 class="text-base font-bold text-amber-400 flex items-center"><i class="fa-solid fa-user-lock mr-2"></i>King AI Account Sign In</h3>
-        <p class="text-xs text-slate-400">Sync all chat histories and limits across your devices.</p>
-      </div>
-
-      <div class="space-y-3">
-        <div>
-          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Email Address</label>
-          <input type="email" id="authEmail" placeholder="user@example.com" value="bgtlaabdullah@gmail.com" class="w-full bg-[#070a12] border border-slate-800 rounded-xl p-3 text-xs focus:outline-none focus:border-amber-500 text-slate-200"/>
+    <!-- MODAL 1: ADMIN PASSWORD -->
+    <div id="adminPassModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#090d16] border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center text-slate-200 shadow-2xl relative space-y-4">
+            <button onclick="closeModal('adminPassModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-base">✕</button>
+            <div class="w-12 h-12 bg-red-950/50 border border-red-500/40 rounded-full flex items-center justify-center mx-auto">
+                <span class="text-xl">🔒</span>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-slate-100 mb-1">Admin Folder Protected</h3>
+                <p class="text-xs text-slate-400">Enter master password to access system controls.</p>
+            </div>
+            <form onsubmit="event.preventDefault(); verifyAdminPassword();" class="space-y-3">
+                <input type="password" id="adminPasswordInput" placeholder="••••••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center text-xs tracking-widest focus:outline-none focus:border-red-500">
+                <button type="submit" class="w-full py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs transition shadow-lg">Unlock Admin Folder</button>
+            </form>
         </div>
-        <div>
-          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Account Password</label>
-          <input type="password" id="authPass" value="12345678" class="w-full bg-[#070a12] border border-slate-800 rounded-xl p-3 text-xs focus:outline-none focus:border-amber-500 text-slate-200"/>
-        </div>
-      </div>
-
-      <div class="flex space-x-2 pt-2">
-        <button onclick="executeSignIn()" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition">Sign In</button>
-        <button onclick="executeSignUp()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 rounded-xl text-xs transition">Create Account</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="adminModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
-    
-    <div id="adminPassChallenge" class="bg-[#0c101d] border border-red-900/60 w-full max-w-sm rounded-2xl p-6 space-y-4 shadow-2xl relative">
-      <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-slate-500 hover:text-slate-300 text-sm">✕</button>
-      <div class="text-center space-y-1">
-        <div class="w-12 h-12 bg-red-950/80 border border-red-700/60 rounded-full flex items-center justify-center text-red-400 mx-auto text-xl">
-          <i class="fa-solid fa-lock"></i>
-        </div>
-        <h3 class="text-base font-bold text-red-400">Admin Folder Protected</h3>
-        <p class="text-[11px] text-slate-400">Enter master password to access control panel.</p>
-      </div>
-
-      <input type="password" id="adminInputPass" placeholder="Master Password" class="w-full bg-[#070a12] border border-slate-800 rounded-xl p-3 text-xs focus:outline-none focus:border-red-500 text-slate-200 text-center tracking-widest"/>
-
-      <button onclick="verifyAdminPassword()" class="w-full bg-red-700 hover:bg-red-600 text-white font-bold py-2.5 rounded-xl text-xs transition">
-        Unlock Admin Folder
-      </button>
     </div>
 
-    <div id="adminDashboard" class="hidden bg-[#0c101d] border border-slate-800 w-full max-w-2xl rounded-2xl p-6 space-y-5 shadow-2xl relative my-8">
-      <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-slate-500 hover:text-slate-300 text-sm">✕</button>
-      
-      <div class="flex items-center space-x-2">
-        <span class="text-xl">👑</span>
-        <h2 class="text-base font-bold text-amber-400">Admin Control Panel Folder</h2>
-      </div>
-
-      <div class="grid grid-cols-2 gap-4">
-        <div class="bg-[#070a12] border border-slate-800/80 p-4 rounded-xl">
-          <span class="text-[10px] font-bold text-slate-500 uppercase">App Running Time</span>
-          <div class="text-lg font-black text-emerald-400 mt-1">Active Cloud System</div>
+    <!-- MODAL 2: ADMIN CONTROL PANEL -->
+    <div id="adminControlModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#070b14] border border-slate-800 rounded-2xl max-w-2xl w-full p-5 text-slate-200 shadow-2xl relative space-y-4">
+            <button onclick="closeModal('adminControlModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-base">✕</button>
+            <div>
+                <h3 class="text-sm font-bold text-amber-400 flex items-center gap-2">🤖 JARVIS Admin Control Panel</h3>
+                <p class="text-[10px] text-slate-400">Manage system settings, security passcodes, and usage limits.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="p-3 bg-slate-900/60 border border-slate-800/80 rounded-xl">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">APP RUNNING TIME</span>
+                    <span id="appRunningTimeDisplay" class="text-xs font-bold text-emerald-400">Loading...</span>
+                </div>
+                <div class="p-3 bg-slate-900/60 border border-slate-800/80 rounded-xl">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">TODAY'S VIP PASSCODE</span>
+                    <span id="todayVipPasscodeDisplay" class="text-xs font-bold text-amber-400 font-mono">JarvisPro@20260826</span>
+                </div>
+            </div>
+            <div class="p-3 bg-slate-900/40 border border-slate-800/60 rounded-xl space-y-2">
+                <span class="text-[10px] font-bold text-amber-400 tracking-wide uppercase">🔑 CHANGE ADMIN PASSWORD:</span>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="password" id="currentAdminPassInput" placeholder="Current Password" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs focus:outline-none">
+                    <input type="password" id="newAdminPassInput" placeholder="New Password" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs focus:outline-none">
+                </div>
+                <button onclick="updateAdminPassword()" class="w-full py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs transition">Update Password</button>
+            </div>
         </div>
-        <div class="bg-[#070a12] border border-slate-800/80 p-4 rounded-xl">
-          <span class="text-[10px] font-bold text-slate-500 uppercase">Today's VIP Passcode</span>
-          <div id="adminDailyPasscode" class="text-lg font-black text-amber-400 font-mono mt-1">KingAIPro@YYYYMMDD</div>
-          <span class="text-[9px] text-slate-500">Changes daily at midnight</span>
-        </div>
-      </div>
-
-      <div class="bg-[#070a12] border border-slate-800/80 p-4 rounded-xl space-y-3">
-        <div class="text-xs font-bold text-slate-300 flex items-center">
-          <i class="fa-solid fa-key text-amber-400 mr-2"></i>
-          <span>Change Admin Folder Password:</span>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <input type="password" id="adminCurrPass" placeholder="Current Password" class="bg-[#0c101d] border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none"/>
-          <input type="password" id="adminNewPass" placeholder="New Password" class="bg-[#0c101d] border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none"/>
-        </div>
-        <button onclick="updateAdminPassword()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2 rounded-lg text-xs transition">
-          Update Admin Password
-        </button>
-      </div>
-
-      <div class="bg-[#070a12] border border-slate-800/80 p-4 rounded-xl space-y-2">
-        <span class="text-xs font-bold text-slate-300">Active API Key:</span>
-        <div class="flex gap-2">
-          <input type="text" id="adminApiKeyInput" class="flex-1 bg-[#0c101d] border border-slate-800 rounded-lg p-2 text-xs text-emerald-400 font-mono focus:outline-none"/>
-          <button onclick="saveAdminApiKey()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">Update</button>
-        </div>
-      </div>
-
-      <div class="bg-[#070a12] border border-slate-800/80 p-4 rounded-xl space-y-3">
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Registered Users & Quota Limits</span>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead>
-              <tr class="border-b border-slate-800 text-slate-500 uppercase text-[9px]">
-                <th class="pb-2">User / Email</th>
-                <th class="pb-2">Tier</th>
-                <th class="pb-2">Chat Limit</th>
-                <th class="pb-2">Tools Limit</th>
-                <th class="pb-2">Image Uploads</th>
-              </tr>
-            </thead>
-            <tbody id="adminUserTable" class="divide-y divide-slate-800/50">
-              </tbody>
-          </table>
-        </div>
-      </div>
-
     </div>
-  </div>
 
-  <script>
-    /* =================================================================
-       MASTER SYSTEM CONFIGURATION & QUOTA ENFORCEMENT
-       ================================================================= */
-    
-    const DB_KEYS = {
-      USERS: "king_ai_users_db_v3",
-      SESSIONS: "king_ai_sessions_v3",
-      DATA_PREFIX: "king_ai_user_data_v3_",
-      ADMIN_PASS: "king_ai_admin_pass",
-      API_KEY: "king_apiKey"
-    };
+    <!-- MODAL 3: AUTHENTICATION -->
+    <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#090d16] border border-slate-800 rounded-2xl max-w-sm w-full p-5 text-slate-200 shadow-2xl relative space-y-3">
+            <button onclick="closeModal('authModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-base">✕</button>
+            <h3 class="text-sm font-bold text-amber-400">🔐 Sign In to JARVIS AI</h3>
+            <p class="text-[10px] text-slate-400">Sync workspace history across all 12 folders.</p>
+            <div class="space-y-2">
+                <button onclick="signInGoogle()" class="w-full py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 hover:bg-slate-800 transition">🌐 Google Sign In</button>
+                <button onclick="alert('Apple Sign In Active')" class="w-full py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 hover:bg-slate-800 transition">🍎 Apple ID</button>
+            </div>
+        </div>
+    </div>
 
-    // Master Password for Admin Folder
-    let adminMasterPassword = localStorage.getItem(DB_KEYS.ADMIN_PASS) || "Abdullahwaheed123123";
+    <!-- MODAL 4: VIP UPGRADE -->
+    <div id="vipModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#090d16] border border-amber-500/40 rounded-2xl max-w-sm w-full p-5 text-slate-200 shadow-2xl relative space-y-3">
+            <button onclick="closeModal('vipModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-base">✕</button>
+            <h3 class="text-sm font-bold text-amber-400">👑 Upgrade to JARVIS VIP / PRO</h3>
+            <p class="text-[11px] text-slate-300">Unlock unlimited generations across all 12 AI tool folders for 1500 PKR.</p>
+            <a href="https://sandbox.api.getsafepay.com/io/quick-link?ql=link_4be624f5-369c-43b5-9e69-082072b78c79" target="_blank" class="block w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 font-bold text-slate-950 rounded-xl text-center text-xs shadow hover:brightness-110 transition">💳 Pay via Safepay (1500 PKR)</a>
+            <div class="border-t border-slate-800 pt-2">
+                <span class="text-[10px] text-slate-400 block mb-1">Have daily VIP Passcode?</span>
+                <div class="flex gap-2">
+                    <input type="text" id="vipPasscodeInput" placeholder="Enter VIP Passcode" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-1.5 text-xs focus:outline-none">
+                    <button onclick="applyVipPasscode()" class="px-3 py-1.5 bg-amber-500 text-slate-950 font-bold rounded-lg text-xs">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    // Daily Rotating Passcode (Auto-resets at Midnight)
-    function getTodayVipPasscode() {
-      const date = new Date();
-      const yr = date.getFullYear();
-      const mo = String(date.getMonth() + 1).padStart(2, '0');
-      const dy = String(date.getDate()).padStart(2, '0');
-      return `KingAIPro@${yr}${mo}${dy}`;
-    }
+    <!-- MAIN JAVASCRIPT SYSTEM ENGINE -->
+    <script>
+        // FIREBASE INITIALIZATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyCtQ0mFr-Sj2yxkIWFKal4tuvi9HrjvUGc",
+            authDomain: "king-ai-pro.firebaseapp.com",
+            projectId: "king-ai-pro",
+            storageBucket: "king-ai-pro.firebasestorage.app",
+            messagingSenderId: "1031703957787",
+            appId: "1:1031703957787:web:6bd7a28e6a9d2252e4c3be"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
 
-    // Default Seed DB
-    function getMasterUsersDB() {
-      const raw = localStorage.getItem(DB_KEYS.USERS);
-      if(raw) return JSON.parse(raw);
-      
-      const seedDB = {
-        "user_owner": {
-          id: "user_owner",
-          email: "bgtlaabdullah@gmail.com",
-          name: "abdullah waheed",
-          passHash: "12345678",
-          isVip: true
+        // 12 DISTINCT AI WORKSPACE FOLDERS DEFINITIONS
+        const WORKSPACE_FOLDERS = [
+            { id: "chat", name: "1. JARVIS Chat PRO", icon: "🤖", badge: "50/50", desc: "Conversational AI assistant" },
+            { id: "image", name: "2. Ultra 8K Image Studio", icon: "🎨", badge: "5/5", desc: "Flux 8K visual renderer" },
+            { id: "video", name: "3. All-Type Video Generator", icon: "📹", badge: "5/5", desc: "Omni video generator" },
+            { id: "saved", name: "4. Saved Creations Folder", icon: "📁", badge: "0 Saved", desc: "Cloud memory gallery" },
+            { id: "ocr", name: "5. Photo & Document OCR", icon: "📄", badge: "5/5", desc: "Vision OCR file scanner" },
+            { id: "codeWriter", name: "6. Python & Code Writer", icon: "💻", badge: "5/5", desc: "Full-stack code architect" },
+            { id: "codeDebugger", name: "7. Code Cracker & Debugger", icon: "🔓", badge: "5/5", desc: "Bug diagnostic suite" },
+            { id: "translator", name: "8. All-Language Translator", icon: "🌐", badge: "5/5", desc: "PolyGlot translation studio" },
+            { id: "voiceSynth", name: "9. Voice Speech Synthesizer", icon: "🎙️", badge: "5/5", desc: "TTS Voice audio generator" },
+            { id: "docSummary", name: "10. Document Summarizer", icon: "📑", badge: "5/5", desc: "DocuAI file summarizer" },
+            { id: "mathSolver", name: "11. Math & Logic Solver", icon: "🧮", badge: "5/5", desc: "LogicX step-by-step solver" },
+            { id: "essayWriter", name: "12. Essay & Content Writer", icon: "🚀", badge: "5/5", desc: "Creative article studio" }
+        ];
+
+        let activeFolderId = "chat";
+        let masterAdminPassword = localStorage.getItem('jarvis_admin_pass') || '12345678';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFolderListSidebar();
+            switchWorkspaceFolder('chat');
+            calculateUptimeAndPasscode();
+            initSiriContinuousVoice();
+        });
+
+        // RENDER SIDEBAR FOLDERS
+        function renderFolderListSidebar() {
+            const container = document.getElementById('workspaceFoldersContainer');
+            container.innerHTML = '';
+
+            WORKSPACE_FOLDERS.forEach(folder => {
+                const isActive = activeFolderId === folder.id;
+                const folderDiv = document.createElement('div');
+                folderDiv.className = `folder-card w-full p-2.5 rounded-xl border cursor-pointer flex items-center justify-between ${
+                    isActive 
+                        ? 'bg-amber-500/15 border-amber-500/50 text-amber-300 shadow-sm' 
+                        : 'bg-[#060a14] border-slate-800/80 text-slate-300 hover:bg-slate-800/50'
+                }`;
+
+                folderDiv.innerHTML = `
+                    <div class="flex items-center gap-2.5 truncate">
+                        <span class="text-base p-1 bg-slate-900 rounded-lg border border-slate-800 shrink-0">${folder.icon}</span>
+                        <div class="truncate">
+                            <div class="text-[11px] font-bold truncate">${folder.name}</div>
+                            <div class="text-[9px] text-slate-500 truncate">${folder.desc}</div>
+                        </div>
+                    </div>
+                    <span class="text-[9px] bg-slate-950 border border-slate-800 text-amber-400 font-mono px-1.5 py-0.5 rounded shrink-0">${folder.badge}</span>
+                `;
+
+                folderDiv.onclick = () => switchWorkspaceFolder(folder.id);
+                container.appendChild(folderDiv);
+            });
         }
-      };
-      localStorage.setItem(DB_KEYS.USERS, JSON.stringify(seedDB));
-      return seedDB;
-    }
 
-    // Active Application State
-    let currentUser = null;
-    let activeConversationId = null;
-    let activeWorkspace = "chat";
-    let activeApiKey = localStorage.getItem(DB_KEYS.API_KEY) || "";
+        // SWITCH WORKSPACE FOLDER & DYNAMICALLY RENDER UNIQUE UI WORKSPACE VIEWS
+        function switchWorkspaceFolder(folderId) {
+            activeFolderId = folderId;
+            const folderObj = WORKSPACE_FOLDERS.find(f => f.id === folderId);
+            
+            document.getElementById('activeFolderBadge').innerText = folderObj.name.toUpperCase();
+            document.getElementById('activeModeTag').innerText = folderObj.name.split('.')[1]?.trim().toUpperCase() || "JARVIS";
+            
+            renderFolderListSidebar();
+            renderMainWorkspaceView(folderId);
+        }
 
-    // Usage Tracking State (Resets daily or stored in User object)
-    let userUsage = {
-      chatCount: 0,
-      toolsCount: 0
-    };
+        // RENDER 12 DISTINCT CUSTOM INTERFACES
+        function renderMainWorkspaceView(id) {
+            const mainArea = document.getElementById('workspaceMainArea');
+            
+            switch(id) {
+                // FOLDER 1: CHAT PRO
+                case 'chat':
+                    mainArea.innerHTML = `
+                        <div id="chatMessages" class="flex-1 overflow-y-auto p-5 space-y-3.5">
+                            <div class="p-3.5 bg-slate-900/80 border border-slate-800 rounded-2xl max-w-xl text-xs text-slate-300 leading-relaxed">
+                                🤖 <strong>JARVIS:</strong> Welcome to JARVIS Chat PRO! Type your message below or speak anytime by saying "Hi JARVIS".
+                            </div>
+                        </div>
+                        <div class="p-4 border-t border-slate-800/80 bg-[#020408]/60">
+                            <form onsubmit="event.preventDefault(); sendChatMessage();" class="max-w-4xl mx-auto flex items-center gap-2 bg-slate-900/90 border border-slate-800 rounded-xl p-2">
+                                <input type="text" id="chatInputText" placeholder="Type your query..." class="flex-1 bg-transparent text-xs text-slate-100 focus:outline-none px-2">
+                                <button type="submit" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold rounded-lg text-xs shadow">Send 🚀</button>
+                            </form>
+                        </div>
+                    `;
+                    break;
 
-    // Textbox Attached Images Array
-    let attachedImages = [];
+                // FOLDER 2: ULTRA 8K IMAGE STUDIO
+                case 'image':
+                    mainArea.innerHTML = `
+                        <div class="p-6 space-y-5 overflow-y-auto h-full">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xl">🎨</span>
+                                <h2 class="text-sm font-bold text-amber-300">Ultra 8K Image Studio</h2>
+                            </div>
+                            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 space-y-3">
+                                <textarea id="imagePromptInput" rows="3" placeholder="Describe the image you want to generate (e.g., 'A futuristic super sports car in night lighting, 8k resolution')..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-amber-500/50"></textarea>
+                                <div class="flex items-center justify-between">
+                                    <select class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-300">
+                                        <option>Aspect Ratio: 16:9 (Landscape)</option>
+                                        <option>Aspect Ratio: 1:1 (Square)</option>
+                                        <option>Aspect Ratio: 9:16 (Portrait)</option>
+                                    </select>
+                                    <button onclick="triggerImageGen()" class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold rounded-xl text-xs shadow hover:brightness-110 transition">Generate 8K Image 🖼️</button>
+                                </div>
+                            </div>
+                            <div id="imageResultBox" class="border border-dashed border-slate-800 rounded-2xl p-12 flex flex-col items-center justify-center text-slate-500 text-xs gap-2 min-h-[300px]">
+                                <span>🖼️</span> Generated AI Image will render visually here...
+                            </div>
+                        </div>
+                    `;
+                    break;
 
-    // System Startup
-    window.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("adminDailyPasscode").innerText = getTodayVipPasscode();
-      document.getElementById("adminApiKeyInput").value = activeApiKey;
+                // FOLDER 3: ALL-TYPE VIDEO GENERATOR
+                case 'video':
+                    mainArea.innerHTML = `
+                        <div class="p-6 space-y-5 overflow-y-auto h-full">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xl">📹</span>
+                                <h2 class="text-sm font-bold text-amber-300">All-Type AI Video Generator</h2>
+                            </div>
+                            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 space-y-3">
+                                <input type="text" id="videoPromptInput" placeholder="Enter video prompt (e.g., 'A drone camera flying over a Cyberpunk city at night')..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-amber-500/50">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex gap-2">
+                                        <select class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-300">
+                                            <option>Duration: 5 Seconds</option>
+                                            <option>Duration: 10 Seconds</option>
+                                        </select>
+                                        <select class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-300">
+                                            <option>Model: Omni High-Fidelity Video</option>
+                                        </select>
+                                    </div>
+                                    <button onclick="alert('Generating Video Clip...')" class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold rounded-xl text-xs shadow">Generate Video 📹</button>
+                                </div>
+                            </div>
+                            <div class="border border-dashed border-slate-800 rounded-2xl p-12 flex flex-col items-center justify-center text-slate-500 text-xs gap-2 min-h-[280px]">
+                                🎬 Video playback preview frame will appear here...
+                            </div>
+                        </div>
+                    `;
+                    break;
 
-      const sessionToken = localStorage.getItem(DB_KEYS.SESSIONS);
-      if(sessionToken) {
-        const usersDB = getMasterUsersDB();
-        if(usersDB[sessionToken]) currentUser = usersDB[sessionToken];
-      }
+                // FOLDER 4: SAVED CREATIONS FOLDER
+                case 'saved':
+                    mainArea.innerHTML = `
+                        <div class="p-6 space-y-4 overflow-y-auto h-full">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-sm font-bold text-amber-300 flex items-center gap-2">📁 Saved Creations Cloud Memory</h2>
+                                <span class="text-xs text-slate-500">0 Items Saved</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="p-4 bg-slate-900/40 border border-slate-800 rounded-xl text-center text-slate-500 text-xs col-span-3 py-12">
+                                    📁 No saved creations found in your cloud memory library yet.
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
 
-      loadUserUsageData();
-      refreshUserUI();
-      loadAccountHistory();
-    });
+                // FOLDER 5: OCR VISION SCANNER
+                case 'ocr':
+                    mainArea.innerHTML = `
+                        <div class="p-6 space-y-4 overflow-y-auto h-full">
+                            <h2 class="text-sm font-bold text-amber-300 flex items-center gap-2">📄 Photo & Document OCR Scanner</h2>
+                            <div class="border-2 border-dashed border-slate-800 rounded-2xl p-8 text-center bg-slate-900/30 space-y-2">
+                                <span class="text-2xl block">📷</span>
+                                <div class="text-xs text-slate-300 font-bold">Drag & drop document or image here</div>
+                                <div class="text-[10px] text-slate-500">Supports JPG, PNG, PDF, and WebP scans</div>
+                                <button onclick="alert('File scanner active!')" class="mt-2 px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-lg text-amber-400 border border-slate-700">Browse Device File</button>
+                            </div>
+                            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 min-h-[150px] text-xs text-slate-400">
+                                Extracted document text output will display here...
+                            </div>
+                        </div>
+                    `;
+                    break;
 
-    // 1. Quota & Usage Load/Save Engine
-    function loadUserUsageData() {
-      const storageKey = currentUser ? `usage_${currentUser.id}` : `usage_guest_session`;
-      const saved = localStorage.getItem(storageKey);
-      if(saved) {
-        userUsage = JSON.parse(saved);
-      } else {
-        userUsage = { chatCount: 0, toolsCount: 0 };
-      }
-    }
+                // FOLDER 6: PYTHON & CODE WRITER
+                case 'codeWriter':
+                    mainArea.innerHTML = `
+                        <div class="p-6 space-y-4 overflow-y-auto h-full flex flex-col">
+                            <h2 class="text-sm font-bold text-amber-300 flex items-center gap-2">💻 Python & Full-Stack Code Architect</h2>
+                            <div class="flex gap-2">
+                                <select class="bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded-lg p-2">
+                                    <option>Language: Python 3</option>
+                                    <option>Language: JavaScript / Node.js</option>
+                                    <option>Language: HTML/CSS Web Application</option>
+                                </select>
+                                <input type="text" placeholder="Specify code requirements (e.g. 'Build a REST API endpoint')..." class="flex-1 bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none">
+                                <button onclick="alert('Generating Code Script...')" class="px-4 py-2 bg-amber-500 font-bold text-slate-950 rounded-lg text-xs">Generate Code</button>
+                            </div>
+                            <div class="flex-1 bg-[#010307] border border-slate-800/80 rounded-2xl p-4 font-mono text-xs text-emerald-400 overflow-x-auto min-h-[250px]">
+                                <span class="text-slate-600">// Generated code output block...</span>
+                            </div>
+                        </div>
+                    `;
+                    break;
 
-    function saveUserUsageData() {
-      const storageKey = currentUser ? `usage_${currentUser.id}` : `usage_guest_session`;
-      localStorage.setItem(storageKey, JSON.stringify(userUsage));
-      refreshUserUI();
-    }
+                // FOLDER 7: CODE CRACKER & DEBUGGER
+                case 'codeDebugger':
+                    mainArea.innerHTML = `
+                        <div class="p-6 space-y-4 overflow-y-auto h-full">
+                            <h2 class="text-sm font-bold text-amber-300 flex items-center gap-2">🔓 Code Cracker & Bug Diagnostic Suite</h2>
+                            <textarea rows="6" placeholder="Paste buggy or problematic code here for analysis..." class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs font-mono text-slate-200 focus:outline-none"></textarea>
+                            <button onclick="alert('Analyzing and Fixing Bugs...')" class="w-full py-2.5 bg-red-950/60 border border-red-800 text-red-300 font-bold rounded-xl text-xs hover:bg-red-900/60 transition">Run Bug Cracker & Auto-Fix 🚀</button>
+                            <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 min-h-[120px] text-xs text-slate-300 font-mono">
+                                Debugging summary report will render here...
+                            </div>
+                        </div>
+                    `;
+                    break;
 
-    // 2. Refresh UI Badges & Quotas
-    function refreshUserUI() {
-      const accountName = document.getElementById("accountName");
-      const accountEmail = document.getElementById("accountEmail");
-      const accountBadge = document.getElementById("accountBadge");
-      const userHeaderBadge = document.getElementById("userHeaderBadge");
-      const userHeaderEmail = document.getElementById("userHeaderEmail");
-      const authBtn = document.getElementById("authBtn");
+                // FOLDER 8: ALL-LANGUAGE TRANSLATOR
+                case 'translator':
+                    mainArea.innerHTML = `
+                        <div class="p-6 space-y-4 overflow-y-auto h-full">
+                            <h2 class="text-sm font-bold text-amber-300 flex items-center gap-2">🌐 PolyGlot All-Language Translator</h2>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <select class="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded-lg p-2">
+                                        <option>Detect Language / English</option>
+                                        <option>Urdu</option>
+                                        <option>Spanish</option>
+                                    </select>
+                                    <textarea rows="6" placeholder="Type text to translate..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none"></textarea>
+                                </div>
+                                <div class="space-y-2">
+                                    <select class="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded-lg p-2">
+                                        <option>Target: Urdu</option>
+                                        <option>Target: English</option>
+                                        <option>Target: Arabic</option>
+                                    </select>
+                                    <div class="w-full h-[135px] bg-slate-900/40 border border-slate-800 rounded-xl p-3 text-xs text-slate-300">
+                                        Translated text output...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
 
-      const chatQuotaBadge = document.getElementById("chatQuotaBadge");
-      const toolQuotaBadge = document.getElementById("toolQuotaBadge");
-      const imageQuotaBadge = document.getElementById("imageQuotaBadge");
+                // FOLDER 9: VOICE SPEECH SYNTHESIZER
+                case 'voiceSynth':
+                    mainArea.innerHTML = `
+                        <div class="p-6 space-y-4 overflow-y-auto h-full">
+                            <h2 class="text-sm font-bold text-amber-300 flex items-center gap-2">🎙️ Voice Speech Synthesizer Studio</h2>
+                            <textarea rows="4" placeholder="Enter text to convert into realistic human voice audio..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none"></textarea>
+                            <div class="flex items-center justify-between bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                                <select class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-300">
+                                    <option>Voice Accent: Male Studio Deep Voice</option>
+                                    <option>Voice Accent: Female Siri Voice</option>
+                                </select>
+                                <button onclick="alert('Synthesizing Audio File...')" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold rounded-lg text-xs">Synthesize Audio 🎙️</button>
+                            </div>
+                        </div>
+                    `;
+                    break;
 
-      const chatQuotaBar = document.getElementById("chatQuotaBar");
-      const toolQuotaBar = document.getElementById("toolQuotaBar");
+                // FOLDER 10: DOCUMENT SUMMARIZER
+                case 'docSummary':
+                    mainArea.innerHTML = `
+                        <div class="p-6 space-y-4 overflow-y-auto h-full">
+                            <h2 class="text-sm font-bold text-amber-300 flex items-center gap-2">📑 DocuAI File & Essay Summarizer</h2>
+                            <textarea rows="5" placeholder="Paste full article or document text here for rapid summarization..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none"></textarea>
+                            <button onclick="alert('Summarizing Document...')" class="w-full py-2.5 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs">Generate Summary Card 📑</button>
+                        </div>
+                    `;
+                    break;
 
-      const isVip = currentUser?.isVip;
+                // FOLDER 11: MATH & LOGIC SOLVER
+                case 'mathSolver':
+                    mainArea.innerHTML = `
+                        <div class="p-6 space-y-4 overflow-y-auto h-full">
+                            <h2 class="text-sm font-bold text-amber-300 flex items-center gap-2">🧮 LogicX Step-by-Step Math Solver</h2>
+                            <input type="text" placeholder="Enter equation (e.g. 'Solve 3x^2 + 6x - 12 = 0')..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none">
+                            <button onclick="alert('Solving step by step...')" class="w-full py-2.5 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs">Calculate Solution 🧮</button>
+                        </div>
+                    `;
+                    break;
 
-      if(currentUser) {
-        accountName.innerText = currentUser.name;
-        accountEmail.innerText = currentUser.email;
-        userHeaderBadge.classList.remove("hidden");
-        userHeaderBadge.classList.add("flex");
-        userHeaderEmail.innerText = currentUser.email;
-        authBtn.innerText = "Sign Out";
-        authBtn.onclick = executeSignOut;
-      } else {
-        accountName.innerText = "Guest Session";
-        accountEmail.innerText = "Not Signed In";
-        userHeaderBadge.classList.add("hidden");
-        authBtn.innerText = "Sign In";
-        authBtn.onclick = toggleAuthModal;
-      }
+                // FOLDER 12: ESSAY WRITER
+                case 'essayWriter':
+                    mainArea.innerHTML = `
+                        <div class="p-6 space-y-4 overflow-y-auto h-full">
+                            <h2 class="text-sm font-bold text-amber-300 flex items-center gap-2">🚀 Creative Essay & Article Writer</h2>
+                            <input type="text" placeholder="Enter essay topic or article title..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none">
+                            <div class="flex justify-between items-center">
+                                <select class="bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded-lg p-2">
+                                    <option>Tone: Professional Academic</option>
+                                    <option>Tone: Creative Blog Post</option>
+                                </select>
+                                <button onclick="alert('Writing Article...')" class="px-5 py-2.5 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs">Generate Article 🚀</button>
+                            </div>
+                        </div>
+                    `;
+                    break;
 
-      if(isVip) {
-        accountBadge.innerText = "PRO / VIP";
-        accountBadge.className = "text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/40 px-2 py-0.5 rounded uppercase font-bold";
-        
-        chatQuotaBadge.innerText = "UNLIMITED";
-        toolQuotaBadge.innerText = "UNLIMITED";
-        imageQuotaBadge.innerText = "Unlimited Uploads";
-
-        chatQuotaBar.style.width = "100%";
-        toolQuotaBar.style.width = "100%";
-      } else {
-        accountBadge.innerText = "Free Tier";
-        accountBadge.className = "text-[9px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded uppercase font-bold";
-
-        chatQuotaBadge.innerText = `${userUsage.chatCount} / 50`;
-        toolQuotaBadge.innerText = `${userUsage.toolsCount} / 5`;
-        imageQuotaBadge.innerText = "Max 3 Images";
-
-        chatQuotaBar.style.width = `${Math.min(100, (userUsage.chatCount / 50) * 100)}%`;
-        toolQuotaBar.style.width = `${Math.min(100, (userUsage.toolsCount / 5) * 100)}%`;
-      }
-    }
-
-    /* =================================================================
-       IMAGE UPLOAD & ATTACHMENT CONTROL ENGINE
-       ================================================================= */
-    function handleImageUpload(event) {
-      const files = Array.from(event.target.files);
-      const isVip = currentUser?.isVip;
-      const maxAllowed = isVip ? Infinity : 3;
-
-      if (!isVip && (attachedImages.length + files.length) > 3) {
-        alert("⚠️ Standard Tier Limit: You can only upload up to 3 images on the text box. Upgrade to PRO/VIP for unlimited image uploads!");
-        const remainingSlots = 3 - attachedImages.length;
-        if (remainingSlots <= 0) return;
-        files.splice(remainingSlots);
-      }
-
-      files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          attachedImages.push(e.target.result);
-          renderImagePreviews();
-        };
-        reader.readAsDataURL(file);
-      });
-
-      event.target.value = "";
-    }
-
-    function renderImagePreviews() {
-      const container = document.getElementById("imagePreviewContainer");
-      const badge = document.getElementById("imgCountBadge");
-
-      if (attachedImages.length === 0) {
-        container.classList.add("hidden");
-        container.innerHTML = "";
-        badge.classList.add("hidden");
-        return;
-      }
-
-      container.classList.remove("hidden");
-      badge.classList.remove("hidden");
-      badge.innerText = attachedImages.length;
-      container.innerHTML = "";
-
-      attachedImages.forEach((imgSrc, index) => {
-        const thumb = document.createElement("div");
-        thumb.className = "relative w-12 h-12 rounded-lg overflow-hidden border border-amber-500/50 group";
-        thumb.innerHTML = `
-          <img src="${imgSrc}" class="w-full h-full object-cover"/>
-          <button onclick="removeAttachedImage(${index})" class="absolute top-0 right-0 bg-red-600/90 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-bl font-bold hover:bg-red-500">✕</button>
-        `;
-        container.appendChild(thumb);
-      });
-    }
-
-    function removeAttachedImage(index) {
-      attachedImages.splice(index, 1);
-      renderImagePreviews();
-    }
-
-    /* =================================================================
-       CHAT & AI TOOLS QUOTA CHECKERS
-       ================================================================= */
-    function runChat() {
-      const input = document.getElementById("chatInput");
-      const promptText = input.value.trim();
-      if (!promptText && attachedImages.length === 0) return;
-
-      const isVip = currentUser?.isVip;
-
-      // Check 50 Message Limit
-      if (!isVip && userUsage.chatCount >= 50) {
-        alert("🚫 Chat Limit Reached (50/50)! Upgrade to KING AI PRO/VIP for unlimited chat messages.");
-        return;
-      }
-
-      // Check Text Box Image Limit
-      if (!isVip && attachedImages.length > 3) {
-        alert("🚫 Image Limit Reached! Free accounts can only upload up to 3 images. Upgrade to VIP for unlimited uploads.");
-        return;
-      }
-
-      // Increment Usage
-      if (!isVip) userUsage.chatCount++;
-      saveUserUsageData();
-
-      const chatBox = document.getElementById("chatBox");
-      
-      // Render Attached Images in Chat Box
-      let imageHtml = "";
-      if (attachedImages.length > 0) {
-        imageHtml = `<div class="flex gap-2 my-2">${attachedImages.map(img => `<img src="${img}" class="w-16 h-16 object-cover rounded-lg border border-amber-500/40"/>`).join('')}</div>`;
-      }
-
-      chatBox.innerHTML += `<div class="bg-amber-500/10 border border-amber-500/30 p-3 rounded-2xl text-xs text-amber-200">👤 **You**: ${promptText}${imageHtml}</div>`;
-      
-      const botMsg = document.createElement("div");
-      botMsg.className = "bg-[#0f1526] p-4 rounded-2xl border border-slate-800 text-xs text-slate-300";
-      chatBox.appendChild(botMsg);
-
-      streamToElement(promptText, botMsg);
-
-      // Reset Input State
-      input.value = "";
-      attachedImages = [];
-      renderImagePreviews();
-    }
-
-    function executeToolAction(toolName, actionCallback) {
-      const isVip = currentUser?.isVip;
-
-      // Check 5 Message AI Tools Limit
-      if (!isVip && userUsage.toolsCount >= 5) {
-        alert(`🚫 AI Tools Limit Reached (5/5)! Upgrade to KING AI PRO/VIP for unlimited access to all 10 tools.`);
-        return;
-      }
-
-      if (!isVip) userUsage.toolsCount++;
-      saveUserUsageData();
-
-      actionCallback();
-    }
-
-    function generateImage() {
-      executeToolAction('image', () => {
-        const prompt = document.getElementById("imgPrompt").value;
-        if(!prompt) return;
-        const gallery = document.getElementById("imageGallery");
-        gallery.innerHTML = `<span class="text-xs text-amber-400 animate-pulse">Rendering 8K Image...</span>`;
-        const seed = Math.floor(Math.random() * 999999);
-        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;
-        
-        const img = new Image();
-        img.src = url;
-        img.onload = () => {
-          gallery.innerHTML = `<img src="${url}" class="rounded-xl max-h-[340px] w-auto border border-amber-500/30 shadow-2xl"/>`;
-        };
-      });
-    }
-
-    function generateCode() {
-      const lang = document.getElementById("codeLang").value;
-      const prompt = document.getElementById("codePrompt").value;
-      streamToElement(`Write clean ${lang} code for: ${prompt}`, document.getElementById("codeOutput"));
-    }
-
-    function debugCode() {
-      const code = document.getElementById("brokenCode").value;
-      streamToElement(`Debug and fix this code:\n\n${code}`, document.getElementById("debugResult"));
-    }
-
-    function runTranslation() {
-      const text = document.getElementById("transInput").value;
-      streamToElement(`Translate to English/Urdu:\n\n${text}`, document.getElementById("transOutput"));
-    }
-
-    function previewOcrFile(e) {
-      if(e.target.files.length > 0) {
-        executeToolAction('reader', () => {
-          document.getElementById("ocrOutput").innerText = `Contents extracted from file: ${e.target.files[0].name}\n\n[Parsed Text Data Stream Ready]`;
-        });
-      }
-    }
-
-    function speakVoiceText() {
-      const txt = document.getElementById("voiceText").value;
-      speakText(txt);
-    }
-
-    function speakText(txt) {
-      if('speechSynthesis' in window && txt) {
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(new SpeechSynthesisUtterance(txt));
-      }
-    }
-
-    function runSummary() {
-      const txt = document.getElementById("summaryText").value;
-      streamToElement(`Summarize in bullets:\n\n${txt}`, document.getElementById("summaryResult"));
-    }
-
-    function solveMath() {
-      const eq = document.getElementById("mathInput").value;
-      streamToElement(`Solve math equation step by step:\n\n${eq}`, document.getElementById("mathResult"));
-    }
-
-    function writeContent() {
-      const topic = document.getElementById("writerTopic").value;
-      streamToElement(`Write an essay on: "${topic}"`, document.getElementById("writerResult"));
-    }
-
-    async function streamToElement(promptText, outputElement) {
-      if(!activeApiKey) {
-        outputElement.innerHTML = "⚠️ API Key not configured. Please add an API Key via the Admin Folder.";
-        return;
-      }
-      outputElement.innerHTML = "⚡ Generating response...";
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:streamGenerateContent?alt=sse&key=${encodeURIComponent(activeApiKey)}`;
-
-      try {
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ role: "user", parts: [{ text: promptText }] }],
-            generationConfig: { temperature: 0.2 }
-          })
-        });
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder("utf-8");
-        let accumulatedText = "";
-        let buffer = "";
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split("\n");
-          buffer = lines.pop();
-
-          for (const line of lines) {
-            if (line.startsWith("data: ")) {
-              try {
-                const jsonStr = line.replace("data: ", "").trim();
-                if (jsonStr === "[DONE]") continue;
-                const parsed = JSON.parse(jsonStr);
-                const chunk = parsed.candidates?.[0]?.content?.parts?.[0]?.text || "";
-                accumulatedText += chunk;
-                outputElement.innerHTML = accumulatedText.replace(/\n/g, "<br>").replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-              } catch (e) {}
+                default:
+                    break;
             }
-          }
         }
-      } catch (err) {
-        outputElement.innerText = "❌ Connection error or invalid API key.";
-      }
-    }
 
-    /* =================================================================
-       NAVIGATION, HISTORY & AUTHENTICATION MANAGEMENT
-       ================================================================= */
-    function switchWorkspace(wsId) {
-      activeWorkspace = wsId;
-      document.querySelectorAll(".workspace-panel").forEach(p => p.classList.add("hidden"));
-      const target = document.getElementById(`ws-${wsId}`);
-      if(target) target.classList.remove("hidden");
+        // CONTINUOUS BACKGROUND VOICE RECOGNITION ("HI JARVIS") - COMPLETELY FREE / 0 USAGE COUNTS
+        function initSiriContinuousVoice() {
+            if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) return;
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRec();
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
 
-      document.querySelectorAll("aside button[id^='nav-']").forEach(btn => {
-        btn.className = "w-full p-2.5 bg-slate-900/50 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded-xl flex items-center justify-between text-xs transition";
-      });
+            recognition.onresult = (event) => {
+                const transcript = event.results[event.results.length - 1][0].transcript.trim();
+                const lower = transcript.toLowerCase();
+                
+                if (lower.includes('hi jarvis') || lower.includes('jarvis')) {
+                    const promptText = transcript.replace(/hi jarvis|jarvis/gi, '').trim();
+                    if (promptText.length > 0) {
+                        handleSiriDirectVoice(promptText);
+                    } else {
+                        speakJarvisAudioResponse("Yes Abdullah, I am listening. How can I help you?");
+                    }
+                }
+            };
 
-      const activeNav = document.getElementById(`nav-${wsId}`);
-      if(activeNav) {
-        activeNav.className = "w-full p-2.5 bg-amber-500/10 border border-amber-500/40 text-amber-300 font-bold rounded-xl flex items-center justify-between text-xs transition";
-      }
-
-      document.getElementById("activeWorkspaceBadge").innerText = wsId.toUpperCase() + " FOLDER";
-    }
-
-    function toggleAuthModal() {
-      document.getElementById("authModal").classList.toggle("hidden");
-    }
-
-    function executeSignIn() {
-      const email = document.getElementById("authEmail").value.trim();
-      const pass = document.getElementById("authPass").value.trim();
-      const db = getMasterUsersDB();
-
-      const user = Object.values(db).find(u => u.email === email && u.passHash === pass);
-      if(user) {
-        currentUser = user;
-        localStorage.setItem(DB_KEYS.SESSIONS, user.id);
-        loadUserUsageData();
-        refreshUserUI();
-        loadAccountHistory();
-        toggleAuthModal();
-      } else {
-        alert("Invalid credentials!");
-      }
-    }
-
-    function executeSignUp() {
-      const email = document.getElementById("authEmail").value.trim();
-      const pass = document.getElementById("authPass").value.trim();
-      if(!email || !pass) return alert("Fill all fields!");
-
-      const db = getMasterUsersDB();
-      const newId = "user_" + Date.now();
-      const newUser = { id: newId, email, name: email.split("@")[0], passHash: pass, isVip: false };
-
-      db[newId] = newUser;
-      localStorage.setItem(DB_KEYS.USERS, JSON.stringify(db));
-
-      currentUser = newUser;
-      localStorage.setItem(DB_KEYS.SESSIONS, newId);
-      loadUserUsageData();
-      refreshUserUI();
-      loadAccountHistory();
-      toggleAuthModal();
-    }
-
-    function executeSignOut() {
-      currentUser = null;
-      localStorage.removeItem(DB_KEYS.SESSIONS);
-      loadUserUsageData();
-      refreshUserUI();
-      document.getElementById("chatBox").innerHTML = `<div class="bg-[#0f1526] p-4 rounded-2xl border border-slate-800 text-xs text-slate-300">Logged out. Guest mode activated.</div>`;
-    }
-
-    function loadAccountHistory() {
-      // Cloud history sync
-    }
-
-    function createNewConversation() {
-      document.getElementById("chatBox").innerHTML = `<div class="bg-[#0f1526] p-4 rounded-2xl border border-slate-800 text-xs text-amber-400 font-bold">New Chat Initialized</div>`;
-    }
-
-    /* =================================================================
-       ADMIN PANEL CONTROL (Password: Abdullahwaheed123123)
-       ================================================================= */
-    function promptAdminLogin() {
-      document.getElementById("adminModal").classList.remove("hidden");
-      document.getElementById("adminPassChallenge").classList.remove("hidden");
-      document.getElementById("adminDashboard").classList.add("hidden");
-    }
-
-    function closeAdminModal() {
-      document.getElementById("adminModal").classList.add("hidden");
-    }
-
-    function verifyAdminPassword() {
-      const enteredPass = document.getElementById("adminInputPass").value;
-      if(enteredPass === adminMasterPassword) {
-        document.getElementById("adminPassChallenge").classList.add("hidden");
-        document.getElementById("adminDashboard").classList.remove("hidden");
-        renderAdminDirectory();
-      } else {
-        alert("Incorrect Admin Master Password!");
-      }
-    }
-
-    function updateAdminPassword() {
-      const curr = document.getElementById("adminCurrPass").value;
-      const next = document.getElementById("adminNewPass").value;
-      if(curr !== adminMasterPassword) return alert("Current password incorrect!");
-      if(!next || next.length < 6) return alert("New password must be at least 6 characters!");
-
-      adminMasterPassword = next;
-      localStorage.setItem(DB_KEYS.ADMIN_PASS, next);
-      alert("Admin Folder Password updated successfully!");
-    }
-
-    function saveAdminApiKey() {
-      const key = document.getElementById("adminApiKeyInput").value.trim();
-      activeApiKey = key;
-      localStorage.setItem(DB_KEYS.API_KEY, key);
-      alert("API Key updated successfully!");
-    }
-
-    function renderAdminDirectory() {
-      const tbody = document.getElementById("adminUserTable");
-      const db = getMasterUsersDB();
-      tbody.innerHTML = "";
-      Object.values(db).forEach(u => {
-        const row = document.createElement("tr");
-        row.className = "text-slate-300";
-        row.innerHTML = `
-          <td class="py-2 font-semibold">${u.email}</td>
-          <td class="py-2"><span class="bg-amber-500/20 text-amber-400 text-[9px] px-2 py-0.5 rounded font-bold">${u.isVip ? 'VIP PRO' : 'Free Tier'}</span></td>
-          <td class="py-2 font-mono">${u.isVip ? 'Unlimited' : '50 Max'}</td>
-          <td class="py-2 font-mono">${u.isVip ? 'Unlimited' : '5 Max'}</td>
-          <td class="py-2 font-mono">${u.isVip ? 'Unlimited' : 'Max 3 Images'}</td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
-
-    function triggerVipPurchase() {
-      openVipModal();
-    }
-
-    function openVipModal() {
-      const code = prompt("Enter VIP Passcode:");
-      if(code === getTodayVipPasscode()) {
-        if(currentUser) {
-          currentUser.isVip = true;
-          const db = getMasterUsersDB();
-          db[currentUser.id].isVip = true;
-          localStorage.setItem(DB_KEYS.USERS, JSON.stringify(db));
-        } else {
-          alert("Guest upgraded to temporary VIP PRO for this session!");
-          currentUser = { name: "Guest PRO", email: "guest@pro", isVip: true };
+            recognition.onend = () => { try { recognition.start(); } catch(e){} };
+            try { recognition.start(); } catch(e){}
         }
-        refreshUserUI();
-        alert("🎉 VIP PRO Unlocked Successfully!");
-      } else if(code) {
-        alert("Invalid or expired daily VIP passcode!");
-      }
-    }
-  </script>
+
+        function handleSiriDirectVoice(queryText) {
+            // Direct Siri voice conversation does NOT increment chat or tool usage counts
+            const reply = `I heard you clearly: "${queryText}". Operating in direct Siri mode.`;
+            
+            if (activeFolderId === 'chat') {
+                const chatContainer = document.getElementById('chatMessages');
+                if (chatContainer) {
+                    const userDiv = document.createElement('div');
+                    userDiv.className = "p-3 bg-emerald-950/30 border border-emerald-500/40 rounded-2xl max-w-xl text-xs text-emerald-200 ml-auto";
+                    userDiv.innerHTML = `🎙️ <strong>Voice Direct:</strong> ${queryText}`;
+                    chatContainer.appendChild(userDiv);
+
+                    const aiDiv = document.createElement('div');
+                    aiDiv.className = "p-3 bg-slate-900 border border-slate-800 rounded-2xl max-w-xl text-xs text-slate-200";
+                    aiDiv.innerHTML = `🤖 <strong>JARVIS Siri Voice:</strong> ${reply}`;
+                    chatContainer.appendChild(aiDiv);
+
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
+            }
+            speakJarvisAudioResponse(reply);
+        }
+
+        function speakJarvisAudioResponse(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.pitch = 1.0;
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // TEXT CHAT MESSAGE FUNCTION
+        function sendChatMessage() {
+            const input = document.getElementById('chatInputText');
+            if (!input || !input.value.trim()) return;
+            const val = input.value.trim();
+
+            const chatMessages = document.getElementById('chatMessages');
+            
+            const userMsg = document.createElement('div');
+            userMsg.className = "p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl max-w-xl text-xs text-amber-200 ml-auto";
+            userMsg.innerHTML = `<span class="font-bold">You:</span> ${val}`;
+            chatMessages.appendChild(userMsg);
+
+            const aiMsg = document.createElement('div');
+            aiMsg.className = "p-3.5 bg-slate-900 border border-slate-800 rounded-2xl max-w-xl text-xs text-slate-200";
+            aiMsg.innerHTML = `🤖 <strong>JARVIS:</strong> Request processed successfully.`;
+            chatMessages.appendChild(aiMsg);
+
+            input.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function triggerImageGen() {
+            const prompt = document.getElementById('imagePromptInput').value.trim();
+            if (!prompt) return alert('Please enter an image prompt first!');
+            
+            const box = document.getElementById('imageResultBox');
+            box.innerHTML = `
+                <div class="text-amber-400 font-bold animate-pulse text-xs">✨ Generating 8K Visual for: "${prompt}"...</div>
+            `;
+            setTimeout(() => {
+                box.innerHTML = `
+                    <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl text-center space-y-2">
+                        <div class="text-3xl">🖼️</div>
+                        <div class="text-xs text-amber-300 font-bold">8K Image Render Complete</div>
+                        <div class="text-[10px] text-slate-400 font-mono">${prompt}</div>
+                    </div>
+                `;
+            }, 1500);
+        }
+
+        // APP UPTIME & PASSCODE CALCULATOR
+        function calculateUptimeAndPasscode() {
+            const startDate = new Date("2026-08-01T00:00:00");
+            const now = new Date();
+            const diffTime = Math.abs(now - startDate);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            
+            document.getElementById('appRunningTimeDisplay').innerText = `${diffDays} Days Active (Since Aug 1, 2026)`;
+            document.getElementById('todayVipPasscodeDisplay').innerText = `JarvisPro@${year}${month}${day}`;
+        }
+
+        // MODAL HELPERS & ADMIN SYSTEM
+        function openAdminPasswordModal() { document.getElementById('adminPassModal').classList.remove('hidden'); }
+        function verifyAdminPassword() {
+            const val = document.getElementById('adminPasswordInput').value;
+            if (val === masterAdminPassword) {
+                closeModal('adminPassModal');
+                document.getElementById('adminControlModal').classList.remove('hidden');
+            } else {
+                alert("⚠️ Incorrect Master Password!");
+            }
+        }
+
+        function updateAdminPassword() {
+            const curr = document.getElementById('currentAdminPassInput').value;
+            const newP = document.getElementById('newAdminPassInput').value;
+            if (curr === masterAdminPassword && newP.length >= 4) {
+                masterAdminPassword = newP;
+                localStorage.setItem('jarvis_admin_pass', newP);
+                alert("✅ Admin Password Updated!");
+            } else {
+                alert("⚠️ Invalid details.");
+            }
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
+        function openVipModal() { document.getElementById('vipModal').classList.remove('hidden'); }
+
+        function signInGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).then(() => closeModal('authModal')).catch(e => alert(e.message));
+        }
+
+        function applyVipPasscode() {
+            const input = document.getElementById('vipPasscodeInput').value.trim();
+            const todayPass = document.getElementById('todayVipPasscodeDisplay').innerText;
+            if (input === todayPass) {
+                document.getElementById('userTierTag').innerText = "VIP PRO";
+                document.getElementById('userAccountLabel').innerText = "👤 VIP User";
+                closeModal('vipModal');
+                alert("🎉 VIP Status Unlocked!");
+            } else {
+                alert("⚠️ Invalid Passcode.");
+            }
+        }
+
+        function createNewChatSession() {
+            if (activeFolderId === 'chat') {
+                document.getElementById('chatMessages').innerHTML = `
+                    <div class="p-3.5 bg-slate-900/80 border border-slate-800 rounded-2xl max-w-xl text-xs text-slate-300">
+                        🤖 <strong>JARVIS:</strong> New workspace session started!
+                    </div>
+                `;
+            }
+        }
+    </script>
 </body>
 </html>
