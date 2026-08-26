@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JARVIS AI HUB - Multi-Workspace</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -21,11 +19,9 @@
 </head>
 <body class="flex h-screen overflow-hidden select-none">
 
-    <!-- SIDEBAR DRAWER -->
     <aside class="w-80 bg-[#020408] border-r border-slate-800/80 flex flex-col justify-between shrink-0">
         <div class="p-3.5 overflow-y-auto space-y-4 flex-1">
             
-            <!-- Branding Header -->
             <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
                 <div class="flex items-center gap-2">
                     <span class="text-xl">🤖</span>
@@ -36,7 +32,6 @@
                 </span>
             </div>
 
-            <!-- User Session & Limits Card -->
             <div class="p-3 bg-[#070c18] rounded-xl border border-slate-800/80 space-y-2">
                 <div class="flex justify-between items-center text-xs">
                     <span id="userAccountLabel" class="font-bold text-slate-300">👤 Guest Session</span>
@@ -55,45 +50,39 @@
                 </button>
             </div>
 
-            <!-- Saved Cloud History -->
             <div>
                 <div class="flex justify-between items-center mb-1.5 px-1">
                     <span class="text-[9px] font-bold text-slate-400 tracking-wider uppercase">SAVED CLOUD HISTORY</span>
                     <button onclick="createNewChatSession()" class="text-[9px] font-bold text-amber-400 hover:text-amber-300">+ NEW CHAT</button>
                 </div>
                 <div id="chatHistoryList" class="space-y-1 max-h-20 overflow-y-auto">
-                    <div class="p-2 text-slate-500 text-[11px] italic">Sign in to sync saved history.</div>
+                    <div id="historyAuthNotice" class="p-2 text-slate-500 text-[11px] italic">Sign in to sync saved history.</div>
                 </div>
             </div>
 
-            <!-- 12 DISTINCT AI WORKSPACE FOLDERS -->
             <div>
                 <div class="flex justify-between items-center mb-2 px-1">
                     <span class="text-[9px] font-bold text-slate-400 tracking-wider uppercase">AI WORKSPACE FOLDERS</span>
                     <span class="text-[9px] text-slate-500 font-mono">12 UNIQUE UI VIEWS</span>
                 </div>
                 <div id="workspaceFoldersContainer" class="space-y-1.5">
-                    <!-- Dynamic rendering of 12 distinct styled folder cards -->
-                </div>
+                    </div>
             </div>
         </div>
 
-        <!-- Protected Admin Folder Button -->
         <div class="p-3 border-t border-slate-800/80 bg-[#010204]">
             <button onclick="openAdminPasswordModal()" class="w-full p-2.5 rounded-xl bg-red-950/30 border border-red-900/50 hover:bg-red-900/40 text-red-400 flex items-center justify-between transition group">
                 <div class="flex items-center gap-2">
                     <span class="text-base group-hover:scale-110 transition-transform">🔒</span>
-                    <span class="text-xs font-bold">Admin Folder</span>
+                    <span class="text-xs font-bold">Admin Control Folder</span>
                 </div>
                 <span class="text-[9px] bg-red-900/60 text-red-300 px-2 py-0.5 rounded font-mono font-bold tracking-wider border border-red-700/50">PROTECTED</span>
             </button>
         </div>
     </aside>
 
-    <!-- MAIN INTERFACE WITH DYNAMIC FOLDER WORKSPACE WORK AREA -->
     <main class="flex-1 flex flex-col h-full bg-[#04060b] relative overflow-hidden">
         
-        <!-- Top Header Navigation -->
         <header class="h-14 border-b border-slate-800/80 px-5 flex items-center justify-between bg-[#020408]/90 backdrop-blur shrink-0">
             <div class="flex items-center gap-2.5">
                 <span class="text-lg">🤖</span>
@@ -104,7 +93,6 @@
             </div>
             
             <div class="flex items-center gap-3">
-                <!-- Direct Voice Always Active Indicator (NO TOGGLE BUTTON) -->
                 <div class="flex items-center gap-2 px-3 py-1.5 bg-emerald-950/40 border border-emerald-500/40 rounded-lg text-emerald-400 text-xs font-semibold shadow-inner">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     <span>🎙️ Direct Voice Active ("Hi JARVIS")</span>
@@ -118,14 +106,11 @@
             </div>
         </header>
 
-        <!-- Dynamic Main Workspace Container -->
         <section id="workspaceMainArea" class="flex-1 flex flex-col overflow-hidden relative">
-            <!-- Rendered Folder Content UI dynamically loads here -->
-        </section>
+            </section>
 
     </main>
 
-    <!-- MODAL 1: ADMIN PASSWORD -->
     <div id="adminPassModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#090d16] border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center text-slate-200 shadow-2xl relative space-y-4">
             <button onclick="closeModal('adminPassModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-base">✕</button>
@@ -143,36 +128,78 @@
         </div>
     </div>
 
-    <!-- MODAL 2: ADMIN CONTROL PANEL -->
-    <div id="adminControlModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-[#070b14] border border-slate-800 rounded-2xl max-w-2xl w-full p-5 text-slate-200 shadow-2xl relative space-y-4">
+    <div id="adminControlModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#070b14] border border-slate-800 rounded-2xl max-w-3xl w-full p-6 text-slate-200 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
             <button onclick="closeModal('adminControlModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-base">✕</button>
-            <div>
-                <h3 class="text-sm font-bold text-amber-400 flex items-center gap-2">🤖 JARVIS Admin Control Panel</h3>
-                <p class="text-[10px] text-slate-400">Manage system settings, security passcodes, and usage limits.</p>
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div>
+                    <h3 class="text-sm font-bold text-amber-400 flex items-center gap-2">🤖 JARVIS Master Admin Dashboard</h3>
+                    <p class="text-[10px] text-slate-400">Manage user authentication, VIP memberships, API Keys, and core security.</p>
+                </div>
+                <span id="adminStatusBadge" class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded font-mono font-bold">SYSTEM ACTIVE</span>
             </div>
+
             <div class="grid grid-cols-2 gap-3">
-                <div class="p-3 bg-slate-900/60 border border-slate-800/80 rounded-xl">
-                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">APP RUNNING TIME</span>
-                    <span id="appRunningTimeDisplay" class="text-xs font-bold text-emerald-400">Loading...</span>
+                <div class="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-2">
+                    <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">👥 SIGNED IN USERS MONITOR</span>
+                    <div id="adminUserList" class="bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-[11px] text-slate-300 space-y-1.5 max-h-32 overflow-y-auto font-mono">
+                        <div class="text-slate-500 italic">Checking authentication sessions...</div>
+                    </div>
                 </div>
-                <div class="p-3 bg-slate-900/60 border border-slate-800/80 rounded-xl">
-                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">TODAY'S VIP PASSCODE</span>
-                    <span id="todayVipPasscodeDisplay" class="text-xs font-bold text-amber-400 font-mono">JarvisPro@20260826</span>
+
+                <div class="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-2">
+                    <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">🔑 VIP & PRO PASSCODE MANAGER</span>
+                    <div class="bg-slate-950 border border-slate-800 rounded-lg p-2 space-y-1 text-xs">
+                        <div class="flex justify-between items-center text-[11px]">
+                            <span class="text-slate-400">Today's VIP Code:</span>
+                            <span id="todayVipPasscodeDisplay" class="font-mono font-bold text-amber-300">JarvisPro@20260826</span>
+                        </div>
+                        <div class="flex justify-between items-center text-[11px]">
+                            <span class="text-slate-400">App Running Time:</span>
+                            <span id="appRunningTimeDisplay" class="font-bold text-emerald-400">Calculated...</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="adminGrantProStatus()" class="flex-1 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold rounded-lg text-xs shadow hover:brightness-110">
+                            👑 Direct Grant VIP / PRO
+                        </button>
+                        <button onclick="adminGenerateCustomPasscode()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-lg text-xs border border-slate-700">
+                            + Gen Pass
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="p-3 bg-slate-900/40 border border-slate-800/60 rounded-xl space-y-2">
-                <span class="text-[10px] font-bold text-amber-400 tracking-wide uppercase">🔑 CHANGE ADMIN PASSWORD:</span>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="password" id="currentAdminPassInput" placeholder="Current Password" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs focus:outline-none">
-                    <input type="password" id="newAdminPassInput" placeholder="New Password" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs focus:outline-none">
+
+            <div class="p-4 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-[10px] font-bold text-amber-400 tracking-wide uppercase">🔑 AI API KEY CONFIGURATION</span>
+                    <span id="apiKeySavedBadge" class="text-[9px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono hidden">SAVED TO LOCALSTORAGE</span>
                 </div>
-                <button onclick="updateAdminPassword()" class="w-full py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs transition">Update Password</button>
+                <div class="space-y-1">
+                    <label class="text-[10px] text-slate-400">Active API Key:</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="activeApiKeyInput" placeholder="Enter API Key" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs font-mono text-emerald-300 focus:outline-none focus:border-amber-500">
+                        <button onclick="saveAdminApiKey()" class="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-lg text-xs hover:bg-amber-400 transition">
+                            Save API Key
+                        </button>
+                    </div>
+                    <p class="text-[9px] text-slate-500">All 12 AI folders execute requests using this master operational API Key.</p>
+                </div>
+            </div>
+
+            <div class="p-4 bg-slate-900/40 border border-slate-800/60 rounded-xl space-y-3">
+                <span class="text-[10px] font-bold text-red-400 tracking-wide uppercase">🔒 CHANGE ADMIN MASTER PASSWORD</span>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="password" id="currentAdminPassInput" placeholder="Current Password" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs focus:outline-none focus:border-red-500">
+                    <input type="password" id="newAdminPassInput" placeholder="New Password" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs focus:outline-none focus:border-red-500">
+                </div>
+                <button onclick="updateAdminPassword()" class="w-full py-2 bg-red-950/60 border border-red-800 text-red-300 hover:bg-red-900/60 font-bold rounded-lg text-xs transition">
+                    Update Master Admin Password
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL 3: AUTHENTICATION -->
     <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#090d16] border border-slate-800 rounded-2xl max-w-sm w-full p-5 text-slate-200 shadow-2xl relative space-y-3">
             <button onclick="closeModal('authModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-base">✕</button>
@@ -185,7 +212,6 @@
         </div>
     </div>
 
-    <!-- MODAL 4: VIP UPGRADE -->
     <div id="vipModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#090d16] border border-amber-500/40 rounded-2xl max-w-sm w-full p-5 text-slate-200 shadow-2xl relative space-y-3">
             <button onclick="closeModal('vipModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-base">✕</button>
@@ -202,7 +228,6 @@
         </div>
     </div>
 
-    <!-- MAIN JAVASCRIPT SYSTEM ENGINE -->
     <script>
         // FIREBASE INITIALIZATION
         const firebaseConfig = {
@@ -216,7 +241,11 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
 
-        // 12 DISTINCT AI WORKSPACE FOLDERS DEFINITIONS
+        // MASTER CONSTANTS & STATE
+        const DEFAULT_API_KEY = "AQ.Ab8RN6JNvPZvJBQr5nQONHRUWv1zF7uJ1kNUW-BTsIZD-3jMrw";
+        let masterAdminPassword = localStorage.getItem('jarvis_admin_pass') || '12345678';
+        let currentActiveApiKey = localStorage.getItem('jarvis_api_key') || DEFAULT_API_KEY;
+
         const WORKSPACE_FOLDERS = [
             { id: "chat", name: "1. JARVIS Chat PRO", icon: "🤖", badge: "50/50", desc: "Conversational AI assistant" },
             { id: "image", name: "2. Ultra 8K Image Studio", icon: "🎨", badge: "5/5", desc: "Flux 8K visual renderer" },
@@ -233,14 +262,88 @@
         ];
 
         let activeFolderId = "chat";
-        let masterAdminPassword = localStorage.getItem('jarvis_admin_pass') || '12345678';
 
         document.addEventListener('DOMContentLoaded', () => {
             renderFolderListSidebar();
             switchWorkspaceFolder('chat');
             calculateUptimeAndPasscode();
             initSiriContinuousVoice();
+            loadApiKeyToAdmin();
+            listenAuthUserStatus();
         });
+
+        // LISTEN TO FIREBASE AUTH STATE & POPULATE ADMIN MONITOR
+        function listenAuthUserStatus() {
+            auth.onAuthStateChanged(user => {
+                const userListDiv = document.getElementById('adminUserList');
+                const accountLabel = document.getElementById('userAccountLabel');
+                const authBtn = document.getElementById('authHeaderBtn');
+
+                if (user) {
+                    accountLabel.innerText = `👤 ${user.displayName || user.email}`;
+                    authBtn.innerText = "Sign Out";
+                    authBtn.onclick = () => auth.signOut();
+                    
+                    userListDiv.innerHTML = `
+                        <div class="flex items-center justify-between p-1 bg-emerald-950/40 border border-emerald-500/30 rounded">
+                            <div class="truncate">
+                                <span class="font-bold text-emerald-300">${user.displayName || 'Authenticated User'}</span>
+                                <div class="text-[9px] text-slate-400 truncate">${user.email}</div>
+                            </div>
+                            <span class="text-[9px] bg-emerald-500/20 text-emerald-300 font-bold px-1.5 py-0.5 rounded">ONLINE</span>
+                        </div>
+                        <div class="text-[9px] text-slate-500 border-t border-slate-800 pt-1">UID: ${user.uid}</div>
+                    `;
+                } else {
+                    accountLabel.innerText = "👤 Guest Session";
+                    authBtn.innerText = "Sign In";
+                    authBtn.onclick = () => openAuthModal();
+
+                    userListDiv.innerHTML = `
+                        <div class="flex items-center justify-between p-1 bg-amber-500/10 border border-amber-500/20 rounded">
+                            <div>
+                                <span class="font-bold text-amber-300">Guest User (Local)</span>
+                                <div class="text-[9px] text-slate-400">Anonymous Web Session</div>
+                            </div>
+                            <span class="text-[9px] bg-amber-500/20 text-amber-300 font-bold px-1.5 py-0.5 rounded">ACTIVE</span>
+                        </div>
+                        <div class="text-[9px] text-slate-500 border-t border-slate-800 pt-1">No registered Google user logged in yet.</div>
+                    `;
+                }
+            });
+        }
+
+        // LOAD & SAVE ADMIN API KEY
+        function loadApiKeyToAdmin() {
+            const input = document.getElementById('activeApiKeyInput');
+            if (input) input.value = currentActiveApiKey;
+        }
+
+        function saveAdminApiKey() {
+            const input = document.getElementById('activeApiKeyInput');
+            if (input && input.value.trim()) {
+                currentActiveApiKey = input.value.trim();
+                localStorage.setItem('jarvis_api_key', currentActiveApiKey);
+                
+                const badge = document.getElementById('apiKeySavedBadge');
+                badge.classList.remove('hidden');
+                setTimeout(() => badge.classList.add('hidden'), 3000);
+                alert("✅ Master API Key updated successfully!");
+            }
+        }
+
+        // ADMIN VIP & PRO DIRECT CONTROL
+        function adminGrantProStatus() {
+            document.getElementById('userTierTag').innerText = "VIP PRO";
+            document.getElementById('userAccountLabel').innerText = "👤 VIP User (Admin Granted)";
+            alert("👑 PRO Status directly granted by Admin!");
+        }
+
+        function adminGenerateCustomPasscode() {
+            const randomCode = "JarvisPro@" + Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('todayVipPasscodeDisplay').innerText = randomCode;
+            alert(`🔑 New VIP Passcode Generated:\n${randomCode}`);
+        }
 
         // RENDER SIDEBAR FOLDERS
         function renderFolderListSidebar() {
@@ -289,7 +392,6 @@
             const mainArea = document.getElementById('workspaceMainArea');
             
             switch(id) {
-                // FOLDER 1: CHAT PRO
                 case 'chat':
                     mainArea.innerHTML = `
                         <div id="chatMessages" class="flex-1 overflow-y-auto p-5 space-y-3.5">
@@ -306,7 +408,6 @@
                     `;
                     break;
 
-                // FOLDER 2: ULTRA 8K IMAGE STUDIO
                 case 'image':
                     mainArea.innerHTML = `
                         <div class="p-6 space-y-5 overflow-y-auto h-full">
@@ -332,7 +433,6 @@
                     `;
                     break;
 
-                // FOLDER 3: ALL-TYPE VIDEO GENERATOR
                 case 'video':
                     mainArea.innerHTML = `
                         <div class="p-6 space-y-5 overflow-y-auto h-full">
@@ -362,7 +462,6 @@
                     `;
                     break;
 
-                // FOLDER 4: SAVED CREATIONS FOLDER
                 case 'saved':
                     mainArea.innerHTML = `
                         <div class="p-6 space-y-4 overflow-y-auto h-full">
@@ -379,7 +478,6 @@
                     `;
                     break;
 
-                // FOLDER 5: OCR VISION SCANNER
                 case 'ocr':
                     mainArea.innerHTML = `
                         <div class="p-6 space-y-4 overflow-y-auto h-full">
@@ -397,7 +495,6 @@
                     `;
                     break;
 
-                // FOLDER 6: PYTHON & CODE WRITER
                 case 'codeWriter':
                     mainArea.innerHTML = `
                         <div class="p-6 space-y-4 overflow-y-auto h-full flex flex-col">
@@ -418,7 +515,6 @@
                     `;
                     break;
 
-                // FOLDER 7: CODE CRACKER & DEBUGGER
                 case 'codeDebugger':
                     mainArea.innerHTML = `
                         <div class="p-6 space-y-4 overflow-y-auto h-full">
@@ -432,7 +528,6 @@
                     `;
                     break;
 
-                // FOLDER 8: ALL-LANGUAGE TRANSLATOR
                 case 'translator':
                     mainArea.innerHTML = `
                         <div class="p-6 space-y-4 overflow-y-auto h-full">
@@ -461,7 +556,6 @@
                     `;
                     break;
 
-                // FOLDER 9: VOICE SPEECH SYNTHESIZER
                 case 'voiceSynth':
                     mainArea.innerHTML = `
                         <div class="p-6 space-y-4 overflow-y-auto h-full">
@@ -478,7 +572,6 @@
                     `;
                     break;
 
-                // FOLDER 10: DOCUMENT SUMMARIZER
                 case 'docSummary':
                     mainArea.innerHTML = `
                         <div class="p-6 space-y-4 overflow-y-auto h-full">
@@ -489,7 +582,6 @@
                     `;
                     break;
 
-                // FOLDER 11: MATH & LOGIC SOLVER
                 case 'mathSolver':
                     mainArea.innerHTML = `
                         <div class="p-6 space-y-4 overflow-y-auto h-full">
@@ -500,7 +592,6 @@
                     `;
                     break;
 
-                // FOLDER 12: ESSAY WRITER
                 case 'essayWriter':
                     mainArea.innerHTML = `
                         <div class="p-6 space-y-4 overflow-y-auto h-full">
@@ -522,7 +613,7 @@
             }
         }
 
-        // CONTINUOUS BACKGROUND VOICE RECOGNITION ("HI JARVIS") - COMPLETELY FREE / 0 USAGE COUNTS
+        // CONTINUOUS BACKGROUND VOICE RECOGNITION ("HI JARVIS")
         function initSiriContinuousVoice() {
             if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) return;
             const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -550,7 +641,6 @@
         }
 
         function handleSiriDirectVoice(queryText) {
-            // Direct Siri voice conversation does NOT increment chat or tool usage counts
             const reply = `I heard you clearly: "${queryText}". Operating in direct Siri mode.`;
             
             if (activeFolderId === 'chat') {
@@ -582,7 +672,7 @@
             }
         }
 
-        // TEXT CHAT MESSAGE FUNCTION
+        // CHAT ENGINE
         function sendChatMessage() {
             const input = document.getElementById('chatInputText');
             if (!input || !input.value.trim()) return;
@@ -597,7 +687,7 @@
 
             const aiMsg = document.createElement('div');
             aiMsg.className = "p-3.5 bg-slate-900 border border-slate-800 rounded-2xl max-w-xl text-xs text-slate-200";
-            aiMsg.innerHTML = `🤖 <strong>JARVIS:</strong> Request processed successfully.`;
+            aiMsg.innerHTML = `🤖 <strong>JARVIS:</strong> Request processed successfully using API Key (${currentActiveApiKey.substring(0, 10)}...).`;
             chatMessages.appendChild(aiMsg);
 
             input.value = '';
@@ -644,6 +734,7 @@
             const val = document.getElementById('adminPasswordInput').value;
             if (val === masterAdminPassword) {
                 closeModal('adminPassModal');
+                loadApiKeyToAdmin();
                 document.getElementById('adminControlModal').classList.remove('hidden');
             } else {
                 alert("⚠️ Incorrect Master Password!");
@@ -656,9 +747,9 @@
             if (curr === masterAdminPassword && newP.length >= 4) {
                 masterAdminPassword = newP;
                 localStorage.setItem('jarvis_admin_pass', newP);
-                alert("✅ Admin Password Updated!");
+                alert("✅ Master Admin Password Updated!");
             } else {
-                alert("⚠️ Invalid details.");
+                alert("⚠️ Invalid password details.");
             }
         }
 
