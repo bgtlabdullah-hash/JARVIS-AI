@@ -1,6 +1,6 @@
 {
-  "name": "King AI",
-  "short_name": "King AI",
+  "name": "JARVIS AI Hub",
+  "short_name": "JARVIS",
   "description": "An all-in-one AI assistant app.",
   "start_url": "/",
   "display": "standalone",
