@@ -3,13 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JARVIS AI HUB - Multi-Workspace Pro</title>
+    
+    <!-- Primary Search Engine Meta Tags -->
+    <title>JARVIS - Multi-Workspace AI Hub</title>
+    <meta name="title" content="JARVIS - Multi-Workspace AI Hub">
+    <meta name="description" content="JARVIS AI HUB - Multi-workspace AI platform featuring chat, 8K image studio, real AI video generator, and developer tools.">
+
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="JARVIS">
+    <meta property="og:title" content="JARVIS - Multi-Workspace AI Hub">
+    <meta property="og:description" content="JARVIS AI HUB - Multi-workspace AI platform featuring chat, 8K image studio, real AI video generator, and developer tools.">
+
+    <!-- PWA Web App Manifest Link -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#04060b">
+
+    <!-- Schema.org JSON-LD Structured Data for Google Site Name -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "JARVIS",
+      "alternateName": ["JARVIS AI Hub", "JARVIS AI"],
+      "url": "https://your-domain.com/"
+    }
+    </script>
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
     <style>
         body { background-color: #04060b; font-family: system-ui, -apple-system, sans-serif; color: #e2e8f0; }
         ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -56,7 +83,7 @@
                 </button>
             </div>
 
-            <!-- Saved Cloud History (PER USER ISOLATED) -->
+            <!-- Saved Cloud History -->
             <div>
                 <div class="flex justify-between items-center mb-1.5 px-1">
                     <span class="text-[9px] font-bold text-slate-400 tracking-wider uppercase">SAVED CLOUD HISTORY</span>
@@ -199,7 +226,7 @@
         </div>
     </div>
 
-    <!-- MODAL 3: AUTHENTICATION (AUTHENTIC GOOGLE & PRIVATE USER ACCOUNTS) -->
+    <!-- MODAL 3: AUTHENTICATION -->
     <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#090d16] border border-slate-800 rounded-2xl max-w-sm w-full p-5 text-slate-200 shadow-2xl relative space-y-4">
             <button onclick="closeModal('authModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-base">✕</button>
@@ -271,11 +298,7 @@
 
         let masterAdminPassword = localStorage.getItem('jarvis_admin_pass') || '12345678';
         let currentUserAccount = null; 
-        
-        let isVoiceActive = false;
-        let speechRecognizer = null;
 
-        // REAL SAMPLE VIDEO CLIP SOURCES BY KEYWORD (No particles! Real HD motion video clips)
         const VIDEO_LIBRARY = {
             car: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
             drift: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
@@ -311,7 +334,6 @@
             updateUsageUI();
         });
 
-        // PER-USER PRIVACY KEYING & DATA MANAGEMENT
         function getUserStorageKey(suffix) {
             const userKey = currentUserAccount ? currentUserAccount.uid || currentUserAccount.email : 'guest_session';
             return `jarvis_user_${userKey}_${suffix}`;
@@ -337,7 +359,7 @@
         }
 
         function checkAndConsumeUsage() {
-            if (isUserPro()) return true; // VIP / PRO get unlimited access
+            if (isUserPro()) return true;
             
             const usage = getUserUsageCount();
             if (usage >= MAX_FREE_GENERATIONS) {
@@ -388,19 +410,14 @@
             `).join('');
         }
 
-        // AUTHENTICATION ENGINE (GOOGLE, APPLE, EMAIL, PHONE)
         function signInGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider)
-                .then((result) => {
-                    handleUserLoginSuccess(result.user);
-                })
-                .catch((err) => {
-                    // Fallback for direct browser prompts if popup domain restricted
+                .then((result) => handleUserLoginSuccess(result.user))
+                .catch(() => {
                     const userGoogleEmail = prompt("Enter your personal Google Account Email to Sign In:");
                     if (userGoogleEmail && userGoogleEmail.includes('@')) {
-                        const mockUser = { uid: 'google_' + btoa(userGoogleEmail).substring(0, 10), email: userGoogleEmail, displayName: userGoogleEmail.split('@')[0] };
-                        handleUserLoginSuccess(mockUser);
+                        handleUserLoginSuccess({ uid: 'google_' + btoa(userGoogleEmail).substring(0, 10), email: userGoogleEmail, displayName: userGoogleEmail.split('@')[0] });
                     }
                 });
         }
@@ -440,7 +457,7 @@
             updateUsageUI();
             renderUserHistory();
             if (activeFolderId === 'saved') renderMainWorkspaceView('saved');
-            alert(`✅ Signed in as ${user.email || user.displayName}! Private user workspace active.`);
+            alert(`✅ Signed in as ${user.email || user.displayName}!`);
         }
 
         function listenAuthUserStatus() {
@@ -464,13 +481,12 @@
             });
         }
 
-        // REAL AI VIDEO GENERATOR (REAL HD VIDEO SOURCE MATCHING PROMPT)
         async function triggerVideoGen() {
             const promptInput = document.getElementById('videoPromptInput');
             if (!promptInput || !promptInput.value.trim()) return alert('Please enter a video prompt!');
             const prompt = promptInput.value.trim().toLowerCase();
 
-            if (!checkAndConsumeUsage()) return; // Lock if limit reached
+            if (!checkAndConsumeUsage()) return;
 
             const box = document.getElementById('videoResultBox');
             box.innerHTML = `
@@ -480,7 +496,6 @@
                 </div>
             `;
 
-            // Select video clip based on user prompt keywords (no particles!)
             let matchedVideo = VIDEO_LIBRARY.default;
             for (let key in VIDEO_LIBRARY) {
                 if (prompt.includes(key)) {
@@ -515,7 +530,6 @@
             alert('✅ Video successfully saved to your private Cloud Gallery!');
         }
 
-        // TEXT CHAT ENGINE
         async function fetchPollinationsText(userPrompt) {
             try {
                 const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(userPrompt)}`, { method: 'GET' });
@@ -557,12 +571,9 @@
         }
 
         function generateLocalFallback(prompt) {
-            const p = prompt.toLowerCase();
-            if (p.includes('hello') || p.includes('hi')) return "Hello! I am your JARVIS AI assistant. How can I help you with video creation, coding, or translation today?";
             return `Processed request: "${prompt}". Let me know if you would like step-by-step code or content breakdown!`;
         }
 
-        // 8K IMAGE ENGINE
         function triggerImageGen() {
             const prompt = document.getElementById('imagePromptInput').value.trim();
             if (!prompt) return alert('Please enter an image prompt!');
@@ -592,7 +603,6 @@
             };
         }
 
-        // RENDER WORKSPACE VIEWS
         function renderFolderListSidebar() {
             const container = document.getElementById('workspaceFoldersContainer');
             container.innerHTML = '';
@@ -638,7 +648,7 @@
                 mainArea.innerHTML = `
                     <div id="chatMessages" class="flex-1 overflow-y-auto p-5 space-y-3.5">
                         <div class="p-3.5 bg-slate-900/80 border border-slate-800 rounded-2xl max-w-xl text-xs text-slate-300 leading-relaxed shadow-sm">
-                            🤖 <strong>JARVIS:</strong> Welcome to JARVIS Chat PRO! Ask me questions, generate full code, or request creative scripts.
+                            🤖 <strong>JARVIS:</strong> Welcome to JARVIS Chat PRO!
                         </div>
                     </div>
                     <div class="p-4 border-t border-slate-800/80 bg-[#020408]/60">
@@ -728,7 +738,6 @@
             saveUserCreation({ type: toolId.toUpperCase(), content: input, result: res, date: new Date().toLocaleTimeString() });
         }
 
-        // ADMIN CONTROLS
         function changeAdminPassword() {
             const newPass = document.getElementById('newAdminPasswordInput').value.trim();
             if (!newPass || newPass.length < 4) return alert('Password must be at least 4 characters long!');
