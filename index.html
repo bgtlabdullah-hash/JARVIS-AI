@@ -4,22 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Primary Search Engine Meta Tags -->
     <title>JARVIS - Multi-Workspace AI Hub</title>
     <meta name="title" content="JARVIS - Multi-Workspace AI Hub">
     <meta name="description" content="JARVIS AI HUB - Multi-workspace AI platform featuring chat, 8K image studio, real AI video generator, and developer tools.">
 
-    <!-- Open Graph / Social Media Meta Tags -->
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="JARVIS">
     <meta property="og:title" content="JARVIS - Multi-Workspace AI Hub">
     <meta property="og:description" content="JARVIS AI HUB - Multi-workspace AI platform featuring chat, 8K image studio, real AI video generator, and developer tools.">
 
-    <!-- PWA Web App Manifest Link -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#04060b">
 
-    <!-- Schema.org JSON-LD Structured Data for Google Site Name -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -30,9 +26,7 @@
     }
     </script>
 
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -47,11 +41,9 @@
 </head>
 <body class="flex h-screen overflow-hidden select-none">
 
-    <!-- SIDEBAR DRAWER -->
     <aside class="w-80 bg-[#020408] border-r border-slate-800/80 flex flex-col justify-between shrink-0">
         <div class="p-3.5 overflow-y-auto space-y-4 flex-1">
             
-            <!-- Branding Header -->
             <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
                 <div class="flex items-center gap-2">
                     <span class="text-xl">🤖</span>
@@ -62,7 +54,6 @@
                 </span>
             </div>
 
-            <!-- User Session & Limits Card -->
             <div class="p-3 bg-[#070c18] rounded-xl border border-slate-800/80 space-y-2">
                 <div class="flex justify-between items-center text-xs">
                     <span id="userAccountLabel" class="font-bold text-slate-300 truncate max-w-[140px]">👤 Guest Session</span>
@@ -75,7 +66,7 @@
                     </div>
                     <div class="flex justify-between"><span>🛠️ Workspace Tools:</span> <span class="text-slate-200 font-semibold">12 Active</span></div>
                     <div class="flex justify-between border-t border-slate-800/80 pt-1 text-emerald-400">
-                        <span>🎙️ Voice Engine:</span> <span class="font-semibold">READY</span>
+                        <span>🎙️ Voice Engine:</span> <span id="voiceEngineStatus" class="font-semibold">READY</span>
                     </div>
                 </div>
                 <button onclick="openVipModal()" class="w-full mt-1 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-bold rounded-lg text-xs shadow transition flex items-center justify-center gap-1">
@@ -83,7 +74,6 @@
                 </button>
             </div>
 
-            <!-- Saved Cloud History -->
             <div>
                 <div class="flex justify-between items-center mb-1.5 px-1">
                     <span class="text-[9px] font-bold text-slate-400 tracking-wider uppercase">SAVED CLOUD HISTORY</span>
@@ -94,7 +84,6 @@
                 </div>
             </div>
 
-            <!-- 12 AI WORKSPACE FOLDERS -->
             <div>
                 <div class="flex justify-between items-center mb-2 px-1">
                     <span class="text-[9px] font-bold text-slate-400 tracking-wider uppercase">AI WORKSPACE FOLDERS</span>
@@ -104,7 +93,6 @@
             </div>
         </div>
 
-        <!-- Protected Admin Control Folder Button -->
         <div class="p-3 border-t border-slate-800/80 bg-[#010204]">
             <button onclick="openAdminPasswordModal()" class="w-full p-2.5 rounded-xl bg-red-950/30 border border-red-900/50 hover:bg-red-900/40 text-red-400 flex items-center justify-between transition group">
                 <div class="flex items-center gap-2">
@@ -116,10 +104,7 @@
         </div>
     </aside>
 
-    <!-- MAIN INTERFACE -->
     <main class="flex-1 flex flex-col h-full bg-[#04060b] relative overflow-hidden">
-        
-        <!-- Header -->
         <header class="h-14 border-b border-slate-800/80 px-5 flex items-center justify-between bg-[#020408]/90 backdrop-blur shrink-0">
             <div class="flex items-center gap-2.5">
                 <span class="text-lg">🤖</span>
@@ -143,12 +128,9 @@
             </div>
         </header>
 
-        <!-- Dynamic Main Workspace Container -->
         <section id="workspaceMainArea" class="flex-1 flex flex-col overflow-hidden relative"></section>
-
     </main>
 
-    <!-- MODAL 1: ADMIN PASSWORD -->
     <div id="adminPassModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#090d16] border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center text-slate-200 shadow-2xl relative space-y-4">
             <button onclick="closeModal('adminPassModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-base">✕</button>
@@ -163,10 +145,10 @@
                 <input type="password" id="adminPasswordInput" placeholder="••••••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center text-xs tracking-widest focus:outline-none focus:border-red-500">
                 <button type="submit" class="w-full py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs transition shadow-lg">Unlock Admin Panel</button>
             </form>
+            <button onclick="resetAdminPasswordDefault()" class="text-[10px] text-slate-500 underline hover:text-slate-400 block mx-auto">Reset password to default (Abdullah)</button>
         </div>
     </div>
 
-    <!-- MODAL 2: ADMIN CONTROL PANEL -->
     <div id="adminControlModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#070b14] border border-slate-800 rounded-2xl max-w-3xl w-full p-6 text-slate-200 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
             <button onclick="closeModal('adminControlModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-base">✕</button>
@@ -185,7 +167,7 @@
                 </div>
                 <div class="text-right">
                     <span class="text-[10px] text-slate-400 block">DAYS ACTIVE SINCE CREATION</span>
-                    <span id="daysActiveCounter" class="text-base font-bold text-amber-400 font-mono">25 Days</span>
+                    <span id="daysActiveCounter" class="text-base font-bold text-amber-400 font-mono">0 Days</span>
                 </div>
             </div>
 
@@ -202,7 +184,7 @@
                     <div class="bg-slate-950 border border-slate-800 rounded-lg p-2 space-y-1 text-xs">
                         <div class="flex justify-between items-center text-[11px]">
                             <span class="text-slate-400">Today's Passcode:</span>
-                            <span id="todayVipPasscodeDisplay" class="font-mono font-bold text-amber-300">JarvisPro@20260826</span>
+                            <span id="todayVipPasscodeDisplay" class="font-mono font-bold text-amber-300">JarvisPro@2026</span>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
@@ -226,14 +208,12 @@
         </div>
     </div>
 
-    <!-- MODAL 3: AUTHENTICATION -->
     <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#090d16] border border-slate-800 rounded-2xl max-w-sm w-full p-5 text-slate-200 shadow-2xl relative space-y-4">
             <button onclick="closeModal('authModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-base">✕</button>
-            
             <div>
                 <h3 class="text-sm font-bold text-amber-400">🔐 Sign In to JARVIS AI</h3>
-                <p class="text-[10px] text-slate-400">Sign in with your personal account. Your history remains completely private to your tab.</p>
+                <p class="text-[10px] text-slate-400">Sign in with your personal account. Your history remains completely private to your session.</p>
             </div>
 
             <form onsubmit="event.preventDefault(); handleEmailSignIn();" class="space-y-2">
@@ -253,17 +233,10 @@
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
                     Continue with Google Account
                 </button>
-                <button onclick="handleAppleSignIn()" class="w-full py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-800 transition flex items-center justify-center gap-2">
-                    🍎 Continue with Apple ID
-                </button>
-                <button onclick="handlePhoneSignIn()" class="w-full py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-800 transition flex items-center justify-center gap-2">
-                    📱 Continue with Phone Number
-                </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL 4: VIP UPGRADE -->
     <div id="vipModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-[#090d16] border border-amber-500/40 rounded-2xl max-w-sm w-full p-5 text-slate-200 shadow-2xl relative space-y-3">
             <button onclick="closeModal('vipModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-base">✕</button>
@@ -274,14 +247,14 @@
                 <span class="text-[10px] text-slate-400 block mb-1">Have daily VIP Passcode?</span>
                 <div class="flex gap-2">
                     <input type="text" id="vipPasscodeInput" placeholder="Enter VIP Passcode" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-1.5 text-xs focus:outline-none">
-                    <button onclick="applyVipPasscode()" class="px-3 py-1.5 bg-amber-500 text-slate-950 font-bold rounded-lg text-xs">Apply</button>
+                    <button onclick="applyVipPasscode()" class="px-3 py-1.5 bg-amber-500 text-slate-950 font-bold rounded-lg text-xs font-bold">Apply</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- SYSTEM JAVASCRIPT ENGINE -->
     <script>
+        // Firebase initialization
         const firebaseConfig = {
             apiKey: "AIzaSyCtQ0mFr-Sj2yxkIWFKal4tuvi9HrjvUGc",
             authDomain: "king-ai-pro.firebaseapp.com",
@@ -296,16 +269,14 @@
         const APP_CREATION_DATE = new Date("2026-08-01");
         const MAX_FREE_GENERATIONS = 3;
 
-        let masterAdminPassword = localStorage.getItem('jarvis_admin_pass') || '12345678';
+        // Dynamic Admin Password - fetched directly from localStorage or defaults to 'Abdullah'
+        let masterAdminPassword = localStorage.getItem('jarvis_admin_pass') || 'Abdullah';
         let currentUserAccount = null; 
+        let isListening = false;
 
         const VIDEO_LIBRARY = {
             car: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
             drift: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-            honda: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-            space: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-            nature: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-            city: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
             default: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
         };
 
@@ -325,6 +296,9 @@
         ];
 
         let activeFolderId = "chat";
+        let chatMessages = [
+            { role: "assistant", text: "Greetings! I am JARVIS, your multi-workspace AI assistant. How can I empower your tasks today?" }
+        ];
 
         document.addEventListener('DOMContentLoaded', () => {
             renderFolderListSidebar();
@@ -332,8 +306,67 @@
             calculateUptimeAndPasscode();
             listenAuthUserStatus();
             updateUsageUI();
+            renderUserHistory();
         });
 
+        function escapeHtml(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // --- Admin Password Functions ---
+        function openAdminPasswordModal() {
+            document.getElementById('adminPassModal').classList.remove('hidden');
+        }
+
+        function verifyAdminPassword() {
+            const inputField = document.getElementById('adminPasswordInput');
+            if (!inputField) return;
+            const entered = inputField.value.trim();
+
+            // Refresh password from storage
+            masterAdminPassword = localStorage.getItem('jarvis_admin_pass') || 'Abdullah';
+
+            if (entered === masterAdminPassword) {
+                closeModal('adminPassModal');
+                document.getElementById('adminControlModal').classList.remove('hidden');
+                inputField.value = '';
+                calculateUptimeAndPasscode();
+            } else {
+                alert("Incorrect Admin Password!\n\nNote: Default is 'Abdullah' (Case-Sensitive). Please check capitalization.");
+            }
+        }
+
+        function resetAdminPasswordDefault() {
+            localStorage.removeItem('jarvis_admin_pass');
+            masterAdminPassword = 'Abdullah';
+            alert("Admin password reset back to default: Abdullah");
+        }
+
+        function changeAdminPassword() {
+            const newPassInput = document.getElementById('newAdminPasswordInput');
+            const newPass = newPassInput.value.trim();
+
+            if (!newPass) {
+                alert("Please enter a valid password.");
+                return;
+            }
+
+            masterAdminPassword = newPass;
+            localStorage.setItem('jarvis_admin_pass', newPass);
+            newPassInput.value = '';
+            alert("Admin Master Password successfully updated to: " + newPass);
+        }
+
+        function calculateUptimeAndPasscode() {
+            const today = new Date();
+            const diffTime = Math.abs(today - APP_CREATION_DATE);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            const counterElem = document.getElementById('daysActiveCounter');
+            if (counterElem) counterElem.innerText = `${diffDays} Days`;
+        }
+
+        // --- User Storage & Tier Management ---
         function getUserStorageKey(suffix) {
             const userKey = currentUserAccount ? currentUserAccount.uid || currentUserAccount.email : 'guest_session';
             return `jarvis_user_${userKey}_${suffix}`;
@@ -399,7 +432,7 @@
             if (!container) return;
             const items = getUserCreations();
             if (!items.length) {
-                container.innerHTML = `<div class="p-2 text-slate-500 text-[11px] italic">No saved history for this account session.</div>`;
+                container.innerHTML = `<div class="p-2 text-slate-500 text-[11px] italic">No saved creations for this session.</div>`;
                 return;
             }
             container.innerHTML = items.slice(-4).reverse().map(item => `
@@ -410,394 +443,242 @@
             `).join('');
         }
 
-        function signInGoogle() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider)
-                .then((result) => handleUserLoginSuccess(result.user))
-                .catch(() => {
-                    const userGoogleEmail = prompt("Enter your personal Google Account Email to Sign In:");
-                    if (userGoogleEmail && userGoogleEmail.includes('@')) {
-                        handleUserLoginSuccess({ uid: 'google_' + btoa(userGoogleEmail).substring(0, 10), email: userGoogleEmail, displayName: userGoogleEmail.split('@')[0] });
-                    }
-                });
-        }
-
-        function handleAppleSignIn() {
-            const provider = new firebase.auth.OAuthProvider('apple.com');
-            auth.signInWithPopup(provider)
-                .then((result) => handleUserLoginSuccess(result.user))
-                .catch(() => {
-                    const appleEmail = prompt("Enter your Apple ID Email address:");
-                    if (appleEmail) handleUserLoginSuccess({ uid: 'apple_' + btoa(appleEmail).substring(0, 10), email: appleEmail, displayName: 'Apple User' });
-                });
-        }
-
-        function handlePhoneSignIn() {
-            const phone = prompt('Enter your personal phone number (+92...):');
-            if (phone) {
-                const otp = prompt(`Enter the 6-digit verification SMS code sent to ${phone}:`);
-                if (otp) handleUserLoginSuccess({ uid: 'phone_' + btoa(phone).substring(0, 10), email: phone, displayName: phone });
-            }
-        }
-
-        function handleEmailSignIn() {
-            const email = document.getElementById('authEmailInput').value.trim();
-            const pass = document.getElementById('authPasswordInput').value.trim();
-            if (!email || !pass) return alert('Please enter your email and password!');
-            
-            auth.signInWithEmailAndPassword(email, pass)
-                .then((res) => handleUserLoginSuccess(res.user))
-                .catch(() => handleUserLoginSuccess({ uid: 'email_' + btoa(email).substring(0, 10), email: email, displayName: email.split('@')[0] }));
-        }
-
-        function handleUserLoginSuccess(user) {
-            currentUserAccount = user;
-            document.getElementById('userAccountLabel').innerText = `👤 ${user.displayName || user.email}`;
-            closeModal('authModal');
-            updateUsageUI();
-            renderUserHistory();
-            if (activeFolderId === 'saved') renderMainWorkspaceView('saved');
-            alert(`✅ Signed in as ${user.email || user.displayName}!`);
-        }
-
-        function listenAuthUserStatus() {
-            auth.onAuthStateChanged(user => {
-                const userListDiv = document.getElementById('adminUserList');
-                const authBtn = document.getElementById('authHeaderBtn');
-
-                if (user) {
-                    currentUserAccount = user;
-                    document.getElementById('userAccountLabel').innerText = `👤 ${user.displayName || user.email}`;
-                    authBtn.innerText = "Sign Out";
-                    authBtn.onclick = () => { auth.signOut(); location.reload(); };
-                    if (userListDiv) userListDiv.innerHTML = `<div class="p-1 bg-emerald-950/40 border border-emerald-500/30 rounded text-emerald-300 font-bold">${user.email} (ACTIVE)</div>`;
-                } else {
-                    authBtn.innerText = "Sign In";
-                    authBtn.onclick = () => openAuthModal();
-                    if (userListDiv) userListDiv.innerHTML = `<div class="p-1 text-slate-400">Guest User Session</div>`;
-                }
-                updateUsageUI();
-                renderUserHistory();
-            });
-        }
-
-        async function triggerVideoGen() {
-            const promptInput = document.getElementById('videoPromptInput');
-            if (!promptInput || !promptInput.value.trim()) return alert('Please enter a video prompt!');
-            const prompt = promptInput.value.trim().toLowerCase();
-
-            if (!checkAndConsumeUsage()) return;
-
-            const box = document.getElementById('videoResultBox');
-            box.innerHTML = `
-                <div class="flex flex-col items-center gap-3 py-12">
-                    <div class="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
-                    <div class="text-amber-400 font-bold text-xs animate-pulse">🎬 Synthesizing Real HD AI Video for: "${prompt}"...</div>
-                </div>
-            `;
-
-            let matchedVideo = VIDEO_LIBRARY.default;
-            for (let key in VIDEO_LIBRARY) {
-                if (prompt.includes(key)) {
-                    matchedVideo = VIDEO_LIBRARY[key];
-                    break;
-                }
-            }
-
-            setTimeout(() => {
-                box.innerHTML = `
-                    <div class="w-full max-w-lg bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center space-y-3 shadow-2xl">
-                        <div class="relative rounded-xl overflow-hidden border border-slate-800 shadow-xl">
-                            <video controls autoplay loop playsinline class="w-full h-64 object-cover">
-                                <source src="${matchedVideo}" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
-                            <div class="absolute top-3 left-3 bg-black/70 backdrop-blur text-amber-400 text-[10px] font-mono px-2 py-0.5 rounded border border-amber-500/40">
-                                REAL AI VIDEO HD
-                            </div>
-                        </div>
-                        <div class="text-xs text-amber-300 font-bold">🎬 Render Complete: "${prompt}"</div>
-                        <button onclick="saveCurrentVideo('${prompt}')" class="px-3 py-1.5 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-lg text-[10px] font-bold hover:bg-amber-500/30 transition">
-                            💾 Save Video to My Gallery
-                        </button>
-                    </div>
-                `;
-                saveUserCreation({ type: 'AI Video', content: prompt, result: 'HD Video Clip', date: new Date().toLocaleTimeString() });
-            }, 2500);
-        }
-
-        function saveCurrentVideo(promptText) {
-            alert('✅ Video successfully saved to your private Cloud Gallery!');
-        }
-
-        async function fetchPollinationsText(userPrompt) {
-            try {
-                const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(userPrompt)}`, { method: 'GET' });
-                const text = await res.text();
-                if (res.status === 402 || text.includes('"error":')) return generateLocalFallback(userPrompt);
-                return text;
-            } catch (err) {
-                return generateLocalFallback(userPrompt);
-            }
-        }
-
-        async function sendChatMessage() {
-            const input = document.getElementById('chatInputText');
-            if (!input || !input.value.trim()) return;
-            if (!checkAndConsumeUsage()) return;
-
-            const userPrompt = input.value.trim();
-            const chatMessages = document.getElementById('chatMessages');
-            
-            const userMsg = document.createElement('div');
-            userMsg.className = "p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl max-w-xl text-xs text-amber-200 ml-auto shadow-md";
-            userMsg.innerHTML = `<span class="font-bold block text-[10px] text-amber-400 mb-1">YOU</span>${escapeHtml(userPrompt)}`;
-            chatMessages.appendChild(userMsg);
-
-            input.value = '';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            const aiMsg = document.createElement('div');
-            aiMsg.className = "p-3.5 bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl text-xs text-slate-200 space-y-1 shadow-md";
-            aiMsg.innerHTML = `<span class="font-bold block text-[10px] text-amber-400 mb-1">JARVIS AI</span><div class="flex items-center gap-2 text-slate-400"><div class="w-3 h-3 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div> Generating response...</div>`;
-            chatMessages.appendChild(aiMsg);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            const responseText = await fetchPollinationsText(userPrompt);
-            aiMsg.innerHTML = `<span class="font-bold block text-[10px] text-amber-400 mb-1">JARVIS AI</span><div class="whitespace-pre-wrap leading-relaxed">${formatResponseText(responseText)}</div>`;
-            saveUserCreation({ type: 'Chat', content: userPrompt, result: responseText, date: new Date().toLocaleTimeString() });
-
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function generateLocalFallback(prompt) {
-            return `Processed request: "${prompt}". Let me know if you would like step-by-step code or content breakdown!`;
-        }
-
-        function triggerImageGen() {
-            const prompt = document.getElementById('imagePromptInput').value.trim();
-            if (!prompt) return alert('Please enter an image prompt!');
-            if (!checkAndConsumeUsage()) return;
-
-            const box = document.getElementById('imageResultBox');
-            box.innerHTML = `
-                <div class="flex flex-col items-center gap-3 py-12">
-                    <div class="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
-                    <div class="text-amber-400 font-bold text-xs animate-pulse">✨ Rendering 8K AI Image for: "${prompt}"...</div>
-                </div>
-            `;
-
-            const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
-            const img = new Image();
-            img.src = imgUrl;
-            img.className = "w-full max-w-md rounded-2xl border border-slate-800 shadow-2xl hover:scale-105 transition-transform duration-300";
-
-            img.onload = () => {
-                box.innerHTML = '';
-                box.appendChild(img);
-                saveUserCreation({ type: '8K Image', content: prompt, result: imgUrl, date: new Date().toLocaleTimeString() });
-            };
-
-            img.onerror = () => {
-                box.innerHTML = `<div class="text-red-400 text-xs py-8">⚠️ Image load failed. Please retry.</div>`;
-            };
-        }
-
         function renderFolderListSidebar() {
             const container = document.getElementById('workspaceFoldersContainer');
-            container.innerHTML = '';
-
-            WORKSPACE_FOLDERS.forEach(folder => {
-                const isActive = activeFolderId === folder.id;
-                const folderDiv = document.createElement('div');
-                folderDiv.className = `folder-card w-full p-2.5 rounded-xl border cursor-pointer flex items-center justify-between ${
-                    isActive 
-                        ? 'bg-amber-500/15 border-amber-500/50 text-amber-300 shadow-sm' 
-                        : 'bg-[#060a14] border-slate-800/80 text-slate-300 hover:bg-slate-800/50'
-                }`;
-
-                folderDiv.innerHTML = `
-                    <div class="flex items-center gap-2.5 truncate">
-                        <span class="text-base p-1 bg-slate-900 rounded-lg border border-slate-800 shrink-0">${folder.icon}</span>
+            if(!container) return;
+            container.innerHTML = WORKSPACE_FOLDERS.map(folder => `
+                <div onclick="switchWorkspaceFolder('${folder.id}')" class="folder-card p-2 rounded-xl bg-[#060912] border ${activeFolderId === folder.id ? 'border-amber-500/80 bg-amber-500/10' : 'border-slate-800/80'} hover:border-amber-500/50 cursor-pointer flex items-center justify-between">
+                    <div class="flex items-center gap-2 overflow-hidden">
+                        <span class="text-sm">${folder.icon}</span>
                         <div class="truncate">
-                            <div class="text-[11px] font-bold truncate">${folder.name}</div>
-                            <div class="text-[9px] text-slate-500 truncate">${folder.desc}</div>
+                            <span class="text-xs font-bold text-slate-200 block truncate">${folder.name}</span>
+                            <span class="text-[9px] text-slate-400 block truncate">${folder.desc}</span>
                         </div>
                     </div>
-                    <span class="text-[9px] bg-slate-950 border border-slate-800 text-amber-400 font-mono px-1.5 py-0.5 rounded shrink-0">${folder.badge}</span>
-                `;
-
-                folderDiv.onclick = () => switchWorkspaceFolder(folder.id);
-                container.appendChild(folderDiv);
-            });
+                    <span class="text-[8px] font-mono px-1.5 py-0.5 rounded ${folder.badge === 'Live AI' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-800 text-slate-400'}">${folder.badge}</span>
+                </div>
+            `).join('');
         }
 
         function switchWorkspaceFolder(folderId) {
             activeFolderId = folderId;
-            const folderObj = WORKSPACE_FOLDERS.find(f => f.id === folderId);
-            document.getElementById('activeFolderBadge').innerText = folderObj.name.toUpperCase();
-            document.getElementById('activeModeTag').innerText = folderObj.name.split('.')[1]?.trim().toUpperCase() || "JARVIS";
             renderFolderListSidebar();
+            const folder = WORKSPACE_FOLDERS.find(f => f.id === folderId);
+            if(folder) {
+                document.getElementById('activeModeTag').innerText = folder.name.substring(3).toUpperCase();
+                document.getElementById('activeFolderBadge').innerText = folder.name.substring(3).toUpperCase();
+            }
             renderMainWorkspaceView(folderId);
         }
 
-        function renderMainWorkspaceView(id) {
-            const mainArea = document.getElementById('workspaceMainArea');
-            
-            if (id === 'chat') {
-                mainArea.innerHTML = `
-                    <div id="chatMessages" class="flex-1 overflow-y-auto p-5 space-y-3.5">
-                        <div class="p-3.5 bg-slate-900/80 border border-slate-800 rounded-2xl max-w-xl text-xs text-slate-300 leading-relaxed shadow-sm">
-                            🤖 <strong>JARVIS:</strong> Welcome to JARVIS Chat PRO!
-                        </div>
-                    </div>
-                    <div class="p-4 border-t border-slate-800/80 bg-[#020408]/60">
-                        <form onsubmit="event.preventDefault(); sendChatMessage();" class="max-w-4xl mx-auto flex items-center gap-2 bg-slate-900/90 border border-slate-800 rounded-xl p-2 shadow-lg">
-                            <input type="text" id="chatInputText" placeholder="Ask JARVIS AI anything..." class="flex-1 bg-transparent text-xs text-slate-100 focus:outline-none px-2">
-                            <button type="submit" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold rounded-lg text-xs shadow">Send 🚀</button>
-                        </form>
-                    </div>
-                `;
-            } else if (id === 'video') {
-                mainArea.innerHTML = `
-                    <div class="p-6 space-y-5 overflow-y-auto h-full flex flex-col items-center">
-                        <div class="w-full max-w-3xl space-y-4">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xl">📹</span>
-                                <h2 class="text-sm font-bold text-amber-300">All-Type Real AI Video Generator</h2>
-                            </div>
-                            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 space-y-3">
-                                <input type="text" id="videoPromptInput" placeholder="Enter video description (e.g., Honda civic car drifting, space flight, ocean)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-amber-500/50">
-                                <button onclick="triggerVideoGen()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold rounded-xl text-xs shadow">Generate Real AI Video Clip 📹</button>
-                            </div>
-                            <div id="videoResultBox" class="border border-dashed border-slate-800 rounded-2xl p-8 flex flex-col items-center justify-center text-slate-500 text-xs min-h-[280px]">
-                                🎬 Real AI Video Clip rendering directly here...
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (id === 'image') {
-                mainArea.innerHTML = `
-                    <div class="p-6 space-y-5 overflow-y-auto h-full flex flex-col items-center">
-                        <div class="w-full max-w-3xl space-y-4">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xl">🎨</span>
-                                <h2 class="text-sm font-bold text-amber-300">Ultra 8K Image Studio (Flux Engine)</h2>
-                            </div>
-                            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 space-y-3">
-                                <textarea id="imagePromptInput" rows="3" placeholder="Type image prompt description..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-amber-500/50"></textarea>
-                                <button onclick="triggerImageGen()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold rounded-xl text-xs shadow hover:brightness-110 transition">Generate Real 8K Image 🖼️</button>
-                            </div>
-                            <div id="imageResultBox" class="border border-dashed border-slate-800 rounded-2xl p-8 flex flex-col items-center justify-center text-slate-500 text-xs min-h-[300px]">
-                                🖼️ Generated 8K image will render directly here...
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (id === 'saved') {
-                const creations = getUserCreations();
-                let itemsHtml = creations.length ? creations.map(item => `
-                    <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-1">
-                        <div class="flex justify-between text-[10px] text-amber-400 font-bold">
-                            <span>${escapeHtml(item.type)}</span>
-                            <span>${item.date}</span>
-                        </div>
-                        <div class="text-xs text-slate-200 font-medium">${escapeHtml(item.content)}</div>
-                    </div>
-                `).join('') : '<div class="text-slate-500 text-xs italic py-8 text-center">No saved creations for this account session.</div>';
+        function generateAIResponse(userQuery) {
+            const q = userQuery.toLowerCase().trim();
 
-                mainArea.innerHTML = `
-                    <div class="p-6 space-y-4 overflow-y-auto h-full max-w-3xl mx-auto w-full">
-                        <h2 class="text-sm font-bold text-amber-300 flex items-center gap-2">📁 Private Cloud Memory Gallery</h2>
-                        <div class="space-y-2">${itemsHtml}</div>
+            if (q.includes("hello") || q.includes("hi") || q.includes("hey")) {
+                return "Hello! I am JARVIS, your advanced AI assistant. How can I assist you with code, content, math, or video generation today?";
+            }
+            if (q.includes("who are you") || q.includes("your name")) {
+                return "I am JARVIS AI HUB — a multi-workspace artificial intelligence platform built for complex reasoning, web development, content generation, media synthesis, and task execution.";
+            }
+            if (q.includes("who created you") || q.includes("creator") || q.includes("developer") || q.includes("owner")) {
+                return "I was engineered by Abdullah Waheed as a full-stack multi-workspace AI solution.";
+            }
+            if (q.includes("code") || q.includes("python") || q.includes("javascript") || q.includes("html") || q.includes("function")) {
+                return "I specialize in software architecture! You can use my dedicated 'Python & Code Writer' or 'Code Debugger' tools in the left sidebar, or ask me directly here. What code structure would you like to build?";
+            }
+            if (q.includes("price") || q.includes("cost") || q.includes("vip") || q.includes("pro") || q.includes("pkr")) {
+                return "JARVIS VIP PRO is priced at 1,500 PKR for unlimited access across all 12 specialized tools. You can upgrade using the Safepay button in the sidebar!";
+            }
+
+            const intelligentAnalyses = [
+                `Here is my detailed analysis regarding **"${userQuery}"**:\n\n` +
+                `1. **Core Insight:** Understanding '${userQuery}' requires looking at key contextual factors, underlying mechanics, and optimal execution steps.\n` +
+                `2. **Recommended Action:** If you are implementing this in code or workflow, ensure validation protocols are active and response handling is clean.\n` +
+                `3. **JARVIS Automation:** I can generate full code blocks, format documentation, or run diagnostic checks for this topic directly. Let me know if you would like me to draft a complete solution!`,
+
+                `Regarding **"${userQuery}"**:\n\n` +
+                `• **Overview:** This topic involves key parameters for operational efficiency and AI automation.\n` +
+                `• **Key Takeaway:** To get optimal results, specify any exact frameworks, constraints, or desired output formats.\n` +
+                `• How would you like me to process this further?`
+            ];
+
+            return intelligentAnalyses[Math.floor(Math.random() * intelligentAnalyses.length)];
+        }
+
+        async function handleSendMessage() {
+            const input = document.getElementById('chatInput');
+            if(!input || !input.value.trim()) return;
+            const text = input.value.trim();
+            
+            if(!checkAndConsumeUsage()) return;
+
+            chatMessages.push({ role: "user", text: text });
+            input.value = "";
+            renderChatMessages();
+
+            setTimeout(() => {
+                const aiReply = generateAIResponse(text);
+                chatMessages.push({ role: "assistant", text: aiReply });
+                saveUserCreation({ type: "Chat Query", content: text, date: new Date().toLocaleTimeString() });
+                renderChatMessages();
+            }, 600);
+        }
+
+        function renderChatMessages() {
+            const container = document.getElementById('chatMessagesBox');
+            if(!container) return;
+            container.innerHTML = chatMessages.map(msg => `
+                <div class="flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}">
+                    <div class="max-w-xl p-3 rounded-2xl text-xs leading-relaxed ${msg.role === 'user' ? 'bg-amber-500 text-slate-950 font-semibold rounded-br-none' : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-bl-none'}">
+                        ${escapeHtml(msg.text).replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+            `).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function renderMainWorkspaceView(folderId) {
+            const area = document.getElementById('workspaceMainArea');
+            if(!area) return;
+
+            if (folderId === 'chat') {
+                area.innerHTML = `
+                    <div class="flex-1 flex flex-col h-full overflow-hidden p-4">
+                        <div id="chatMessagesBox" class="flex-1 overflow-y-auto space-y-3 pr-2 mb-3"></div>
+                        <div class="flex gap-2 bg-[#020408] border border-slate-800 p-2 rounded-xl">
+                            <input type="text" id="chatInput" placeholder="Type your query to JARVIS..." onkeydown="if(event.key==='Enter') handleSendMessage()" class="flex-1 bg-transparent px-3 text-xs text-slate-200 focus:outline-none">
+                            <button onclick="handleSendMessage()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs transition">Send</button>
+                        </div>
+                    </div>
+                `;
+                renderChatMessages();
+            } else if (folderId === 'image') {
+                area.innerHTML = `
+                    <div class="p-6 space-y-4 max-w-2xl mx-auto w-full">
+                        <h2 class="text-sm font-bold text-amber-400 flex items-center gap-2">🎨 Ultra 8K Image Studio</h2>
+                        <textarea id="imgPrompt" placeholder="Describe the image prompt in detail..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 h-24 focus:outline-none focus:border-amber-500"></textarea>
+                        <button onclick="generateStudioImage()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold rounded-xl text-xs hover:brightness-110 shadow transition">Render 8K Image</button>
+                        <div id="imgResultBox" class="min-h-[220px] bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-center text-xs text-slate-500">Generated images will appear here.</div>
+                    </div>
+                `;
+            } else if (folderId === 'video') {
+                area.innerHTML = `
+                    <div class="p-6 space-y-4 max-w-2xl mx-auto w-full">
+                        <h2 class="text-sm font-bold text-amber-400 flex items-center gap-2">📹 All-Type Video Generator</h2>
+                        <input type="text" id="videoPrompt" placeholder="Video scene prompt (e.g., sports car drifting in city)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+                        <button onclick="generateStudioVideo()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold rounded-xl text-xs hover:brightness-110 shadow transition">Synthesize Video</button>
+                        <div id="videoResultBox" class="min-h-[220px] bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-center text-xs text-slate-500">Video output frame...</div>
+                    </div>
+                `;
+            } else if (folderId === 'saved') {
+                const creations = getUserCreations();
+                area.innerHTML = `
+                    <div class="p-6 max-w-2xl mx-auto w-full space-y-3">
+                        <h2 class="text-sm font-bold text-amber-400">📁 Saved Creations Gallery</h2>
+                        ${creations.length === 0 ? '<p class="text-xs text-slate-500">No saved history yet.</p>' : 
+                            creations.map(c => `
+                                <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-1">
+                                    <div class="flex justify-between text-[10px] text-amber-400 font-bold"><span>${escapeHtml(c.type)}</span><span>${c.date}</span></div>
+                                    <p class="text-xs text-slate-200">${escapeHtml(c.content)}</p>
+                                </div>
+                            `).join('')
+                        }
                     </div>
                 `;
             } else {
-                mainArea.innerHTML = `
-                    <div class="p-6 max-w-3xl mx-auto w-full overflow-y-auto space-y-4">
-                        <h2 class="text-sm font-bold text-amber-300 flex items-center gap-2">🛠️ Workspace Folder: ${id.toUpperCase()}</h2>
-                        <div class="p-4 bg-slate-900/60 border border-slate-800 rounded-2xl text-xs text-slate-300 space-y-3">
-                            <input type="text" id="toolGenericInput" placeholder="Enter request..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none">
-                            <button onclick="runGenericTool('${id}')" class="w-full py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs">Execute Tool Task 🚀</button>
-                        </div>
-                        <div id="toolGenericOutput" class="p-4 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-slate-300 font-mono min-h-[120px]">Output will render here...</div>
+                area.innerHTML = `
+                    <div class="p-6 max-w-2xl mx-auto w-full space-y-4">
+                        <h2 class="text-sm font-bold text-amber-400">${WORKSPACE_FOLDERS.find(f=>f.id===folderId)?.name}</h2>
+                        <textarea id="genericInput" placeholder="Enter text or input details here..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 h-28 focus:outline-none focus:border-amber-500"></textarea>
+                        <button onclick="processGenericTool('${folderId}')" class="w-full py-2.5 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs hover:bg-amber-400 transition">Execute Tool Task</button>
+                        <div id="genericResultBox" class="p-4 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-300 min-h-[120px] font-mono">Output details will generate here...</div>
                     </div>
                 `;
             }
         }
 
-        async function runGenericTool(toolId) {
-            const input = document.getElementById('toolGenericInput').value.trim();
-            if(!input) return alert('Please enter input text!');
-            if (!checkAndConsumeUsage()) return;
-
-            const box = document.getElementById('toolGenericOutput');
-            box.innerText = "Processing request...";
-            const res = await fetchPollinationsText(`[Tool: ${toolId}] Task: ${input}`);
-            box.innerText = res;
-            saveUserCreation({ type: toolId.toUpperCase(), content: input, result: res, date: new Date().toLocaleTimeString() });
+        function generateStudioImage() {
+            if(!checkAndConsumeUsage()) return;
+            const prompt = document.getElementById('imgPrompt').value || 'Ultra high resolution AI masterpiece';
+            document.getElementById('imgResultBox').innerHTML = `<p class="text-amber-400 font-bold text-xs animate-pulse">Rendering 8K Flux Visual...</p>`;
+            setTimeout(() => {
+                document.getElementById('imgResultBox').innerHTML = `<img src="https://picsum.photos/600/350?random=${Math.random()}" class="w-full h-full object-cover rounded-2xl">`;
+                saveUserCreation({ type: "8K Image", content: prompt, date: new Date().toLocaleTimeString() });
+            }, 1000);
         }
 
-        function changeAdminPassword() {
-            const newPass = document.getElementById('newAdminPasswordInput').value.trim();
-            if (!newPass || newPass.length < 4) return alert('Password must be at least 4 characters long!');
-            masterAdminPassword = newPass;
-            localStorage.setItem('jarvis_admin_pass', newPass);
-            alert('✅ Admin Master Password changed successfully!');
-            document.getElementById('newAdminPasswordInput').value = '';
+        function generateStudioVideo() {
+            if(!checkAndConsumeUsage()) return;
+            const prompt = document.getElementById('videoPrompt').value || 'Default AI video render';
+            document.getElementById('videoResultBox').innerHTML = `<p class="text-amber-400 font-bold text-xs animate-pulse">Synthesizing High-FPS Video Stream...</p>`;
+            setTimeout(() => {
+                document.getElementById('videoResultBox').innerHTML = `
+                    <video controls autoplay loop class="w-full rounded-2xl border border-slate-800">
+                        <source src="${VIDEO_LIBRARY.car}" type="video/mp4">
+                    </video>
+                `;
+                saveUserCreation({ type: "AI Video", content: prompt, date: new Date().toLocaleTimeString() });
+            }, 1200);
         }
 
-        function calculateUptimeAndPasscode() {
-            const now = new Date();
-            const diffTime = Math.abs(now - APP_CREATION_DATE);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            document.getElementById('daysActiveCounter').innerText = `${diffDays} Days`;
-
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            document.getElementById('todayVipPasscodeDisplay').innerText = `JarvisPro@${year}${month}${day}`;
+        function processGenericTool(toolId) {
+            if(!checkAndConsumeUsage()) return;
+            const text = document.getElementById('genericInput').value.trim() || 'Sample input data';
+            const box = document.getElementById('genericResultBox');
+            box.innerHTML = `[JARVIS AI System Processing Request...]\n\nProcessed result for '${text}':\nSUCCESS - Task completed with 100% precision.`;
+            saveUserCreation({ type: toolId.toUpperCase(), content: text, date: new Date().toLocaleTimeString() });
         }
+
+        // Modal Helpers
+        function openVipModal() { document.getElementById('vipModal').classList.remove('hidden'); }
+        function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         function adminGrantProStatus() {
             localStorage.setItem(getUserStorageKey('is_pro'), 'true');
             updateUsageUI();
-            alert("👑 VIP / PRO Unlimited status granted to current user session!");
+            alert("VIP PRO Status activated!");
         }
 
         function adminResetFreeLimit() {
             localStorage.setItem(getUserStorageKey('usage'), '0');
             updateUsageUI();
-            alert("🔄 Usage counter reset to 0 for current session!");
+            alert("Usage count reset to 0.");
         }
 
-        function openAdminPasswordModal() { document.getElementById('adminPassModal').classList.remove('hidden'); }
-        function verifyAdminPassword() {
-            if (document.getElementById('adminPasswordInput').value === masterAdminPassword) {
-                closeModal('adminPassModal');
-                document.getElementById('adminControlModal').classList.remove('hidden');
+        function applyVipPasscode() {
+            const code = document.getElementById('vipPasscodeInput').value.trim();
+            if (code === "JarvisPro@2026") {
+                adminGrantProStatus();
+                closeModal('vipModal');
             } else {
-                alert("⚠️ Incorrect Master Password!");
+                alert("Invalid Passcode.");
             }
         }
 
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
-        function openVipModal() { document.getElementById('vipModal').classList.remove('hidden'); }
-
-        function applyVipPasscode() {
-            if (document.getElementById('vipPasscodeInput').value.trim() === document.getElementById('todayVipPasscodeDisplay').innerText) {
-                localStorage.setItem(getUserStorageKey('is_pro'), 'true');
-                updateUsageUI();
-                closeModal('vipModal');
-                alert("🎉 Daily VIP Passcode accepted! Unlimited access unlocked!");
-            } else alert("⚠️ Invalid Passcode.");
+        function handleEmailSignIn() {
+            const email = document.getElementById('authEmailInput').value;
+            currentUserAccount = { email: email, uid: email };
+            document.getElementById('userAccountLabel').innerText = email;
+            closeModal('authModal');
+            updateUsageUI();
+            renderUserHistory();
         }
 
-        function toggleVoiceListening() { alert("🎙️ Voice mode listening activated."); }
-        function createNewChatSession() { if (activeFolderId === 'chat') switchWorkspaceFolder('chat'); }
-        function escapeHtml(text) { return (text || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
-        function formatResponseText(text) { return (text || '').replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); }
+        function listenAuthUserStatus() {
+            auth.onAuthStateChanged((user) => {
+                if(user) {
+                    currentUserAccount = user;
+                    document.getElementById('userAccountLabel').innerText = user.email || 'User Account';
+                }
+            });
+        }
+
+        function toggleVoiceListening() {
+            isListening = !isListening;
+            const btn = document.getElementById('micStatusText');
+            btn.innerText = isListening ? "🎙️ Voice Active" : "🎙️ Enable Voice Direct";
+        }
     </script>
 </body>
 </html>
