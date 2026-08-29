@@ -1,3 +1,7 @@
+// ==========================================
+// JARVIS AI HUB - RELIABLE PRODUCTION SCRIPT
+// ==========================================
+
 // Register Service Worker for PWA Support
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -7,8 +11,8 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Global Variables
-const GEMINI_API_KEY = "AQ.Ab8RN6KBXcqux4L1jp3qFqpXBovmLVwAgxp1ria1b7GZQIlEXw";
+// Global Configuration & Security Constants
+const GEMINI_API_KEY = "AQ.Ab8RN6KIQ7Q5V...your_full_key_here..."; // Replace with your actual AQ... token
 const INTERNAL_MODEL_ID = "gemini-3.6-flash";
 const API_ENDPOINT_URL = `https://generativelanguage.googleapis.com/v1beta/models/${INTERNAL_MODEL_ID}:generateContent`;
 
@@ -27,6 +31,7 @@ let chatCount = 0;
 const CHAT_LIMIT = 50;
 let toolUsageMap = {};
 let selectedImageBase64 = null;
+let isRequestInProgress = false; // Anti-burnout protection flag
 
 let dynamicPasskeys = {
   day: "JARVIS-DAY-" + Math.floor(1000 + Math.random() * 9000),
@@ -58,12 +63,11 @@ const AI_TOOLS = [
 
 let activeTool = AI_TOOLS[0];
 let currentSelectedPlan = 'life';
-
 let recognition = null;
 let isVoiceActive = false;
 let deferredPrompt = null;
 
-// PWA Installation Handling
+// PWA Installation Hook
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
@@ -78,7 +82,7 @@ async function installAppPrompt() {
     }
     deferredPrompt = null;
   } else {
-    alert("To install JARVIS AI HUB on your device:\n\n• On Chrome/Edge: Click the 3 dots (top right) -> 'Install JARVIS AI HUB'\n• On Android (Chrome): Tap 3 dots -> 'Add to Home Screen' / 'Install App'\n• On iPhone (Safari): Tap Share button -> 'Add to Home Screen'");
+    alert("To install JARVIS AI HUB:\n\n• On Chrome/Edge: Click top-right 3 dots -> 'Install JARVIS AI HUB'\n• On Android: Tap 3 dots -> 'Add to Home Screen'");
   }
 }
 
@@ -293,7 +297,13 @@ function removeImage() {
   document.getElementById('imagePreviewContainer').classList.add('hidden');
 }
 
+// ==========================================
+// HIGHLY RELIABLE GEMINI QUERY EXECUTOR
+// Includes anti-spam lock & 15s timeout protection
+// ==========================================
 async function sendQueryToGemini() {
+  if (isRequestInProgress) return; // Prevent double-firing or burnout
+
   const inputEl = document.getElementById('userInputPrompt');
   const promptText = inputEl.value.trim();
   if (!promptText && !selectedImageBase64) return;
@@ -317,31 +327,44 @@ async function sendQueryToGemini() {
   }
 
   const loadingMsgId = appendLoadingMessage();
+  isRequestInProgress = true;
 
   try {
+    // 15-second safeguard timeout controller
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
     const response = await fetch(API_ENDPOINT_URL, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
         "x-goog-api-key": GEMINI_API_KEY
       },
-      body: JSON.stringify({ contents: [{ parts: parts }] })
+      body: JSON.stringify({ contents: [{ parts: parts }] }),
+      signal: controller.signal
     });
 
+    clearTimeout(timeoutId);
     const data = await response.json();
     removeLoadingMessage(loadingMsgId);
+    isRequestInProgress = false;
 
     if (response.ok && data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
       const aiText = data.candidates[0].content.parts[0].text;
       appendChatMessage(aiText, 'ai');
       saveHistoryEntry(promptText, aiText);
     } else {
-      const errMsg = data.error?.message || `HTTP ${response.status}: Failed to retrieve response. Check API key permissions.`;
-      appendChatMessage(`API Error: ${errMsg}`, 'ai');
+      const errMsg = data.error?.message || `HTTP Status ${response.status}: Server rejected request. Check your AQ... token configuration.`;
+      appendChatMessage(`System Alert: ${errMsg}`, 'ai');
     }
   } catch (err) {
     removeLoadingMessage(loadingMsgId);
-    appendChatMessage("Network Error: Failed to reach Google API servers.", 'ai');
+    isRequestInProgress = false;
+    if (err.name === 'AbortError') {
+      appendChatMessage("Network Timeout: Google servers took too long to reply. Please try again.", 'ai');
+    } else {
+      appendChatMessage("Connection Error: Check your network connectivity or API key permissions.", 'ai');
+    }
   }
 }
 
@@ -440,10 +463,7 @@ function toggleVoiceSession() {
       document.getElementById('liveTranscriptContent').innerText = transcript;
     };
 
-    recognition.onerror = (e) => {
-      console.error("Speech Error:", e.error);
-    };
-
+    recognition.onerror = (e) => { console.error("Speech Error:", e.error); };
     recognition.start();
   } else {
     if (recognition) recognition.stop();
@@ -472,11 +492,10 @@ function toggleQuickSpeech() {
 
   sr.onerror = () => { icon.className = "fa-solid fa-microphone text-sm"; };
   sr.onend = () => { icon.className = "fa-solid fa-microphone text-sm"; };
-
   sr.start();
 }
 
-// Initializations
+// Initializing application modules
 renderAITools();
 renderHistoryList();
 updateQuotaDisplay();
