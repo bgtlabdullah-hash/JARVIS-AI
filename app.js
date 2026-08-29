@@ -8,7 +8,7 @@ if ('serviceWorker' in navigator) {
 }
 
 // Global Variables
-const GEMINI_API_KEY = "AQ.Ab8RN6Lbxaqqjdo0dT5g0rr98OvjPuNt2gnpE-8L_VDK-XheEA";
+const GEMINI_API_KEY = "AQ.Ab8RN6KBXcqux4L1jp3qFqpXBovmLVwAgxp1ria1b7GZQIlEXw";
 const INTERNAL_MODEL_ID = "gemini-3.6-flash";
 const API_ENDPOINT_URL = `https://generativelanguage.googleapis.com/v1beta/models/${INTERNAL_MODEL_ID}:generateContent`;
 
