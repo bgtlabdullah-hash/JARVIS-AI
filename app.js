@@ -1,265 +1,184 @@
-// --- APP CONFIG & STATE MANAGEMENT ---
-const APP_START_DATE = new Date('2026-08-24'); // App creation baseline
-let currentUser = null;
-let deferredPrompt = null;
+// ==========================================
+// CONFIGURATION & STATE
+// ==========================================
+// Replace with a fresh API Key generated from Google AI Studio
+const API_KEY = "YOUR_GEMINI_API_KEY_HERE"; 
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
-// Usage limits configuration
-let usageLimits = {
-  chat: { used: 0, max: 50 },
-  tools: { used: 0, max: 5 },
-  codeWriter: { used: 0, max: 10 },
-  chatgpt: { used: 0, max: 100 }
-};
+let textChatCount = 0;
+const MAX_TEXT_CHATS = 50;
 
-// Admin default state
-let adminConfig = {
-  masterPassword: "Abdullah waheed",
-  vipPasscode: "JarvisPro@2026",
-  vipExpiryDays: 30,
-  safepayUrl: "https://pay.safepay.co/checkout"
-};
+// DOM Element Selectors (Adjust IDs if needed to match your HTML)
+const chatInput = document.querySelector('input[type="text"]') || document.getElementById("chat-input");
+const sendBtn = document.querySelector('button.bg-amber-500') || document.getElementById("send-btn");
+const chatContainer = document.querySelector('.flex-1.overflow-y-auto') || document.getElementById("chat-container");
+const counterDisplay = document.getElementById("text-chat-counter");
 
-// --- SESSION ISOLATION & STORAGE ---
-function loadUserData(user) {
-  if (user) {
-    // Sync signed-in user data from account key
-    const saved = localStorage.getItem(`jarvis_user_${user.uid}`);
-    if (saved) usageLimits = JSON.parse(saved);
-  } else {
-    // Guest Session: Isolated per session tab (clears when closed or reset)
-    const guestData = sessionStorage.getItem('jarvis_guest_session');
-    if (guestData) {
-      usageLimits = JSON.parse(guestData);
-    } else {
-      usageLimits = { chat: { used: 0, max: 50 }, tools: { used: 0, max: 5 }, codeWriter: { used: 0, max: 10 }, chatgpt: { used: 0, max: 100 } };
-      sessionStorage.setItem('jarvis_guest_session', JSON.stringify(usageLimits));
+// ==========================================
+// EVENT LISTENERS
+// ==========================================
+if (sendBtn) {
+  sendBtn.addEventListener("click", handleSendMessage);
+}
+
+if (chatInput) {
+  chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
     }
-  }
-  updateUIUsage();
+  });
 }
 
-function saveUserData() {
-  if (currentUser) {
-    localStorage.setItem(`jarvis_user_${currentUser.uid}`, JSON.stringify(usageLimits));
-  } else {
-    sessionStorage.setItem('jarvis_guest_session', JSON.stringify(usageLimits));
-  }
-}
+// ==========================================
+// MAIN HANDLER
+// ==========================================
+async function handleSendMessage() {
+  const userText = chatInput.value.trim();
+  if (!userText) return;
 
-// --- GOOGLE SIGN-IN HANDLER (FIREBASE) ---
-function initGoogleAuth() {
-  const googleBtn = document.getElementById('googleSignInBtn') || document.querySelector('[data-auth="google"]');
-  if (googleBtn && window.firebase) {
-    googleBtn.addEventListener('click', () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithPopup(provider)
-        .then((result) => {
-          currentUser = result.user;
-          loadUserData(currentUser);
-          speakMaleVoice(`Welcome back ${currentUser.displayName || 'User'}`);
-          trackUserLogin(currentUser);
-        })
-        .catch((error) => console.error("Google Auth Error:", error));
-    });
-  }
-}
+  // Clear input and temporarily disable UI
+  chatInput.value = "";
+  chatInput.disabled = true;
 
-// --- VOICE SYNTHESIS (MALE VOICE OUTPUT) ---
-function speakMaleVoice(text) {
-  if (!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  const voices = window.speechSynthesis.getVoices();
-  
-  // Select male voice profile
-  const maleVoice = voices.find(v => v.lang.includes('en') && (v.name.includes('David') || v.name.includes('Male') || v.name.includes('George') || v.name.includes('Natural'))) || voices[0];
-  if (maleVoice) utterance.voice = maleVoice;
-  
-  utterance.pitch = 0.85; // Lower pitch for natural male tone
-  utterance.rate = 1.0;
-  window.speechSynthesis.speak(utterance);
-}
+  // 1. Display User Message
+  const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  renderUserMessage(userText, currentTime);
 
-// --- HANDS-FREE "HI JARVIS" VOICE COMMAND CONTROLLER ---
-function initVoiceAssistant() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) return;
+  // 2. Display Temporary Loading State
+  const loadingId = renderLoadingMessage();
+  scrollToBottom();
 
-  const recognition = new SpeechRecognition();
-  recognition.continuous = true;
-  recognition.interimResults = false;
-  recognition.lang = 'en-US';
-
-  recognition.onresult = (event) => {
-    const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
-    
-    if (transcript.includes("hi jarvis") || transcript.includes("jarvis")) {
-      handleVoiceCommand(transcript);
-    }
-  };
-
-  recognition.onend = () => recognition.start(); // Keep microphone continuously active
-  try { recognition.start(); } catch(e) {}
-}
-
-function handleVoiceCommand(cmd) {
-  if (cmd.includes("open math solver") || cmd.includes("open math")) {
-    selectWorkspaceTool(11);
-    speakMaleVoice("Opening Math and Logic Solver.");
-  } else if (cmd.includes("open image generator") || cmd.includes("open image studio")) {
-    selectWorkspaceTool(2);
-    speakMaleVoice("Opening Ultra 8K Image Studio.");
-  } else if (cmd.includes("open video generator")) {
-    selectWorkspaceTool(3);
-    speakMaleVoice("Opening Video Generator.");
-  } else if (cmd.includes("open saved folder") || cmd.includes("open gallery")) {
-    selectWorkspaceTool(4);
-    speakMaleVoice("Opening Saved Creations Folder.");
-  } else if (cmd.includes("open code writer") || cmd.includes("open python")) {
-    selectWorkspaceTool(6);
-    speakMaleVoice("Opening Code Writer.");
-  } else if (cmd.includes("open admin")) {
-    const pass = prompt("Enter Master Admin Password:");
-    if (pass === adminConfig.masterPassword) {
-      document.getElementById('adminPanelModal')?.classList.remove('hidden');
-      speakMaleVoice("Admin folder unlocked.");
-    } else {
-      speakMaleVoice("Access denied. Incorrect password.");
-    }
-  } else if (cmd.includes("buy pro") || cmd.includes("upgrade pro")) {
-    speakMaleVoice("Redirecting to Safepay checkout.");
-    window.location.href = adminConfig.safepayUrl;
-  } else {
-    speakMaleVoice("Yes? How can I assist you today?");
-  }
-}
-
-// --- DYNAMIC AI TOOL TASK EXECUTION ---
-async function executeToolTask(toolId, inputVal) {
-  if (usageLimits.tools.used >= usageLimits.tools.max) {
-    alert("Free Tier limit reached for tools. Upgrade to PRO for unlimited access.");
-    return;
-  }
-
-  const outputBox = document.getElementById('toolOutputDisplay');
-  if (!outputBox) return;
-  outputBox.innerText = "JARVIS Processing Task...";
-
-  // 1. Math & Logic Solver: Detailed step-by-step notebook resolution
-  if (toolId === 11) {
-    const steps = solveMathStepByStep(inputVal);
-    outputBox.innerText = steps;
-    speakMaleVoice("Calculation complete. Here is the step-by-step solution.");
-  } 
-  // 2. Ultra 8K Image Studio: Generates functional dynamic images via Pollinations API
-  else if (toolId === 2) {
-    const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(inputVal)}?width=1024&height=1024&seed=${Math.floor(Math.random()*1000)}`;
-    outputBox.innerHTML = `
-      <div class="space-y-3">
-        <img src="${imgUrl}" alt="Generated AI Image" class="w-full max-w-lg rounded-lg border border-amber-500/30 shadow-lg"/>
-        <button onclick="saveToFolder('${imgUrl}', 'image')" class="px-4 py-2 bg-amber-500 text-black font-semibold rounded">Save to Creations Folder</button>
-      </div>`;
-    speakMaleVoice("Your image visual render is ready.");
-  }
-  // 3. All-Type Video Generator: Generates 10-second video stream preview
-  else if (toolId === 3) {
-    outputBox.innerHTML = `
-      <div class="space-y-3">
-        <video controls autoplay loop class="w-full max-w-lg rounded-lg border border-amber-500/30">
-          <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
-        </video>
-        <p class="text-xs text-amber-400">Rendered 10-Second High Definition AI Video Preview</p>
-        <button onclick="saveToFolder('10-Sec-Video-Render', 'video')" class="px-4 py-2 bg-amber-500 text-black font-semibold rounded">Save Video</button>
-      </div>`;
-    speakMaleVoice("10-second video render generated.");
-  } 
-  // Fallback AI Text Execution
-  else {
-    outputBox.innerText = `[JARVIS Response for Tool ${toolId}]: Structured resolution generated successfully for: "${inputVal}"`;
-  }
-
-  usageLimits.tools.used++;
-  saveUserData();
-  updateUIUsage();
-}
-
-// Step-by-step human notebook math solver logic
-function solveMathStepByStep(expr) {
-  return `=== JARVIS STEP-BY-STEP MATH SOLUTION ===\n
-Given Problem: ${expr}\n
-Step 1: Parse and identify structural operators.
-Step 2: Isolate the primary target variable on the left hand side.
-Step 3: Perform inverse arithmetic balance across equal boundary.
-Step 4: Final Evaluation:
-   => Expression simplified.
-   => Result Verified with 100% precision.\n
-Final Answer: ${evalMathSafe(expr)}`;
-}
-
-function evalMathSafe(fn) {
+  // 3. Call Gemini API & Update Interface
   try {
-    const sanitized = fn.replace(/[^0-9+\-*/().=x]/g, '');
-    if (sanitized.includes('2x=6')) return 'x = 3';
-    return "Evaluated Solution: Success";
-  } catch(e) { return "Solution computed"; }
-}
+    const aiResponse = await fetchGeminiResponse(userText);
+    removeElement(loadingId);
+    renderJarvisMessage(aiResponse);
 
-// --- SAVED CREATIONS MANAGEMENT (EXPLICIT SAVE ONLY) ---
-function saveToFolder(itemUrl, type) {
-  let savedItems = JSON.parse(localStorage.getItem('jarvis_saved_creations') || '[]');
-  savedItems.push({ url: itemUrl, type: type, date: new Date().toLocaleString() });
-  localStorage.setItem('jarvis_saved_creations', JSON.stringify(savedItems));
-  alert('Saved to Creations Folder!');
-}
-
-// --- ADMIN ANALYTICS & METRICS ---
-function updateAdminMetrics() {
-  const now = new Date();
-  const diffTime = Math.abs(now - APP_START_DATE);
-  const daysActive = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  
-  const daysElem = document.getElementById('adminDaysActive');
-  if (daysElem) daysElem.innerText = `${daysActive} Days Active (Since Aug 24, 2026)`;
-  
-  const vipCodeElem = document.getElementById('adminVipCode');
-  if (vipCodeElem) vipCodeElem.innerText = adminConfig.vipPasscode;
-}
-
-function trackUserLogin(user) {
-  let usersList = JSON.parse(localStorage.getItem('jarvis_signed_in_users') || '[]');
-  if (!usersList.some(u => u.email === user.email)) {
-    usersList.push({ name: user.displayName, email: user.email, time: new Date().toLocaleString() });
-    localStorage.setItem('jarvis_signed_in_users', JSON.stringify(usersList));
+    // Update stats counter
+    textChatCount++;
+    if (counterDisplay) {
+      counterDisplay.textContent = `${textChatCount} / ${MAX_TEXT_CHATS}`;
+    }
+  } catch (error) {
+    removeElement(loadingId);
+    renderJarvisMessage(`⚠️ Request Failed: ${error.message}`);
+  } finally {
+    chatInput.disabled = false;
+    chatInput.focus();
+    scrollToBottom();
   }
 }
 
-// --- PWA INSTALLATION EVENT HANDLER ---
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  const installBtn = document.getElementById('pwaInstallBtn');
-  if (installBtn) {
-    installBtn.classList.remove('hidden');
-    installBtn.addEventListener('click', () => {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
-    });
+// ==========================================
+// GEMINI API FETCH
+// ==========================================
+async function fetchGeminiResponse(promptText) {
+  if (!API_KEY || API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
+    throw new Error("Invalid API key. Please insert your key from Google AI Studio in the JavaScript file.");
   }
-});
 
-// Helper switch workspace placeholder
-function selectWorkspaceTool(id) {
-  console.log("Workspace active tool selected:", id);
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          parts: [{ text: promptText }]
+        }
+      ]
+    })
+  });
+
+  const data = await response.json();
+
+  // If status is 401, 403, or general error, throw explicit detail
+  if (!response.ok) {
+    throw new Error(data.error?.message || `Server responded with HTTP ${response.status}`);
+  }
+
+  const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  
+  if (!generatedText) {
+    throw new Error("Received empty response payload from backend.");
+  }
+
+  return generatedText;
 }
 
-function updateUIUsage() {
-  const usageText = document.getElementById('usageLimitText');
-  if (usageText) usageText.innerText = `${usageLimits.tools.used} / ${usageLimits.tools.max} Used`;
+// ==========================================
+// UI RENDERING HELPERS
+// ==========================================
+function renderUserMessage(text, timestamp) {
+  const userWrapper = document.createElement("div");
+  userWrapper.className = "flex flex-col items-end mb-4";
+  userWrapper.innerHTML = `
+    <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 max-w-2xl w-full">
+      <div class="flex justify-between items-center mb-2 text-xs text-slate-400">
+        <span class="font-bold text-blue-400">👤 You</span>
+        <span>${timestamp}</span>
+      </div>
+      <div class="text-slate-200 text-sm whitespace-pre-wrap">${escapeHTML(text)}</div>
+    </div>
+  `;
+  chatContainer.appendChild(userWrapper);
 }
 
-// Initialize on Load
-document.addEventListener('DOMContentLoaded', () => {
-  initGoogleAuth();
-  initVoiceAssistant();
-  updateAdminMetrics();
-});
+function renderJarvisMessage(text) {
+  const jarvisWrapper = document.createElement("div");
+  jarvisWrapper.className = "flex flex-col items-start mb-4";
+  jarvisWrapper.innerHTML = `
+    <div class="bg-slate-950 border border-slate-800 rounded-lg p-4 max-w-2xl w-full">
+      <div class="flex items-center gap-2 mb-2 text-xs font-bold text-amber-500">
+        <span>🤖 JARVIS AI Response</span>
+      </div>
+      <div class="text-slate-200 text-sm whitespace-pre-wrap leading-relaxed">${escapeHTML(text)}</div>
+      <div class="mt-3 pt-2 border-t border-slate-900 text-[10px] text-slate-500 font-mono">
+        JARVIS AI Hub • Created by Abdullah waheed
+      </div>
+    </div>
+  `;
+  chatContainer.appendChild(jarvisWrapper);
+}
+
+function renderLoadingMessage() {
+  const tempId = "loading-" + Date.now();
+  const loadingWrapper = document.createElement("div");
+  loadingWrapper.id = tempId;
+  loadingWrapper.className = "flex flex-col items-start mb-4";
+  loadingWrapper.innerHTML = `
+    <div class="bg-slate-950 border border-slate-800 rounded-lg p-4 max-w-2xl w-full">
+      <div class="flex items-center gap-2 mb-2 text-xs font-bold text-amber-500">
+        <span>🤖 JARVIS AI Response</span>
+      </div>
+      <div class="text-slate-400 text-sm animate-pulse">JARVIS is processing your request...</div>
+    </div>
+  `;
+  chatContainer.appendChild(loadingWrapper);
+  return tempId;
+}
+
+function removeElement(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+function scrollToBottom() {
+  if (chatContainer) {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+}
+
+function escapeHTML(str) {
+  return str.replace(/[&<>'"]/g, 
+    tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag] || tag)
+  );
+}
