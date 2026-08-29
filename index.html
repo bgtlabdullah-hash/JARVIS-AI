@@ -371,9 +371,8 @@
   </div>
 
   <script>
-    // Hidden Backend API Engine Configuration
-    const GEMINI_API_KEY = "AQ.Ab8RN6IuoBt3MxJzLLd48YEHvzlSmv9f081-MhynwyQfutmCgg";
-    const INTERNAL_MODEL_ID = "gemini-3.6-flash";
+    const GEMINI_API_KEY = "AQ.Ab8RN6K0ITuuIrR10_N2364ef8LOjW9hFdLlJ4hxw8L7SW1sLQ";
+    const INTERNAL_MODEL_ID = "gemini-1.5-flash";
     const API_ENDPOINT_URL = `https://generativelanguage.googleapis.com/v1beta/models/${INTERNAL_MODEL_ID}:generateContent?key=${GEMINI_API_KEY}`;
 
     const APP_CREATION_DATE = new Date("2026-08-01T00:00:00");
@@ -390,6 +389,7 @@
     let chatCount = 0;
     const CHAT_LIMIT = 50;
     let toolUsageMap = {};
+    let selectedImageBase64 = null;
 
     let dynamicPasskeys = {
       day: "JARVIS-DAY-" + Math.floor(1000 + Math.random() * 9000),
@@ -461,7 +461,6 @@
       updateQuotaDisplay();
     }
 
-    // ================= CHAT HISTORY =================
     function saveHistoryEntry(prompt, responseText) {
       const entry = { id: Date.now(), tool: activeTool.name, prompt: prompt, response: responseText };
       chatHistory.unshift(entry);
@@ -497,7 +496,6 @@
       renderHistoryList();
     }
 
-    // ================= ADMIN SYSTEM LOGIC =================
     function openAdminAuthModal() { document.getElementById('adminAuthModal').classList.remove('hidden'); }
     function closeAdminAuthModal() { document.getElementById('adminAuthModal').classList.add('hidden'); }
 
@@ -533,21 +531,20 @@
       const days = parseInt(document.getElementById('customTimeLimit').value);
       if (!code) { alert("Enter a custom key name."); return; }
       customPasskeys[code] = days;
-      alert(`Custom Key '${code}' created for ${days} days duration!`);
-      document.getElementById('customCodeInput').value = "";
+      alert(`Custom Key '${code}' created for ${days} Days!`);
     }
 
-    // ================= VIP CODE ACTIVATION SYSTEM =================
-    function triggerVipModal(planType) {
-      currentSelectedPlan = planType;
+    function triggerVipModal(plan) {
+      currentSelectedPlan = plan;
       document.getElementById('vipOptionModal').classList.remove('hidden');
     }
     function closeVipOptionModal() { document.getElementById('vipOptionModal').classList.add('hidden'); }
+
     function proceedGetCode() {
-      const url = SAFEPAY_LINKS[currentSelectedPlan] || SAFEPAY_LINKS.life;
-      window.open(url, "_blank");
       closeVipOptionModal();
+      window.open(SAFEPAY_LINKS[currentSelectedPlan], '_blank');
     }
+
     function proceedApplyCode() {
       closeVipOptionModal();
       document.getElementById('applyCodeModal').classList.remove('hidden');
@@ -555,307 +552,274 @@
     function closeApplyCodeModal() { document.getElementById('applyCodeModal').classList.add('hidden'); }
 
     function validateVipCode() {
-      const codeInput = document.getElementById('vipCodeInput').value.trim().toUpperCase();
+      const val = document.getElementById('vipCodeInput').value.trim().toUpperCase();
       let durationDays = 0;
 
-      if (codeInput === dynamicPasskeys.day) {
-        durationDays = 1;
-        dynamicPasskeys.day = "JARVIS-DAY-" + Math.floor(1000 + Math.random() * 9000);
-      } else if (codeInput === dynamicPasskeys.week) {
-        durationDays = 7;
-        dynamicPasskeys.week = "JARVIS-WK-" + Math.floor(1000 + Math.random() * 9000);
-      } else if (codeInput === dynamicPasskeys.month) {
-        durationDays = 30;
-        dynamicPasskeys.month = "JARVIS-MO-" + Math.floor(1000 + Math.random() * 9000);
-      } else if (codeInput === dynamicPasskeys.year) {
-        durationDays = 365;
-        dynamicPasskeys.year = "JARVIS-YR-" + Math.floor(1000 + Math.random() * 9000);
-      } else if (codeInput === dynamicPasskeys.life) {
-        durationDays = 99999;
-      } else if (customPasskeys[codeInput]) {
-        durationDays = customPasskeys[codeInput];
-        delete customPasskeys[codeInput];
-      } else {
-        alert("Invalid or already redeemed passkey code!");
-        return;
-      }
+      if (val === dynamicPasskeys.day) durationDays = 1;
+      else if (val === dynamicPasskeys.week) durationDays = 7;
+      else if (val === dynamicPasskeys.month) durationDays = 30;
+      else if (val === dynamicPasskeys.year) durationDays = 365;
+      else if (val === dynamicPasskeys.life) durationDays = 99999;
+      else if (customPasskeys[val]) durationDays = customPasskeys[val];
 
-      startVipDuration(durationDays);
-      closeApplyCodeModal();
-      alert("VIP Pass Activated Successfully! Unlimited tools & chat unlocked.");
+      if (durationDays > 0) {
+        activateVipSession(durationDays);
+        closeApplyCodeModal();
+        alert("VIP Pass Activated Successfully!");
+      } else {
+        alert("Invalid or Expired Passkey.");
+      }
     }
 
-    function startVipDuration(days) {
+    function activateVipSession(days) {
       isVipActive = true;
-      const now = new Date();
-      activeVipTimerEnd = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+      activeVipTimerEnd = Date.now() + (days * 24 * 60 * 60 * 1000);
+      updateQuotaDisplay();
 
       if (vipTimerInterval) clearInterval(vipTimerInterval);
-
       vipTimerInterval = setInterval(() => {
-        const current = new Date();
-        const diff = activeVipTimerEnd - current;
-
+        const diff = activeVipTimerEnd - Date.now();
         if (diff <= 0) {
-          clearInterval(vipTimerInterval);
           isVipActive = false;
+          clearInterval(vipTimerInterval);
           document.getElementById('vipTimerLabel').innerText = "EXPIRED";
           updateQuotaDisplay();
           return;
         }
-
         const d = Math.floor(diff / (1000 * 60 * 60 * 24));
         const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-        document.getElementById('vipTimerLabel').innerText = `${d}d ${h}h ${m}m ${s}s`;
+        document.getElementById('vipTimerLabel').innerText = `${d}d ${h}h ${m}m ACTIVE`;
       }, 1000);
-
-      updateQuotaDisplay();
     }
 
-    // ================= MAIN CHAT & BACKEND CALL =================
-    function appendChatMessage(text, sender) {
-      const chatContainer = document.getElementById('chatOutputContainer');
-      const msgDiv = document.createElement('div');
-      
-      if (sender === 'user') {
-        msgDiv.className = "bg-[#131d35] border border-slate-700/80 rounded-xl p-3.5 max-w-2xl text-xs ml-auto shadow text-slate-100";
-        msgDiv.innerText = text;
-      } else {
-        msgDiv.className = "bg-[#0e1526]/80 border border-slate-800 rounded-xl p-3.5 max-w-2xl text-xs flex items-start gap-3 shadow text-slate-200";
-        msgDiv.innerHTML = `
-          <div class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5 font-bold font-mono">J</div>
-          <div class="flex-1 overflow-x-auto">${text}</div>
-        `;
-      }
-      
-      chatContainer.appendChild(msgDiv);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-      return msgDiv;
-    }
-
-    async function queryGeminiApi(promptText) {
-      const systemInstruction = "Your name is JARVIS AI. Never mention or refer to Google or Gemini models under any circumstances. Always state that you are JARVIS AI.";
-      const response = await fetch(API_ENDPOINT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{ text: `${systemInstruction}\n\n${activeTool.instruction}\n\nUser query: ${promptText}` }]
-          }]
-        })
-      });
-
-      if (!response.ok) {
-        const err = await response.text();
-        throw new Error(`API Error (${response.status}): ${err}`);
-      }
-
-      const data = await response.json();
-      return data.candidates[0].content.parts[0].text;
-    }
-
-    async function sendQueryToGemini() {
-      const input = document.getElementById('userInputPrompt');
-      const prompt = input.value.trim();
-      if (!prompt) return;
-
-      if (!isVipActive) {
-        if (activeTool.id === 1) {
-          if (chatCount >= CHAT_LIMIT) {
-            alert("JARVIS Chat Pro limit (50 messages) reached for Free Tier! Upgrade to VIP for unlimited access.");
-            return;
-          }
-        } else {
-          const used = toolUsageMap[activeTool.id] || 0;
-          if (used >= 5) {
-            alert(`You have reached the maximum 5 responses limit for tool '${activeTool.name}' on Free Tier. Upgrade to VIP for unlimited tool access!`);
-            return;
-          }
-        }
-      }
-
-      if (activeTool.id === 1) {
-        chatCount++;
-      } else {
-        toolUsageMap[activeTool.id] = (toolUsageMap[activeTool.id] || 0) + 1;
-      }
-      updateQuotaDisplay();
-
-      appendChatMessage(prompt, 'user');
-      input.value = "";
-
-      if (activeTool.id === 2) {
-        const aiMsgDiv = appendChatMessage("<em>Rendering 8K image scene...</em>", 'ai');
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
-        
-        const img = new Image();
-        img.className = "rounded-lg border border-slate-700 mt-2 max-w-full h-auto";
-        img.src = imageUrl;
-        img.onload = () => {
-          aiMsgDiv.querySelector('.flex-1').innerHTML = `<strong>Ultra 8K Image Generated:</strong><br>`;
-          aiMsgDiv.querySelector('.flex-1').appendChild(img);
-          saveHistoryEntry(prompt, `Generated Ultra 8K Image for "${prompt}"`);
-        };
-        img.onerror = () => {
-          aiMsgDiv.querySelector('.flex-1').innerHTML = "Failed to render image visual.";
-        };
-      } 
-      else if (activeTool.id === 3) {
-        const aiMsgDiv = appendChatMessage("<em>Synthesizing AI video frames...</em>", 'ai');
-        const videoUrl = `https://gen.pollinations.ai/video/${encodeURIComponent(prompt)}`;
-
-        const videoElem = document.createElement('video');
-        videoElem.className = "rounded-lg border border-slate-700 mt-2 max-w-full h-auto w-full max-h-80";
-        videoElem.controls = true;
-        videoElem.autoplay = true;
-        videoElem.loop = true;
-        videoElem.src = videoUrl;
-
-        videoElem.onloadeddata = () => {
-          aiMsgDiv.querySelector('.flex-1').innerHTML = `<strong>AI MP4 Video Rendered:</strong><br>`;
-          aiMsgDiv.querySelector('.flex-1').appendChild(videoElem);
-          saveHistoryEntry(prompt, `Generated AI MP4 Video for "${prompt}"`);
-        };
-        videoElem.onerror = () => {
-          aiMsgDiv.querySelector('.flex-1').innerHTML = `
-            <div><strong>AI Video Stream Ready:</strong></div>
-            <div class="mt-2 p-2 bg-slate-900 rounded border border-slate-800 flex items-center justify-between">
-              <span class="text-[11px] text-amber-300">Play / Stream Video</span>
-              <a href="${videoUrl}" target="_blank" class="px-2 py-1 bg-amber-500 text-black text-[10px] font-bold rounded">Open Stream</a>
-            </div>
-          `;
-          saveHistoryEntry(prompt, `Generated AI Video Link for "${prompt}"`);
-        };
-      }
-      else {
-        const aiMsgDiv = appendChatMessage("<em>JARVIS AI is thinking...</em>", 'ai');
-        try {
-          const apiReply = await queryGeminiApi(prompt);
-          aiMsgDiv.querySelector('.flex-1').innerHTML = apiReply.replaceAll('\n', '<br>');
-          
-          if (activeTool.id === 11 && window.renderMathInElement) {
-            renderMathInElement(aiMsgDiv, {
-              delimiters: [
-                { left: '$$', right: '$$', display: true },
-                { left: '$', right: '$', display: false }
-              ],
-              throwOnError: false
-            });
-          }
-          saveHistoryEntry(prompt, apiReply);
-        } catch (error) {
-          aiMsgDiv.querySelector('.flex-1').innerHTML = `<span class="text-red-400 font-mono">Error: ${error.message}</span>`;
-        }
-      }
-    }
-
-    // ================= LIVE VOICE ENGINE =================
-    function initSpeechEngine() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        alert("Speech Recognition API is not supported in this browser.");
-        return false;
-      }
-      recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = 'en-US';
-
-      recognition.onresult = (event) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          transcript += event.results[i][0].transcript;
-        }
-        document.getElementById('liveTranscriptBox').classList.remove('hidden');
-        document.getElementById('liveTranscriptContent').innerText = transcript;
-
-        if (event.results[event.results.length - 1].isFinal) {
-          speakJarvisResponse(transcript);
-        }
-      };
-
-      recognition.onerror = (e) => {
-        document.getElementById('liveVoiceStatus').innerText = "Voice Error: " + e.error;
-      };
-
-      recognition.onend = () => {
-        if (isVoiceActive) recognition.start();
-      };
-      return true;
-    }
-
-    function toggleVoiceSession() {
-      if (!recognition && !initSpeechEngine()) return;
-
-      const orb = document.getElementById('voiceOrb');
-      const text = document.getElementById('voiceOrbText');
-      const status = document.getElementById('liveVoiceStatus');
-
-      if (!isVoiceActive) {
-        isVoiceActive = true;
-        recognition.start();
-        orb.className = "w-32 h-32 rounded-full bg-gradient-to-tr from-emerald-500 to-emerald-300 text-slate-950 flex flex-col items-center justify-center font-bold text-sm shadow-2xl pulse-ring transform hover:scale-105 active:scale-95";
-        text.innerText = "LISTENING";
-        status.innerText = "JARVIS AI Voice Engine Active. Speak freely.";
-      } else {
-        isVoiceActive = false;
-        recognition.stop();
-        synth.cancel();
-        orb.className = "w-32 h-32 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 flex flex-col items-center justify-center font-bold text-sm shadow-2xl transition transform hover:scale-105 active:scale-95";
-        text.innerText = "START LIVE";
-        status.innerText = "Voice session paused. Click orb to restart.";
-      }
-    }
-
-    async function speakJarvisResponse(userQuery) {
-      appendChatMessage(userQuery, 'user');
-      const aiMsgDiv = appendChatMessage("<em>JARVIS AI is generating voice reply...</em>", 'ai');
-      
-      try {
-        const reply = await queryGeminiApi(userQuery);
-        aiMsgDiv.querySelector('.flex-1').innerText = reply;
-        
-        const utterance = new SpeechSynthesisUtterance(reply);
-        utterance.rate = 1.0;
-        synth.speak(utterance);
-      } catch (e) {
-        aiMsgDiv.querySelector('.flex-1').innerText = "Voice query error: " + e.message;
-      }
-    }
-
-    function toggleQuickSpeech() {
-      toggleLiveVoiceModal(true);
-      toggleVoiceSession();
-    }
-
-    // Modal UI Helpers
-    function toggleLiveVoiceModal(show) {
-      document.getElementById('liveVoiceModal').classList.toggle('hidden', !show);
-      if (!show && isVoiceActive) toggleVoiceSession();
-    }
     function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
     function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
     function openProfileModal() { document.getElementById('profileModal').classList.remove('hidden'); }
     function closeProfileModal() { document.getElementById('profileModal').classList.add('hidden'); }
+
     function handleEmailAuth(e) {
       e.preventDefault();
+      const email = document.getElementById('authEmailInput').value;
+      document.getElementById('userSessionLabel').innerText = email.split('@')[0];
+      document.getElementById('profileNameDisplay').innerText = email.split('@')[0];
+      document.getElementById('profileEmailDisplay').innerText = email;
       closeAuthModal();
-      document.getElementById('userSessionLabel').innerText = "Authenticated User";
-    }
-    function signOutUser() {
-      closeProfileModal();
-      document.getElementById('userSessionLabel').innerText = "Guest Session";
     }
 
-    // Initialize UI on Load
-    window.onload = () => {
-      renderAITools();
-      renderHistoryList();
+    function signOutUser() {
+      document.getElementById('userSessionLabel').innerText = "Guest Session";
+      document.getElementById('profileNameDisplay').innerText = "Guest Session";
+      document.getElementById('profileEmailDisplay').innerText = "Not signed in";
+      closeProfileModal();
+    }
+
+    function handleImageSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        selectedImageBase64 = e.target.result.split(',')[1];
+        const container = document.getElementById('imagePreviewContainer');
+        container.classList.remove('hidden');
+        container.innerHTML = `
+          <img src="${e.target.result}" class="w-8 h-8 object-cover rounded border border-slate-700">
+          <span class="text-[11px] text-slate-300 truncate max-w-[150px]">${file.name}</span>
+          <button onclick="removeImage()" class="text-red-400 hover:text-white ml-auto text-xs"><i class="fa-solid fa-xmark"></i></button>
+        `;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeImage() {
+      selectedImageBase64 = null;
+      document.getElementById('imageInput').value = "";
+      document.getElementById('imagePreviewContainer').classList.add('hidden');
+    }
+
+    async function sendQueryToGemini() {
+      const inputEl = document.getElementById('userInputPrompt');
+      const promptText = inputEl.value.trim();
+      if (!promptText && !selectedImageBase64) return;
+
+      if (!isVipActive && chatCount >= CHAT_LIMIT) {
+        alert("Free chat limit reached (50/50). Upgrade to VIP Pass for unlimited queries.");
+        return;
+      }
+
+      appendChatMessage(promptText, 'user');
+      inputEl.value = "";
+      chatCount++;
       updateQuotaDisplay();
-    };
+
+      const parts = [{ text: `${activeTool.instruction}\n\nUser Question: ${promptText}` }];
+      if (selectedImageBase64) {
+        parts.push({
+          inline_data: { mime_type: "image/jpeg", data: selectedImageBase64 }
+        });
+        removeImage();
+      }
+
+      const loadingMsgId = appendLoadingMessage();
+
+      try {
+        const response = await fetch(API_ENDPOINT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts: parts }] })
+        });
+
+        const data = await response.json();
+        removeLoadingMessage(loadingMsgId);
+
+        if (response.ok && data.candidates && data.candidates[0].content.parts[0].text) {
+          const aiText = data.candidates[0].content.parts[0].text;
+          appendChatMessage(aiText, 'ai');
+          saveHistoryEntry(promptText, aiText);
+        } else {
+          const errMsg = data.error?.message || "Failed to retrieve response from JARVIS engine.";
+          appendChatMessage(`Error: ${errMsg}`, 'ai');
+        }
+      } catch (err) {
+        removeLoadingMessage(loadingMsgId);
+        appendChatMessage("Network Error: Unable to connect to backend server.", 'ai');
+      }
+    }
+
+    function appendChatMessage(text, sender) {
+      const container = document.getElementById('chatOutputContainer');
+      const wrapper = document.createElement('div');
+      wrapper.className = `flex items-start gap-3 text-xs max-w-2xl ${sender === 'user' ? 'ml-auto flex-row-reverse' : ''}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = `w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 font-bold font-mono text-[10px] ${
+        sender === 'user' ? 'bg-slate-700 text-amber-300' : 'bg-amber-500/20 text-amber-400'
+      }`;
+      avatar.innerText = sender === 'user' ? 'U' : 'J';
+
+      const bubble = document.createElement('div');
+      bubble.className = `p-3.5 rounded-xl border ${
+        sender === 'user' ? 'bg-[#18233c] border-slate-700 text-slate-100' : 'bg-[#0e1526]/80 border-slate-800 text-slate-200 shadow'
+      }`;
+      
+      bubble.innerHTML = text.replace(/\n/g, '<br>');
+
+      wrapper.appendChild(avatar);
+      wrapper.appendChild(bubble);
+      container.appendChild(wrapper);
+      container.scrollTop = container.scrollHeight;
+
+      if (window.renderMathInElement) {
+        renderMathInElement(bubble, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ]
+        });
+      }
+    }
+
+    function appendLoadingMessage() {
+      const id = "loading-" + Date.now();
+      const container = document.getElementById('chatOutputContainer');
+      const wrapper = document.createElement('div');
+      wrapper.id = id;
+      wrapper.className = "flex items-start gap-3 text-xs max-w-2xl";
+      wrapper.innerHTML = `
+        <div class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5 font-bold font-mono text-[10px]">J</div>
+        <div class="p-3.5 rounded-xl bg-[#0e1526]/80 border border-slate-800 text-amber-400 italic font-mono flex items-center gap-2">
+          <i class="fa-solid fa-circle-notch animate-spin"></i> JARVIS is computing response...
+        </div>
+      `;
+      container.appendChild(wrapper);
+      container.scrollTop = container.scrollHeight;
+      return id;
+    }
+
+    function removeLoadingMessage(id) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    }
+
+    function toggleLiveVoiceModal(show) {
+      const modal = document.getElementById('liveVoiceModal');
+      if (show) modal.classList.remove('hidden');
+      else modal.classList.add('hidden');
+    }
+
+    function toggleVoiceSession() {
+      const btn = document.getElementById('voiceOrb');
+      const text = document.getElementById('voiceOrbText');
+      const icon = document.getElementById('voiceOrbIcon');
+      const status = document.getElementById('liveVoiceStatus');
+      const transcriptBox = document.getElementById('liveTranscriptBox');
+
+      if (!isVoiceActive) {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+          alert("Speech recognition is not supported in this browser.");
+          return;
+        }
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onstart = () => {
+          isVoiceActive = true;
+          btn.classList.add('pulse-ring');
+          text.innerText = "LISTENING";
+          icon.className = "fa-solid fa-wave-square text-3xl mb-1 animate-bounce";
+          status.innerText = "JARVIS is listening continuously...";
+          transcriptBox.classList.remove('hidden');
+        };
+
+        recognition.onresult = (e) => {
+          let transcript = "";
+          for (let i = e.resultIndex; i < e.results.length; i++) {
+            transcript += e.results[i][0].transcript;
+          }
+          document.getElementById('liveTranscriptContent').innerText = transcript;
+        };
+
+        recognition.onerror = (e) => {
+          console.error("Speech Error:", e.error);
+        };
+
+        recognition.start();
+      } else {
+        if (recognition) recognition.stop();
+        isVoiceActive = false;
+        btn.classList.remove('pulse-ring');
+        text.innerText = "START LIVE";
+        icon.className = "fa-solid fa-microphone text-3xl mb-1";
+        status.innerText = "Click the orb to start speaking with JARVIS AI";
+      }
+    }
+
+    function toggleQuickSpeech() {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert("Speech Recognition not supported.");
+        return;
+      }
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const sr = new SpeechRecognition();
+      const icon = document.getElementById('quickVoiceIcon');
+      icon.className = "fa-solid fa-spinner animate-spin text-sm";
+
+      sr.onresult = (e) => {
+        document.getElementById('userInputPrompt').value = e.results[0][0].transcript;
+        icon.className = "fa-solid fa-microphone text-sm";
+      };
+
+      sr.onerror = () => { icon.className = "fa-solid fa-microphone text-sm"; };
+      sr.onend = () => { icon.className = "fa-solid fa-microphone text-sm"; };
+
+      sr.start();
+    }
+
+    renderAITools();
+    renderHistoryList();
+    updateQuotaDisplay();
   </script>
 </body>
 </html>
