@@ -8,9 +8,9 @@ if ('serviceWorker' in navigator) {
 }
 
 // Global Variables
-const GEMINI_API_KEY = "AQ.Ab8RN6KOfhwm-PHfQoBciwl4oXvw4Jz9Nxz-MrXkMQPVwdHZxA";
+const GEMINI_API_KEY = "AQ.Ab8RN6Lbxaqqjdo0dT5g0rr98OvjPuNt2gnpE-8L_VDK-XheEA";
 const INTERNAL_MODEL_ID = "gemini-3.6-flash";
-const API_ENDPOINT_URL = `https://generativelanguage.googleapis.com/v1beta/models/${INTERNAL_MODEL_ID}:generateContent?key=${GEMINI_API_KEY}`;
+const API_ENDPOINT_URL = `https://generativelanguage.googleapis.com/v1beta/models/${INTERNAL_MODEL_ID}:generateContent`;
 
 const APP_CREATION_DATE = new Date("2026-08-01T00:00:00");
 
@@ -322,7 +322,8 @@ async function sendQueryToGemini() {
     const response = await fetch(API_ENDPOINT_URL, {
       method: "POST",
       headers: { 
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "x-goog-api-key": GEMINI_API_KEY
       },
       body: JSON.stringify({ contents: [{ parts: parts }] })
     });
@@ -335,7 +336,7 @@ async function sendQueryToGemini() {
       appendChatMessage(aiText, 'ai');
       saveHistoryEntry(promptText, aiText);
     } else {
-      const errMsg = data.error?.message || "Invalid response format or unauthorized API key.";
+      const errMsg = data.error?.message || `HTTP ${response.status}: Failed to retrieve response. Check API key permissions.`;
       appendChatMessage(`API Error: ${errMsg}`, 'ai');
     }
   } catch (err) {
