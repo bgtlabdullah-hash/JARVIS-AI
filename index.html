@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JARVIS AI HUB</title>
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22JARVIS%20AI%20HUB%22,%22short_name%22:%22JARVIS%22,%22start_url%22:%22/%22,%22display%22:%22standalone%22,%22background_color%22:%22%23050811%22,%22theme_color%22:%22%23050811%22}">
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
@@ -128,6 +132,12 @@
       </div>
 
       <div class="flex items-center gap-2">
+        <!-- Install App Button -->
+        <button id="installAppBtn" onclick="installAppPrompt()" class="hidden px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs rounded-lg flex items-center gap-1.5 transition shadow active:scale-95">
+          <i class="fa-solid fa-download text-xs"></i>
+          <span>Install App</span>
+        </button>
+
         <button onclick="openAdminAuthModal()" class="px-3 py-1.5 bg-red-950/50 hover:bg-red-900/60 border border-red-800/60 text-red-300 font-bold text-xs rounded-lg flex items-center gap-1.5 transition">
           <i class="fa-solid fa-user-shield text-xs"></i>
           <span>Admin Portal</span>
@@ -371,9 +381,10 @@
   </div>
 
   <script>
-    const GEMINI_API_KEY = "AQ.Ab8RN6K0ITuuIrR10_N2364ef8LOjW9hFdLlJ4hxw8L7SW1sLQ";
-    const INTERNAL_MODEL_ID = "gemini-1.5-flash";
-    const API_ENDPOINT_URL = `https://generativelanguage.googleapis.com/v1beta/models/${INTERNAL_MODEL_ID}:generateContent?key=${GEMINI_API_KEY}`;
+    // Embedded API Key configured with header-based authorization for AQ keys
+    const GEMINI_API_KEY = "AQ.Ab8RN6JfhZGo-RxEX98S1YUFXMaRoigznQBGrRBFHNWQgF7-xw";
+    const INTERNAL_MODEL_ID = "gemini-3.6-flash";
+    const API_ENDPOINT_URL = `https://generativelanguage.googleapis.com/v1beta/models/${INTERNAL_MODEL_ID}:generateContent`;
 
     const APP_CREATION_DATE = new Date("2026-08-01T00:00:00");
 
@@ -424,7 +435,36 @@
 
     let recognition = null;
     let isVoiceActive = false;
-    let synth = window.speechSynthesis;
+    let deferredPrompt = null;
+
+    // Listen for PWA installation prompt event
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const installBtn = document.getElementById('installAppBtn');
+      if (installBtn) installBtn.classList.remove('hidden');
+    });
+
+    async function installAppPrompt() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        document.getElementById('installAppBtn').classList.add('hidden');
+      }
+      deferredPrompt = null;
+    }
+
+    // Register a basic Service Worker dynamically for PWA installation support
+    if ('serviceWorker' in navigator) {
+      const swBlob = new Blob([`
+        self.addEventListener('fetch', function(event) {
+          event.respondWith(fetch(event.request));
+        });
+      `], { type: 'text/javascript' });
+      const swUrl = URL.createObjectURL(swBlob);
+      navigator.serviceWorker.register(swUrl).catch(console.error);
+    }
 
     function updateQuotaDisplay() {
       if (isVipActive) {
@@ -665,14 +705,17 @@
       try {
         const response = await fetch(API_ENDPOINT_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "x-goog-api-key": GEMINI_API_KEY
+          },
           body: JSON.stringify({ contents: [{ parts: parts }] })
         });
 
         const data = await response.json();
         removeLoadingMessage(loadingMsgId);
 
-        if (response.ok && data.candidates && data.candidates[0].content.parts[0].text) {
+        if (response.ok && data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
           const aiText = data.candidates[0].content.parts[0].text;
           appendChatMessage(aiText, 'ai');
           saveHistoryEntry(promptText, aiText);
