@@ -8,7 +8,7 @@ if ('serviceWorker' in navigator) {
 }
 
 // Global Variables
-const GEMINI_API_KEY = "AQ.Ab8RN6JfhZGo-RxEX98S1YUFXMaRoigznQBGrRBFHNWQgF7-xw";
+const GEMINI_API_KEY = "AQ.Ab8RN6KOfhwm-PHfQoBciwl4oXvw4Jz9Nxz-MrXkMQPVwdHZxA";
 const INTERNAL_MODEL_ID = "gemini-3.6-flash";
 const API_ENDPOINT_URL = `https://generativelanguage.googleapis.com/v1beta/models/${INTERNAL_MODEL_ID}:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -335,12 +335,12 @@ async function sendQueryToGemini() {
       appendChatMessage(aiText, 'ai');
       saveHistoryEntry(promptText, aiText);
     } else {
-      const errMsg = data.error?.message || "Failed to retrieve response from JARVIS engine.";
-      appendChatMessage(`Error: ${errMsg}`, 'ai');
+      const errMsg = data.error?.message || "Invalid response format or unauthorized API key.";
+      appendChatMessage(`API Error: ${errMsg}`, 'ai');
     }
   } catch (err) {
     removeLoadingMessage(loadingMsgId);
-    appendChatMessage("Network Error: Unable to connect to backend server.", 'ai');
+    appendChatMessage("Network Error: Failed to reach Google API servers.", 'ai');
   }
 }
 
