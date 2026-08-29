@@ -10,7 +10,7 @@ if ('serviceWorker' in navigator) {
 // Global Variables
 const GEMINI_API_KEY = "AQ.Ab8RN6JfhZGo-RxEX98S1YUFXMaRoigznQBGrRBFHNWQgF7-xw";
 const INTERNAL_MODEL_ID = "gemini-3.6-flash";
-const API_ENDPOINT_URL = `https://generativelanguage.googleapis.com/v1beta/models/${INTERNAL_MODEL_ID}:generateContent`;
+const API_ENDPOINT_URL = `https://generativelanguage.googleapis.com/v1beta/models/${INTERNAL_MODEL_ID}:generateContent?key=${GEMINI_API_KEY}`;
 
 const APP_CREATION_DATE = new Date("2026-08-01T00:00:00");
 
@@ -322,8 +322,7 @@ async function sendQueryToGemini() {
     const response = await fetch(API_ENDPOINT_URL, {
       method: "POST",
       headers: { 
-        "Content-Type": "application/json",
-        "x-goog-api-key": GEMINI_API_KEY
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({ contents: [{ parts: parts }] })
     });
