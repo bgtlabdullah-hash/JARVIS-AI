@@ -13,7 +13,7 @@ if ('serviceWorker' in navigator) {
 
 // Global Configuration & Security Constants (Using Groq for Native Browser CORS support)
 const GROQ_API_KEY = "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"; 
-const GROQ_MODEL_ID = "llama-3.3-70b-versatile";
+const GROQ_MODEL_ID = "llama-3.1-70b-versatile";
 const API_ENDPOINT_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 const APP_CREATION_DATE = new Date("2026-08-01T00:00:00");
