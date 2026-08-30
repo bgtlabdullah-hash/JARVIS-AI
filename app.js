@@ -12,7 +12,7 @@ if ('serviceWorker' in navigator) {
 }
 
 // Global Configuration & Security Constants
-const GROQ_API_KEY = "gsk_your_actual_groq_api_key_here"; // Replace with your real Groq API key if needed
+const GROQ_API_KEY = "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";
 const GROQ_MODEL_ID = "qwen/qwen3.6-27b";
 const API_ENDPOINT_URL = "https://api.groq.com/openai/v1/chat/completions";
 
