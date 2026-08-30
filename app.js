@@ -12,7 +12,7 @@ if ('serviceWorker' in navigator) {
 }
 
 // Global Configuration & Security Constants (Using Groq for Native Browser CORS support)
-const GROQ_API_KEY = "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"; 
+const GROQ_API_KEY = "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"; 
 const GROQ_MODEL_ID = "llama-3.3-70b-versatile";
 const API_ENDPOINT_URL = "https://api.groq.com/openai/v1/chat/completions";
 
