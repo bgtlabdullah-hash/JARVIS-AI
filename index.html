@@ -1,283 +1,239 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JARVIS AI HUB</title>
-  <!-- Tailwind CSS CDN -->
+  <title>JARVIS AI HUB - Production Edition</title>
+  
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- KaTeX for Math LaTeX Rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+  
   <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#0b0f19">
+
   <style>
+    body { background-color: #050811; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #0b0f19; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+    .pulse-ring { animation: pulseRing 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
     @keyframes pulseRing {
-      0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
-      70% { box-shadow: 0 0 0 20px rgba(245, 158, 11, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+      50% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(245, 158, 11, 0); }
     }
-    .pulse-ring { animation: pulseRing 2s infinite; }
   </style>
 </head>
-<body class="bg-[#0b0f19] text-slate-100 font-sans h-screen flex overflow-hidden">
+<body class="flex h-screen overflow-hidden">
 
-  <!-- LEFT SIDEBAR: CONTROLS & WORKSPACE FOLDERS -->
-  <aside class="w-72 bg-[#0e1526] border-r border-slate-800 flex flex-col shrink-0 select-none">
-    <!-- Header App Branding -->
+  <aside id="sidebarPanel" class="w-80 bg-[#0b0f19] border-r border-slate-800 flex flex-col shrink-0 transition-all duration-300 z-20">
     <div class="p-4 border-b border-slate-800 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold font-mono">J</div>
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-bold font-mono">J</div>
         <div>
-          <h1 class="font-bold text-sm tracking-wide text-slate-200">JARVIS AI HUB</h1>
-          <span id="tierBadgeLabel" class="bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded text-[9px] font-mono">FREE TIER</span>
+          <h1 class="font-bold text-sm tracking-wide text-slate-100">JARVIS AI HUB</h1>
+          <span id="tierBadgeLabel" class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px] font-bold font-mono">FREE TIER</span>
         </div>
       </div>
-      <button onclick="openProfileModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-gear"></i></button>
+      <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-bars-staggered"></i></button>
     </div>
 
-    <!-- Quota & Status Box -->
-    <div class="p-3 border-b border-slate-800 bg-[#070b14] text-xs space-y-1.5">
-      <div class="flex justify-between text-[11px]">
-        <span class="text-slate-400"><i class="fa-solid fa-crown text-amber-400 mr-1"></i> VIP Status:</span>
-        <span id="vipTimerLabel" class="font-bold text-amber-400 font-mono">INACTIVE</span>
-      </div>
-      <div class="flex justify-between text-[11px]">
-        <span class="text-slate-400"><i class="fa-solid fa-comments text-amber-400 mr-1"></i> Chat Quota:</span>
-        <span id="chatQuotaDisplay" class="font-mono text-slate-300">1 / 50</span>
-      </div>
-      <div class="flex justify-between text-[11px]">
-        <span class="text-slate-400"><i class="fa-solid fa-toolbox text-amber-400 mr-1"></i> Tools Quota:</span>
-        <span id="toolQuotaDisplay" class="font-mono text-slate-300">1 / 50</span>
-      </div>
+    <div class="p-3 border-b border-slate-800 bg-[#0e1526]/50 text-xs space-y-1.5 font-mono">
+      <div class="flex justify-between text-slate-400"><span>VIP Status:</span><span id="vipTimerLabel" class="text-red-400 font-bold">INACTIVE</span></div>
+      <div class="flex justify-between text-slate-400"><span>Chat Quota:</span><span id="chatQuotaDisplay" class="text-slate-200">0 / 50</span></div>
+      <div class="flex justify-between text-slate-400"><span>Tools Quota:</span><span id="toolQuotaDisplay" class="text-slate-200">0 / 50</span></div>
     </div>
 
-    <!-- VIP Pass Store Links -->
     <div class="p-3 border-b border-slate-800 space-y-2">
-      <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Instant VIP Passes</div>
+      <div class="text-[10px] font-bold text-amber-400 tracking-wider font-mono">INSTANT VIP PASSES</div>
       <div class="grid grid-cols-2 gap-1.5">
-        <button onclick="triggerVipModal('day')" class="p-2 bg-[#131b2e] hover:bg-[#1a253f] border border-slate-700/60 rounded text-left transition">
-          <div class="text-[11px] font-bold text-amber-300">1 Day VIP</div>
-          <div class="text-[9px] text-slate-400">100 RS</div>
+        <button onclick="triggerVipModal('day')" class="p-1.5 bg-[#131b2e] hover:bg-amber-500/10 border border-slate-800 hover:border-amber-500/40 rounded text-left transition">
+          <div class="text-[11px] font-bold text-slate-200">1 Day VIP</div>
+          <div class="text-[9px] text-amber-400 font-mono">100 RS</div>
         </button>
-        <button onclick="triggerVipModal('week')" class="p-2 bg-[#131b2e] hover:bg-[#1a253f] border border-slate-700/60 rounded text-left transition">
-          <div class="text-[11px] font-bold text-amber-300">1 Week VIP</div>
-          <div class="text-[9px] text-slate-400">500 RS</div>
+        <button onclick="triggerVipModal('week')" class="p-1.5 bg-[#131b2e] hover:bg-amber-500/10 border border-slate-800 hover:border-amber-500/40 rounded text-left transition">
+          <div class="text-[11px] font-bold text-slate-200">1 Week VIP</div>
+          <div class="text-[9px] text-amber-400 font-mono">500 RS</div>
         </button>
-        <button onclick="triggerVipModal('month')" class="p-2 bg-[#131b2e] hover:bg-[#1a253f] border border-slate-700/60 rounded text-left transition">
-          <div class="text-[11px] font-bold text-amber-300">1 Month VIP</div>
-          <div class="text-[9px] text-slate-400">800 RS</div>
+        <button onclick="triggerVipModal('month')" class="p-1.5 bg-[#131b2e] hover:bg-amber-500/10 border border-slate-800 hover:border-amber-500/40 rounded text-left transition">
+          <div class="text-[11px] font-bold text-slate-200">1 Month VIP</div>
+          <div class="text-[9px] text-amber-400 font-mono">800 RS</div>
         </button>
-        <button onclick="triggerVipModal('year')" class="p-2 bg-[#131b2e] hover:bg-[#1a253f] border border-slate-700/60 rounded text-left transition">
-          <div class="text-[11px] font-bold text-amber-300">1 Year VIP</div>
-          <div class="text-[9px] text-slate-400">1200 RS</div>
+        <button onclick="triggerVipModal('year')" class="p-1.5 bg-[#131b2e] hover:bg-amber-500/10 border border-slate-800 hover:border-amber-500/40 rounded text-left transition">
+          <div class="text-[11px] font-bold text-slate-200">1 Year VIP</div>
+          <div class="text-[9px] text-amber-400 font-mono">1200 RS</div>
         </button>
       </div>
-      <button onclick="triggerVipModal('life')" class="w-full py-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-black font-bold rounded text-xs shadow transition flex items-center justify-center gap-1.5">
+      <button onclick="triggerVipModal('life')" class="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-xs rounded shadow transition flex items-center justify-center gap-1.5">
         <i class="fa-solid fa-crown"></i> LIFETIME VIP PASS (2000 PKR)
       </button>
     </div>
 
-    <!-- Admin Controls Trigger -->
-    <div class="px-3 py-2 border-b border-slate-800 flex items-center justify-between">
-      <span class="text-[10px] text-slate-400 uppercase tracking-wider">Controls</span>
-      <button onclick="openAdminAuthModal()" class="px-2 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded text-[10px] font-bold font-mono transition flex items-center gap-1">
-        <i class="fa-solid fa-lock"></i> ADMIN FOLDER
-      </button>
+    <div class="p-3 border-b border-slate-800 flex items-center justify-between gap-2">
+      <button onclick="openAdminAuthModal()" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded text-xs font-mono font-semibold transition"><i class="fa-solid fa-shield-halved mr-1"></i> Admin Portal</button>
+      <button onclick="clearChatHistory()" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded text-xs transition" title="Clear History"><i class="fa-solid fa-trash"></i></button>
     </div>
 
-    <!-- Saved History Section -->
-    <div class="px-3 py-2 border-b border-slate-800 flex items-center justify-between">
-      <span class="text-[10px] text-slate-400 uppercase tracking-wider">Saved History</span>
-      <button onclick="clearChatHistory()" class="text-[10px] text-red-400 hover:underline"><i class="fa-solid fa-trash mr-1"></i>Clear All</button>
+    <div class="px-3 py-2 text-[10px] font-bold text-slate-400 font-mono flex items-center justify-between">
+      <span>SAVED HISTORY</span>
+      <span id="userSessionLabel" class="text-amber-400">Guest Session</span>
     </div>
-    <div id="historyListContainer" class="px-3 py-2 flex-1 overflow-y-auto space-y-1.5 max-h-36">
+    <div id="historyListContainer" class="px-3 space-y-1 overflow-y-auto max-h-32 mb-2">
       <div class="text-slate-500 italic text-[10px] py-1">No saved history yet.</div>
     </div>
 
-    <!-- AI Workspace Folders List (12 Tools) -->
-    <div class="p-3 border-t border-slate-800 bg-[#070b14]">
-      <div class="flex justify-between items-center mb-2">
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">AI Workspace Folders</span>
-        <span class="text-[10px] font-mono text-amber-400">12 TOOLS</span>
-      </div>
-      <div id="aiToolsList" class="space-y-1 overflow-y-auto max-h-48 pr-1"></div>
-    </div>
+    <div class="px-3 py-1 text-[10px] font-bold text-slate-400 font-mono">AI WORKSPACE FOLDERS (12)</div>
+    <div id="aiToolsList" class="flex-1 overflow-y-auto px-3 pb-3 space-y-1.5"></div>
   </aside>
 
-  <!-- MAIN CHAT & INTERACTION AREA -->
-  <main class="flex-1 flex flex-col bg-[#0b0f19] relative overflow-hidden">
-    <!-- Top Action Nav -->
-    <header class="h-14 border-b border-slate-800 bg-[#0e1526]/80 backdrop-blur px-4 flex items-center justify-between shrink-0">
+  <main class="flex-1 flex flex-col bg-[#050811] relative overflow-hidden">
+    <header class="h-14 border-b border-slate-800 bg-[#0b0f19] px-4 flex items-center justify-between z-10">
       <div class="flex items-center gap-3">
-        <span id="activeToolBadge" class="bg-amber-500/10 text-amber-400 border border-amber-500/30 px-3 py-1 rounded text-xs font-bold font-mono">1. JARVIS Chat Pro</span>
+        <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-bars"></i></button>
+        <div id="activeToolBadge" class="bg-amber-500/10 border border-amber-500/30 text-amber-300 px-3 py-1 rounded-lg text-xs font-bold font-mono">1. JARVIS Chat Pro</div>
       </div>
-      <div class="flex items-center gap-2">
-        <button onclick="installAppPrompt()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded text-xs transition flex items-center gap-1.5 shadow">
+      
+      <div class="flex items-center gap-2.5">
+        <button onclick="installAppPrompt()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-lg transition flex items-center gap-1.5">
           <i class="fa-solid fa-download"></i> Install App
         </button>
-        <button onclick="openAdminAuthModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded text-xs transition flex items-center gap-1.5">
-          <i class="fa-solid fa-shield-halved text-amber-400"></i> Admin Portal
+        <button onclick="openAdminAuthModal()" class="px-3 py-1.5 bg-[#131b2e] hover:bg-slate-800 border border-slate-700 text-slate-200 font-semibold text-xs rounded-lg transition">
+          <i class="fa-solid fa-shield text-amber-400 mr-1"></i> Admin Portal
         </button>
-        <button onclick="toggleLiveVoiceModal(true)" class="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded text-xs transition flex items-center gap-1.5 font-semibold">
+        <button onclick="toggleLiveVoiceModal(true)" class="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-semibold text-xs rounded-lg transition flex items-center gap-1.5">
           <i class="fa-solid fa-microphone-lines animate-pulse"></i> Live Voice Mode
         </button>
-        <button onclick="openAuthModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded text-xs transition flex items-center gap-1.5">
-          <i class="fa-solid fa-user"></i> <span id="userSessionLabel">Guest Session</span>
+        <button onclick="openAuthModal()" class="px-3 py-1.5 bg-[#131b2e] hover:bg-slate-800 border border-slate-700 text-slate-200 font-semibold text-xs rounded-lg transition flex items-center gap-1.5">
+          <i class="fa-solid fa-user-circle text-amber-400"></i> Account / Sign In
         </button>
       </div>
     </header>
 
-    <!-- Chat Messages Scroll Area -->
     <div id="chatOutputContainer" class="flex-1 overflow-y-auto p-4 space-y-4">
       <div class="flex items-start gap-3 text-xs max-w-2xl">
         <div class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5 font-bold font-mono text-[10px]">J</div>
         <div class="p-3.5 rounded-xl bg-[#0e1526]/80 border border-slate-800 text-slate-200 shadow">
-          Greetings! I am JARVIS AI. How can I empower your tasks today?<br>
-          <span id="toolWelcomeText" class="text-[10px] text-slate-400 mt-1 block">Created by Abdullah Waheed</span>
+          <div id="toolWelcomeText">Greetings! I am JARVIS AI. How can I empower your tasks today?</div>
+          <div class="text-[10px] text-slate-500 mt-1 font-mono">Created by Abdullah Waheed</div>
         </div>
       </div>
     </div>
 
-    <!-- Image Preview Container -->
-    <div id="imagePreviewContainer" class="hidden px-4 py-2 bg-[#0e1526] border-t border-slate-800 flex items-center gap-2"></div>
-
-    <!-- Prompt Input Bar -->
-    <div class="p-4 border-t border-slate-800 bg-[#0e1526]/60 backdrop-blur">
-      <div class="max-w-4xl mx-auto flex items-center gap-2 bg-[#070b14] border border-slate-700/80 rounded-xl p-2 shadow-inner">
-        <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
-        <button onclick="toggleQuickSpeech()" class="w-9 h-9 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-amber-400 flex items-center justify-center transition" title="Voice Input">
-          <i id="quickVoiceIcon" class="fa-solid fa-microphone text-sm"></i>
-        </button>
-        <button onclick="document.getElementById('imageInput').click()" class="w-9 h-9 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-amber-400 flex items-center justify-center transition" title="Upload Image">
-          <i class="fa-solid fa-paperclip text-sm"></i>
-        </button>
+    <div class="p-4 border-t border-slate-800 bg-[#0b0f19]">
+      <div id="imagePreviewContainer" class="hidden mb-2 p-2 bg-[#131b2e] border border-slate-800 rounded-lg flex items-center gap-2 max-w-xs"></div>
+      
+      <div class="flex items-center gap-2 bg-[#0e1526] border border-slate-800 rounded-xl p-2 focus-within:border-amber-500/60 transition">
+        <button onclick="toggleQuickSpeech()" class="p-2 text-slate-400 hover:text-amber-400 transition" title="Voice Input"><i id="quickVoiceIcon" class="fa-solid fa-microphone text-sm"></i></button>
+        <label class="p-2 text-slate-400 hover:text-amber-400 cursor-pointer transition" title="Attach Image"><i class="fa-solid fa-paperclip text-sm"></i><input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageSelect(event)"></label>
+        
         <input type="text" id="userInputPrompt" onkeydown="if(event.key==='Enter') sendQueryToGemini()" placeholder="Type your query to JARVIS AI..." class="flex-1 bg-transparent border-none outline-none text-xs text-slate-100 placeholder-slate-500 px-2">
-        <button onclick="sendQueryToGemini()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg text-xs transition flex items-center gap-1.5 shadow">
-          <span>Send</span> <i class="fa-solid fa-paper-plane text-[10px]"></i>
+        
+        <button onclick="sendQueryToGemini()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-lg transition flex items-center gap-1.5 shadow">
+          <span>Send</span> <i class="fa-solid fa-paper-plane"></i>
         </button>
       </div>
     </div>
   </main>
 
-  <!-- MODALS (Admin, VIP, Auth, Live Voice) -->
-  <div id="adminAuthModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-[#0e1526] border border-slate-800 rounded-xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
-      <h3 class="font-bold text-sm text-slate-200"><i class="fa-solid fa-lock text-red-400 mr-2"></i>Admin Authentication</h3>
-      <input type="password" id="adminPassInput" placeholder="Enter Admin Password..." class="w-full bg-[#070b14] border border-slate-700 rounded p-2.5 text-xs text-slate-100 outline-none focus:border-amber-500">
-      <div class="flex justify-end gap-2">
-        <button onclick="closeAdminAuthModal()" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded text-xs">Cancel</button>
-        <button onclick="verifyAdminPass()" class="px-4 py-1.5 bg-amber-500 text-black font-bold rounded text-xs">Authenticate</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="adminPanelModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-[#0e1526] border border-slate-800 rounded-xl p-6 w-full max-w-md space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <h3 class="font-bold text-sm text-amber-400"><i class="fa-solid fa-shield-halved mr-2"></i>Admin Dashboard</h3>
-        <button onclick="closeAdminPanelModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="space-y-3 text-xs">
-        <div class="p-3 bg-[#070b14] border border-slate-800 rounded space-y-1">
-          <div class="text-slate-400 font-semibold">Application Status</div>
-          <div id="appAgeDisplay" class="font-mono text-slate-200">Loading App Stats...</div>
-        </div>
-        <div class="space-y-1">
-          <div class="text-slate-400 font-semibold">Active Dynamic Passkeys</div>
-          <div class="grid grid-cols-2 gap-2 font-mono text-[11px]">
-            <div class="p-2 bg-[#070b14] rounded border border-slate-800">Day: <span id="passkeyDay" class="text-amber-400"></span></div>
-            <div class="p-2 bg-[#070b14] rounded border border-slate-800">Week: <span id="passkeyWeek" class="text-amber-400"></span></div>
-            <div class="p-2 bg-[#070b14] rounded border border-slate-800">Month: <span id="passkeyMonth" class="text-amber-400"></span></div>
-            <div class="p-2 bg-[#070b14] rounded border border-slate-800">Year: <span id="passkeyYear" class="text-amber-400"></span></div>
-          </div>
-        </div>
-        <div class="space-y-2 pt-2 border-t border-slate-800">
-          <div class="text-slate-400 font-semibold">Generate Custom Passkey</div>
-          <div class="flex gap-2">
-            <input type="text" id="customCodeInput" placeholder="KEY NAME (e.g. BOSS)" class="flex-1 bg-[#070b14] border border-slate-700 rounded p-2 text-xs text-slate-100 uppercase">
-            <input type="number" id="customTimeLimit" placeholder="Days" value="7" class="w-16 bg-[#070b14] border border-slate-700 rounded p-2 text-xs text-slate-100">
-            <button onclick="generateCustomAdminCode()" class="px-3 bg-amber-500 text-black font-bold rounded text-xs">Generate</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="vipOptionModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-[#0e1526] border border-slate-800 rounded-xl p-6 w-full max-w-sm space-y-4 shadow-2xl text-center">
-      <h3 class="font-bold text-sm text-amber-400">Activate VIP Pass</h3>
-      <p class="text-xs text-slate-400">Choose how you want to activate your pass via Safepay or passcode.</p>
-      <div class="space-y-2 pt-2">
-        <button onclick="proceedGetCode()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded text-xs transition">Pay via Safepay Gateway</button>
-        <button onclick="proceedApplyCode()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded text-xs transition">I Have a Passcode</button>
-        <button onclick="closeVipOptionModal()" class="w-full py-2 text-slate-500 hover:text-white text-xs">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="applyCodeModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-[#0e1526] border border-slate-800 rounded-xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
-      <h3 class="font-bold text-sm text-slate-200">Enter VIP Passcode</h3>
-      <input type="text" id="vipCodeInput" placeholder="JARVIS-DAY-XXXX" class="w-full bg-[#070b14] border border-slate-700 rounded p-2.5 text-xs text-slate-100 uppercase tracking-wider outline-none focus:border-amber-500 font-mono">
-      <div class="flex justify-end gap-2">
-        <button onclick="closeApplyCodeModal()" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded text-xs">Cancel</button>
-        <button onclick="validateVipCode()" class="px-4 py-1.5 bg-amber-500 text-black font-bold rounded text-xs">Activate Pass</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="authModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-[#0e1526] border border-slate-800 rounded-xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
-      <h3 class="font-bold text-sm text-slate-200">Sign In to JARVIS AI</h3>
-      <form onsubmit="handleEmailAuth(event)" class="space-y-3">
-        <input type="email" id="authEmailInput" placeholder="Enter your email address..." required class="w-full bg-[#070b14] border border-slate-700 rounded p-2.5 text-xs text-slate-100 outline-none focus:border-amber-500">
-        <div class="flex justify-end gap-2">
-          <button type="button" onclick="closeAuthModal()" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded text-xs">Cancel</button>
-          <button type="submit" class="px-4 py-1.5 bg-amber-500 text-black font-bold rounded text-xs">Sign In</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div id="profileModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-[#0e1526] border border-slate-800 rounded-xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
-      <h3 class="font-bold text-sm text-slate-200">User Profile Settings</h3>
-      <div class="space-y-2 text-xs text-slate-300">
-        <div class="p-3 bg-[#070b14] rounded border border-slate-800 space-y-1">
-          <div class="text-slate-500 text-[10px]">CURRENT USER</div>
-          <div id="profileNameDisplay" class="font-bold text-amber-400">Guest Session</div>
-          <div id="profileEmailDisplay" class="text-[11px] text-slate-400">Not signed in</div>
-        </div>
-      </div>
-      <div class="flex justify-between items-center pt-2 border-t border-slate-800">
-        <button onclick="signOutUser()" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded text-xs">Sign Out</button>
-        <button onclick="closeProfileModal()" class="px-4 py-1.5 bg-slate-800 text-slate-200 rounded text-xs">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="liveVoiceModal" class="hidden fixed inset-0 bg-[#070b14]/95 backdrop-blur-md z-50 flex flex-col items-center justify-center p-6 text-center">
-    <button onclick="toggleLiveVoiceModal(false)" class="absolute top-6 right-6 text-slate-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
-    <div class="space-y-6 max-w-lg w-full">
-      <h2 class="text-lg font-bold text-amber-400 tracking-wider">JARVIS LIVE VOICE MODE</h2>
-      <div class="relative flex items-center justify-center py-10">
-        <button id="voiceOrb" onclick="toggleVoiceSession()" class="w-36 h-36 rounded-full bg-gradient-to-tr from-amber-600 to-amber-400 text-black flex flex-col items-center justify-center shadow-2xl transition transform hover:scale-105">
+  <div id="liveVoiceModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+    <div class="bg-[#0b0f19] border border-slate-800 rounded-2xl w-full max-w-md p-6 text-center relative">
+      <button onclick="toggleLiveVoiceModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      <div class="text-amber-400 font-mono text-xs mb-6 tracking-widest uppercase">JARVIS Live Voice Assistant</div>
+      
+      <div class="flex justify-center mb-6">
+        <button id="voiceOrb" onclick="toggleVoiceSession()" class="w-32 h-32 rounded-full bg-gradient-to-tr from-amber-600 to-amber-400 flex flex-col items-center justify-center text-black shadow-2xl transition hover:scale-105">
           <i id="voiceOrbIcon" class="fa-solid fa-microphone text-3xl mb-1"></i>
           <span id="voiceOrbText" class="font-bold text-xs font-mono">START LIVE</span>
         </button>
       </div>
-      <div id="liveVoiceStatus" class="text-xs text-slate-400 font-mono">Click the orb to start speaking with JARVIS AI</div>
-      <div id="liveTranscriptBox" class="hidden p-3 bg-[#0e1526] border border-slate-800 rounded-xl text-left text-xs max-h-32 overflow-y-auto">
-        <div class="text-[10px] text-amber-400 font-bold mb-1">Live Transcript:</div>
-        <div id="liveTranscriptContent" class="text-slate-300 italic">Listening...</div>
+      
+      <div id="liveVoiceStatus" class="text-xs text-slate-300 mb-4">Click the orb to start speaking with JARVIS AI</div>
+      <div id="liveTranscriptBox" class="hidden p-3 bg-[#131b2e] border border-slate-800 rounded-xl text-xs text-amber-300 italic min-h-[50px]">
+        " <span id="liveTranscriptContent">Listening...</span> "
       </div>
     </div>
   </div>
 
-  <!-- Main Application Script -->
+  <div id="authModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+    <div class="bg-[#0b0f19] border border-slate-800 rounded-2xl w-full max-w-sm p-6 relative">
+      <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      <h2 class="text-base font-bold text-slate-100 mb-1">JARVIS Cloud Account</h2>
+      <p class="text-xs text-slate-400 mb-4">Sign in with email and password to sync your chat history.</p>
+      
+      <form onsubmit="handleEmailAuth(event)" class="space-y-3">
+        <div>
+          <label class="block text-[10px] text-slate-400 font-mono mb-1">EMAIL ADDRESS</label>
+          <input type="email" id="authEmailInput" required class="w-full bg-[#131b2e] border border-slate-800 rounded-lg p-2.5 text-xs text-white outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-[10px] text-slate-400 font-mono mb-1">PASSWORD</label>
+          <input type="password" id="authPassInput" required class="w-full bg-[#131b2e] border border-slate-800 rounded-lg p-2.5 text-xs text-white outline-none focus:border-amber-500">
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-lg transition shadow">Sign In / Register</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="adminAuthModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+    <div class="bg-[#0b0f19] border border-slate-800 rounded-2xl w-full max-w-sm p-6 relative">
+      <button onclick="closeAdminAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      <h2 class="text-base font-bold text-slate-100 mb-1">Admin Portal Verification</h2>
+      <p class="text-xs text-slate-400 mb-4">Enter administrator password to access master controls.</p>
+      <input type="password" id="adminPassInput" placeholder="Enter admin password..." class="w-full bg-[#131b2e] border border-slate-800 rounded-lg p-2.5 text-xs text-white outline-none focus:border-amber-500 mb-3">
+      <button onclick="verifyAdminPass()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-lg transition shadow">Verify & Enter</button>
+    </div>
+  </div>
+
+  <div id="adminPanelModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+    <div class="bg-[#0b0f19] border border-slate-800 rounded-2xl w-full max-w-md p-6 relative max-h-[90vh] overflow-y-auto">
+      <button onclick="closeAdminPanelModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      <h2 class="text-base font-bold text-amber-400 mb-1">JARVIS Master Admin Panel</h2>
+      <div id="appAgeDisplay" class="text-xs text-slate-400 font-mono mb-4"></div>
+      
+      <div class="space-y-3 text-xs font-mono">
+        <div class="p-3 bg-[#131b2e] border border-slate-800 rounded-xl space-y-1">
+          <div class="text-slate-400 font-bold">ACTIVE PASSKEYS:</div>
+          <div>1 Day: <span id="passkeyDay" class="text-amber-400 font-bold"></span></div>
+          <div>1 Week: <span id="passkeyWeek" class="text-amber-400 font-bold"></span></div>
+          <div>1 Month: <span id="passkeyMonth" class="text-amber-400 font-bold"></span></div>
+          <div>1 Year: <span id="passkeyYear" class="text-amber-400 font-bold"></span></div>
+        </div>
+        
+        <div class="p-3 bg-[#131b2e] border border-slate-800 rounded-xl space-y-2">
+          <div class="text-slate-400 font-bold">CREATE CUSTOM PASSKEY:</div>
+          <input type="text" id="customCodeInput" placeholder="Passkey Name (e.g. VIPTEST)" class="w-full bg-[#0b0f19] border border-slate-800 rounded p-2 text-white">
+          <input type="number" id="customTimeLimit" placeholder="Days Valid (e.g. 30)" class="w-full bg-[#0b0f19] border border-slate-800 rounded p-2 text-white">
+          <button onclick="generateCustomAdminCode()" class="w-full py-2 bg-amber-500 text-black font-bold rounded">Generate Code</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="vipOptionModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+    <div class="bg-[#0b0f19] border border-slate-800 rounded-2xl w-full max-w-sm p-6 text-center relative">
+      <button onclick="closeVipOptionModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      <h3 class="font-bold text-sm text-amber-400 mb-2">Acquire VIP Pass</h3>
+      <p class="text-xs text-slate-300 mb-4">Choose whether you want to purchase via Safepay or apply an existing passcode.</p>
+      <div class="space-y-2">
+        <button onclick="proceedGetCode()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-lg transition">Buy Pass via Safepay</button>
+        <button onclick="proceedApplyCode()" class="w-full py-2.5 bg-[#131b2e] hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold text-xs rounded-lg transition">I Have a Passkey Code</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="applyCodeModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+    <div class="bg-[#0b0f19] border border-slate-800 rounded-2xl w-full max-w-sm p-6 relative">
+      <button onclick="closeApplyCodeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      <h3 class="font-bold text-sm text-slate-100 mb-1">Apply VIP Passkey</h3>
+      <p class="text-xs text-slate-400 mb-4">Enter your code to unlock unlimited access.</p>
+      <input type="text" id="vipCodeInput" placeholder="Enter passkey (e.g. JARVIS-DAY-...)" class="w-full bg-[#131b2e] border border-slate-800 rounded-lg p-2.5 text-xs text-white uppercase outline-none focus:border-amber-500 mb-3 font-mono">
+      <button onclick="validateVipCode()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-lg transition shadow">Activate Pass</button>
+    </div>
+  </div>
+
   <script src="./app.js"></script>
 </body>
 </html>
