@@ -1,5 +1,5 @@
 // ==========================================
-// JARVIS AI HUB - RELIABLE PRODUCTION SCRIPT
+// JARVIS AI HUB - FULL PRODUCTION SCRIPT
 // ==========================================
 
 // Register Service Worker for PWA Support
@@ -12,9 +12,11 @@ if ('serviceWorker' in navigator) {
 }
 
 // Global Configuration & Security Constants
-const GEMINI_API_KEY = "AQ.Ab8RN6KIQ7Q5V...your_full_key_here..."; // Replace with your actual AQ... token
+const GEMINI_API_KEY = "AQ.Ab8RN6LseWoHRYSawSyyLqli_XX3azz5btWVVk2WnXq61nrSg"; 
 const INTERNAL_MODEL_ID = "gemini-3.6-flash";
-const API_ENDPOINT_URL = `https://generativelanguage.googleapis.com/v1beta/models/${INTERNAL_MODEL_ID}:generateContent`;
+
+// Pass key via URL query parameter to ensure proper validation with Google AI Studio tokens
+const API_ENDPOINT_URL = `https://generativelanguage.googleapis.com/v1beta/models/${INTERNAL_MODEL_ID}:generateContent?key=${GEMINI_API_KEY}`;
 
 const APP_CREATION_DATE = new Date("2026-08-01T00:00:00");
 
@@ -298,8 +300,7 @@ function removeImage() {
 }
 
 // ==========================================
-// HIGHLY RELIABLE GEMINI QUERY EXECUTOR
-// Includes anti-spam lock & 15s timeout protection
+// RELIABLE QUERY EXECUTOR (URL PARAM AUTH)
 // ==========================================
 async function sendQueryToGemini() {
   if (isRequestInProgress) return; // Prevent double-firing or burnout
@@ -337,8 +338,7 @@ async function sendQueryToGemini() {
     const response = await fetch(API_ENDPOINT_URL, {
       method: "POST",
       headers: { 
-        "Content-Type": "application/json",
-        "x-goog-api-key": GEMINI_API_KEY
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({ contents: [{ parts: parts }] }),
       signal: controller.signal
@@ -354,7 +354,7 @@ async function sendQueryToGemini() {
       appendChatMessage(aiText, 'ai');
       saveHistoryEntry(promptText, aiText);
     } else {
-      const errMsg = data.error?.message || `HTTP Status ${response.status}: Server rejected request. Check your AQ... token configuration.`;
+      const errMsg = data.error?.message || `HTTP Status ${response.status}: Server rejected request. Verify your API token.`;
       appendChatMessage(`System Alert: ${errMsg}`, 'ai');
     }
   } catch (err) {
@@ -363,7 +363,7 @@ async function sendQueryToGemini() {
     if (err.name === 'AbortError') {
       appendChatMessage("Network Timeout: Google servers took too long to reply. Please try again.", 'ai');
     } else {
-      appendChatMessage("Connection Error: Check your network connectivity or API key permissions.", 'ai');
+      appendChatMessage("Connection Error: Check your network connectivity.", 'ai');
     }
   }
 }
