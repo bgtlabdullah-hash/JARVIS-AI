@@ -11,8 +11,8 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Global Configuration & Security Constants (Using Groq for Native Browser CORS support)
-const GROQ_API_KEY = "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"; 
+// Global Configuration & Security Constants
+const GROQ_API_KEY = "gsk_your_actual_groq_api_key_here"; // Replace with your real Groq API key if needed
 const GROQ_MODEL_ID = "qwen/qwen3.6-27b";
 const API_ENDPOINT_URL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -47,7 +47,7 @@ let vipTimerInterval = null;
 let chatHistory = JSON.parse(localStorage.getItem('jarvis_chat_history') || '[]');
 
 const AI_TOOLS = [
-  { id: 1, name: "JARVIS Chat Pro", icon: "fa-robot", placeholder: "Type your query to JARVIS AI...", instruction: "You are JARVIS AI. Always identify only as JARVIS AI." },
+  { id: 1, name: "JARVIS Chat Pro", icon: "fa-robot", placeholder: "Type your query to JARVIS AI...", instruction: "You are JARVIS AI. Always identify only as JARVIS AI. Do not display internal reasoning or thinking steps. Provide direct, complete, and final answers only." },
   { id: 2, name: "Ultra 8K Image Studio", icon: "fa-image", placeholder: "Enter description to generate real HD/3D visuals...", instruction: "Generate image request visual." },
   { id: 3, name: "All-Type Video Generator", icon: "fa-video", placeholder: "Describe video scene to generate AI MP4 video...", instruction: "Generate AI video animation." },
   { id: 4, name: "Saved Creations Folder", icon: "fa-folder-open", placeholder: "Organize workspace outputs...", instruction: "Manage creations." },
@@ -328,7 +328,7 @@ async function sendQueryToGemini() {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
 
     const response = await fetch(API_ENDPOINT_URL, {
       method: "POST",
@@ -338,7 +338,8 @@ async function sendQueryToGemini() {
       },
       body: JSON.stringify({
         model: GROQ_MODEL_ID,
-        messages: messages
+        messages: messages,
+        max_tokens: 2048
       }),
       signal: controller.signal
     });
