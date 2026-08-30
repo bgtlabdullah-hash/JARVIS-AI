@@ -1,5 +1,5 @@
 // ==========================================
-// JARVIS AI HUB - FULL PRODUCTION SCRIPT (OPENAI)
+// JARVIS AI HUB - FULL PRODUCTION SCRIPT (OPENAI + CORS PROXY)
 // ==========================================
 
 // Register Service Worker for PWA Support
@@ -14,7 +14,8 @@ if ('serviceWorker' in navigator) {
 // Global Configuration & Security Constants
 const OPENAI_API_KEY = "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"; 
 const OPENAI_MODEL_ID = "gpt-4o-mini";
-const API_ENDPOINT_URL = "https://api.openai.com/v1/chat/completions";
+// Wrap OpenAI endpoint with a public CORS proxy to bypass browser security blocks
+const API_ENDPOINT_URL = "https://corsproxy.io/?url=" + encodeURIComponent("https://api.openai.com/v1/chat/completions");
 
 const APP_CREATION_DATE = new Date("2026-08-01T00:00:00");
 
@@ -298,7 +299,7 @@ function removeImage() {
 }
 
 // ==========================================
-// OPENAI QUERY EXECUTOR
+// OPENAI QUERY EXECUTOR (CORS PROXY BYPASS)
 // ==========================================
 async function sendQueryToGemini() {
   if (isRequestInProgress) return; // Prevent double-firing
