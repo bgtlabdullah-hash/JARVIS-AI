@@ -1,5 +1,5 @@
 // ==========================================
-// JARVIS AI HUB - FULL PRODUCTION SCRIPT (OPENAI + CORS PROXY)
+// JARVIS AI HUB - GROQ INTEGRATION (NATIVE BROWSER CORS)
 // ==========================================
 
 // Register Service Worker for PWA Support
@@ -11,11 +11,10 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Global Configuration & Security Constants
-const OPENAI_API_KEY = "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"; 
-const OPENAI_MODEL_ID = "gpt-4o-mini";
-// Wrapped with CORS proxy to bypass browser security restrictions on static sites
-const API_ENDPOINT_URL = "https://corsproxy.io/?url=" + encodeURIComponent("https://api.openai.com/v1/chat/completions");
+// Global Configuration & Security Constants (Using Groq for Native Browser CORS support)
+const GROQ_API_KEY = "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"; 
+const GROQ_MODEL_ID = "llama-3.3-70b-versatile";
+const API_ENDPOINT_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 const APP_CREATION_DATE = new Date("2026-08-01T00:00:00");
 
@@ -296,7 +295,7 @@ function removeImage() {
 }
 
 // ==========================================
-// OPENAI QUERY EXECUTOR
+// GROQ API QUERY EXECUTOR (NATIVE CORS)
 // ==========================================
 async function sendQueryToGemini() {
   if (isRequestInProgress) return;
@@ -316,20 +315,12 @@ async function sendQueryToGemini() {
   updateQuotaDisplay();
 
   const messages = [
-    { role: "system", content: activeTool.instruction }
+    { role: "system", content: activeTool.instruction },
+    { role: "user", content: promptText }
   ];
 
   if (selectedImageBase64) {
-    messages.push({
-      role: "user",
-      content: [
-        { type: "text", text: promptText },
-        { type: "image_url", image_url: { url: `data:image/jpeg;base64,${selectedImageBase64}` } }
-      ]
-    });
     removeImage();
-  } else {
-    messages.push({ role: "user", content: promptText });
   }
 
   const loadingMsgId = appendLoadingMessage();
@@ -343,10 +334,10 @@ async function sendQueryToGemini() {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${OPENAI_API_KEY}`
+        "Authorization": `Bearer ${GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: OPENAI_MODEL_ID,
+        model: GROQ_MODEL_ID,
         messages: messages
       }),
       signal: controller.signal
@@ -362,14 +353,14 @@ async function sendQueryToGemini() {
       appendChatMessage(aiText, 'ai');
       saveHistoryEntry(promptText, aiText);
     } else {
-      const errMsg = data.error?.message || `HTTP Status ${response.status}: OpenAI request rejected.`;
+      const errMsg = data.error?.message || `HTTP Status ${response.status}: API request rejected.`;
       appendChatMessage(`System Alert: ${errMsg}`, 'ai');
     }
   } catch (err) {
     removeLoadingMessage(loadingMsgId);
     isRequestInProgress = false;
     if (err.name === 'AbortError') {
-      appendChatMessage("Network Timeout: OpenAI servers took too long to reply. Please try again.", 'ai');
+      appendChatMessage("Network Timeout: Servers took too long to reply. Please try again.", 'ai');
     } else {
       appendChatMessage("Connection Error: Check your network connectivity.", 'ai');
     }
