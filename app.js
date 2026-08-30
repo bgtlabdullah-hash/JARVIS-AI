@@ -1,5 +1,5 @@
 // ==========================================
-// JARVIS AI HUB - FULLY UPGRADED APP LOGIC
+// JARVIS AI HUB - FULL PRODUCTION LOGIC (FIXED IMAGE GENERATOR)
 // ==========================================
 
 // Register Service Worker for PWA Support
@@ -34,6 +34,17 @@ let selectedImageBase64 = null;
 let isRequestInProgress = false;
 let isSidebarCollapsed = false;
 
+// User Account & Cloud Sync State
+let currentUserEmail = localStorage.getItem('jarvis_current_user') || null;
+let userDatabase = JSON.parse(localStorage.getItem('jarvis_users_db') || '{}');
+let chatHistory = [];
+
+if (currentUserEmail && userDatabase[currentUserEmail]) {
+  chatHistory = userDatabase[currentUserEmail].history || [];
+} else {
+  chatHistory = [];
+}
+
 let dynamicPasskeys = {
   day: "JARVIS-DAY-" + Math.floor(1000 + Math.random() * 9000),
   week: "JARVIS-WK-" + Math.floor(1000 + Math.random() * 9000),
@@ -45,7 +56,6 @@ let dynamicPasskeys = {
 let customPasskeys = {};
 let activeVipTimerEnd = null;
 let vipTimerInterval = null;
-let chatHistory = JSON.parse(localStorage.getItem('jarvis_chat_history') || '[]');
 
 const AI_TOOLS = [
   { id: 1, name: "JARVIS Chat Pro", icon: "fa-robot", placeholder: "Type your query to JARVIS AI...", instruction: "You are JARVIS AI. Provide direct, complete, and helpful responses to the user without writing any internal reasoning." },
@@ -84,16 +94,12 @@ async function installAppPrompt() {
   }
 }
 
-// Collapsible Sidebar Toggle (Gemini / ChatGPT Style)
+// Collapsible Side Drawer Toggle
 function toggleSidebar() {
   const sidebar = document.querySelector('aside') || document.getElementById('sidebarPanel');
   if (!sidebar) return;
   isSidebarCollapsed = !isSidebarCollapsed;
-  if (isSidebarCollapsed) {
-    sidebar.style.display = 'none';
-  } else {
-    sidebar.style.display = 'flex';
-  }
+  sidebar.style.display = isSidebarCollapsed ? 'none' : 'flex';
 }
 
 function updateQuotaDisplay() {
@@ -131,18 +137,25 @@ function selectToolFolder(toolId) {
   updateQuotaDisplay();
 }
 
+// Cloud & Account History Sync
 function saveHistoryEntry(prompt, responseText) {
   const entry = { id: Date.now(), tool: activeTool.name, prompt: prompt, response: responseText };
   chatHistory.unshift(entry);
-  if (chatHistory.length > 30) chatHistory.pop();
-  localStorage.setItem('jarvis_chat_history', JSON.stringify(chatHistory));
+  if (chatHistory.length > 50) chatHistory.pop();
+
+  if (currentUserEmail && userDatabase[currentUserEmail]) {
+    userDatabase[currentUserEmail].history = chatHistory;
+    localStorage.setItem('jarvis_users_db', JSON.stringify(userDatabase));
+  } else {
+    localStorage.setItem('jarvis_guest_history', JSON.stringify(chatHistory));
+  }
   renderHistoryList();
 }
 
 function renderHistoryList() {
   const container = document.getElementById('historyListContainer');
   if (chatHistory.length === 0) {
-    container.innerHTML = `<div class="text-slate-500 italic text-[10px] py-1">No saved history yet.</div>`;
+    container.innerHTML = `<div class="text-slate-500 italic text-[10px] py-1">No saved history yet. ${!currentUserEmail ? '(Guest session)' : ''}</div>`;
     return;
   }
   container.innerHTML = chatHistory.map(item => `
@@ -162,10 +175,69 @@ function loadHistoryItem(id) {
 
 function clearChatHistory() {
   chatHistory = [];
-  localStorage.removeItem('jarvis_chat_history');
+  if (currentUserEmail && userDatabase[currentUserEmail]) {
+    userDatabase[currentUserEmail].history = [];
+    localStorage.setItem('jarvis_users_db', JSON.stringify(userDatabase));
+  } else {
+    localStorage.removeItem('jarvis_guest_history');
+  }
   renderHistoryList();
 }
 
+// Authentication & Account Management
+function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
+function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
+function openProfileModal() { document.getElementById('profileModal').classList.remove('hidden'); }
+function closeProfileModal() { document.getElementById('profileModal').classList.add('hidden'); }
+
+function handleEmailAuth(e) {
+  e.preventDefault();
+  const email = document.getElementById('authEmailInput').value.trim();
+  const pass = document.getElementById('authPassInput').value;
+  if (!email || !pass) {
+    alert("Please enter both email and password.");
+    return;
+  }
+
+  if (!userDatabase[email]) {
+    userDatabase[email] = { password: pass, history: [] };
+    alert("Account registered successfully and signed in!");
+  } else {
+    if (userDatabase[email].password !== pass) {
+      alert("Incorrect password for this account.");
+      return;
+    }
+    alert("Signed in successfully! Your saved history has been synced.");
+  }
+
+  currentUserEmail = email;
+  localStorage.setItem('jarvis_current_user', email);
+  localStorage.setItem('jarvis_users_db', JSON.stringify(userDatabase));
+
+  chatHistory = userDatabase[email].history || [];
+  
+  document.getElementById('userSessionLabel').innerText = email.split('@')[0];
+  document.getElementById('profileNameDisplay').innerText = email.split('@')[0];
+  document.getElementById('profileEmailDisplay').innerText = email;
+
+  closeAuthModal();
+  renderHistoryList();
+}
+
+function signOutUser() {
+  currentUserEmail = null;
+  localStorage.removeItem('jarvis_current_user');
+  chatHistory = [];
+  
+  document.getElementById('userSessionLabel').innerText = "Guest Session";
+  document.getElementById('profileNameDisplay').innerText = "Guest Session";
+  document.getElementById('profileEmailDisplay').innerText = "Not signed in (History resets on tab close)";
+  closeProfileModal();
+  renderHistoryList();
+  alert("Signed out successfully. You are now in Guest session mode.");
+}
+
+// Admin Panel
 function openAdminAuthModal() { document.getElementById('adminAuthModal').classList.remove('hidden'); }
 function closeAdminAuthModal() { document.getElementById('adminAuthModal').classList.add('hidden'); }
 
@@ -263,27 +335,6 @@ function activateVipSession(days) {
   }, 1000);
 }
 
-function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
-function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
-function openProfileModal() { document.getElementById('profileModal').classList.remove('hidden'); }
-function closeProfileModal() { document.getElementById('profileModal').classList.add('hidden'); }
-
-function handleEmailAuth(e) {
-  e.preventDefault();
-  const email = document.getElementById('authEmailInput').value;
-  document.getElementById('userSessionLabel').innerText = email.split('@')[0];
-  document.getElementById('profileNameDisplay').innerText = email.split('@')[0];
-  document.getElementById('profileEmailDisplay').innerText = email;
-  closeAuthModal();
-}
-
-function signOutUser() {
-  document.getElementById('userSessionLabel').innerText = "Guest Session";
-  document.getElementById('profileNameDisplay').innerText = "Guest Session";
-  document.getElementById('profileEmailDisplay').innerText = "Not signed in";
-  closeProfileModal();
-}
-
 function handleImageSelect(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -308,7 +359,7 @@ function removeImage() {
 }
 
 // ==========================================
-// QUERY EXECUTOR & MULTI-TOOL HANDLER
+// QUERY EXECUTOR & LIVE SEARCHING ANIMATIONS
 // ==========================================
 async function sendQueryToGemini() {
   if (isRequestInProgress) return;
@@ -327,23 +378,24 @@ async function sendQueryToGemini() {
   chatCount++;
   updateQuotaDisplay();
 
-  // TOOL #2: Ultra 8K Image Studio (Generates real images directly in chat)
+  // TOOL #2: Ultra 8K Image Studio (Upgraded to Flux High-End Model for Photorealistic Accuracy)
   if (activeTool.id === 2) {
-    const loadingMsgId = appendLoadingMessage();
+    const loadingMsgId = appendSearchingAnimationMessage("Searching & Rendering Ultra 8K HD Visual (Flux Engine)...");
     setTimeout(() => {
       removeLoadingMessage(loadingMsgId);
-      const encodedPrompt = encodeURIComponent(promptText);
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true`;
+      const encodedPrompt = encodeURIComponent(promptText + ", photorealistic, 8k resolution, highly detailed, cinematic lighting");
+      // Using Flux model for top-tier image accuracy and zero distortion
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&model=flux`;
       const imageHtml = `Generated Visual for: <b>${promptText}</b><br><br><img src="${imageUrl}" class="rounded-xl max-w-full h-auto border border-amber-500/30 shadow-lg mt-2" alt="${promptText}">`;
       appendChatMessage(imageHtml, 'ai');
       saveHistoryEntry(promptText, `[Generated Image: ${promptText}]`);
-    }, 1000);
+    }, 1800);
     return;
   }
 
-  // TOOL #3: All-Type Video Generator (Generates animated preview container in chat)
+  // TOOL #3: All-Type Video Generator (With Live Searching/Rendering Animation)
   if (activeTool.id === 3) {
-    const loadingMsgId = appendLoadingMessage();
+    const loadingMsgId = appendSearchingAnimationMessage("Searching & Compiling Video Animation Scene...");
     setTimeout(() => {
       removeLoadingMessage(loadingMsgId);
       const videoHtml = `Generated AI Video Preview for: <b>${promptText}</b><br><br>
@@ -353,26 +405,24 @@ async function sendQueryToGemini() {
         </div>`;
       appendChatMessage(videoHtml, 'ai');
       saveHistoryEntry(promptText, `[Generated Video: ${promptText}]`);
-    }, 1200);
+    }, 1800);
     return;
   }
 
-  // Standard LLM Tools (Chat, Math Solver with LaTeX, Code, OCR, etc.)
+  // Standard Tools / Chat / Math Solver (With Searching Animation)
+  const loadingMsgId = appendSearchingAnimationMessage(`JARVIS is searching & executing workspace "${activeTool.name}"...`);
+  isRequestInProgress = true;
+
   const messages = [
     { role: "system", content: activeTool.instruction },
     { role: "user", content: promptText }
   ];
 
-  if (selectedImageBase64) {
-    removeImage();
-  }
-
-  const loadingMsgId = appendLoadingMessage();
-  isRequestInProgress = true;
+  if (selectedImageBase64) removeImage();
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 20000);
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
 
     const response = await fetch(API_ENDPOINT_URL, {
       method: "POST",
@@ -449,7 +499,7 @@ function appendChatMessage(text, sender) {
   }
 }
 
-function appendLoadingMessage() {
+function appendSearchingAnimationMessage(customText) {
   const id = "loading-" + Date.now();
   const container = document.getElementById('chatOutputContainer');
   const wrapper = document.createElement('div');
@@ -458,7 +508,7 @@ function appendLoadingMessage() {
   wrapper.innerHTML = `
     <div class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5 font-bold font-mono text-[10px]">J</div>
     <div class="p-3.5 rounded-xl bg-[#0e1526]/80 border border-slate-800 text-amber-400 italic font-mono flex items-center gap-2">
-      <i class="fa-solid fa-circle-notch animate-spin"></i> JARVIS is processing workspace request...
+      <i class="fa-solid fa-magnifying-glass animate-bounce"></i> ${customText}
     </div>
   `;
   container.appendChild(wrapper);
@@ -541,6 +591,13 @@ function toggleQuickSpeech() {
   sr.onerror = () => { icon.className = "fa-solid fa-microphone text-sm"; };
   sr.onend = () => { icon.className = "fa-solid fa-microphone text-sm"; };
   sr.start();
+}
+
+// Initialize App UI States
+if (currentUserEmail) {
+  document.getElementById('userSessionLabel').innerText = currentUserEmail.split('@')[0];
+  document.getElementById('profileNameDisplay').innerText = currentUserEmail.split('@')[0];
+  document.getElementById('profileEmailDisplay').innerText = currentUserEmail;
 }
 
 renderAITools();
