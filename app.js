@@ -14,7 +14,7 @@ if ('serviceWorker' in navigator) {
 // Global Configuration & Security Constants
 const OPENAI_API_KEY = "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"; 
 const OPENAI_MODEL_ID = "gpt-4o-mini";
-// Wrap OpenAI endpoint with a public CORS proxy to bypass browser security blocks
+// Wrapped with CORS proxy to bypass browser security restrictions on static sites
 const API_ENDPOINT_URL = "https://corsproxy.io/?url=" + encodeURIComponent("https://api.openai.com/v1/chat/completions");
 
 const APP_CREATION_DATE = new Date("2026-08-01T00:00:00");
@@ -32,7 +32,7 @@ let chatCount = 0;
 const CHAT_LIMIT = 50;
 let toolUsageMap = {};
 let selectedImageBase64 = null;
-let isRequestInProgress = false; // Anti-burnout protection flag
+let isRequestInProgress = false;
 
 let dynamicPasskeys = {
   day: "JARVIS-DAY-" + Math.floor(1000 + Math.random() * 9000),
@@ -68,7 +68,6 @@ let recognition = null;
 let isVoiceActive = false;
 let deferredPrompt = null;
 
-// PWA Installation Hook
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
@@ -78,9 +77,7 @@ async function installAppPrompt() {
   if (deferredPrompt) {
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      console.log('App Installed Successfully!');
-    }
+    if (outcome === 'accepted') console.log('App Installed Successfully!');
     deferredPrompt = null;
   } else {
     alert("To install JARVIS AI HUB:\n\n• On Chrome/Edge: Click top-right 3 dots -> 'Install JARVIS AI HUB'\n• On Android: Tap 3 dots -> 'Add to Home Screen'");
@@ -299,10 +296,10 @@ function removeImage() {
 }
 
 // ==========================================
-// OPENAI QUERY EXECUTOR (CORS PROXY BYPASS)
+// OPENAI QUERY EXECUTOR
 // ==========================================
 async function sendQueryToGemini() {
-  if (isRequestInProgress) return; // Prevent double-firing
+  if (isRequestInProgress) return;
 
   const inputEl = document.getElementById('userInputPrompt');
   const promptText = inputEl.value.trim();
@@ -506,7 +503,6 @@ function toggleQuickSpeech() {
   sr.start();
 }
 
-// Initializing application modules
 renderAITools();
 renderHistoryList();
 updateQuotaDisplay();
