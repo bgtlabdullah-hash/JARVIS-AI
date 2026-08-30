@@ -12,8 +12,9 @@ if ('serviceWorker' in navigator) {
 }
 
 // Global Configuration & Security Constants
+// Global Configuration & Security Constants
 const GROQ_API_KEY = "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";
-const GROQ_MODEL_ID = "qwen/qwen3.6-27b";
+const GROQ_MODEL_ID = "openai/gpt-oss-20b";
 const API_ENDPOINT_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 const APP_CREATION_DATE = new Date("2026-08-01T00:00:00");
