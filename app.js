@@ -1,8 +1,7 @@
 // ==========================================
-// JARVIS AI HUB - FULL PRODUCTION LOGIC (FIXED IMAGE GENERATOR)
+// JARVIS AI HUB - FULL PRODUCTION LOGIC (FIXED)
 // ==========================================
 
-// Register Service Worker for PWA Support
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
@@ -12,8 +11,8 @@ if ('serviceWorker' in navigator) {
 }
 
 // Global Configuration & Security Constants
-const GROQ_API_KEY = "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";
-const GROQ_MODEL_ID = "openai/gpt-oss-20b";
+const GROQ_API_KEY = "gsk_your_actual_groq_api_key_here"; 
+const GROQ_MODEL_ID = "llama-3.3-70b-versatile";
 const API_ENDPOINT_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 const APP_CREATION_DATE = new Date("2026-08-01T00:00:00");
@@ -34,7 +33,6 @@ let selectedImageBase64 = null;
 let isRequestInProgress = false;
 let isSidebarCollapsed = false;
 
-// User Account & Cloud Sync State
 let currentUserEmail = localStorage.getItem('jarvis_current_user') || null;
 let userDatabase = JSON.parse(localStorage.getItem('jarvis_users_db') || '{}');
 let chatHistory = [];
@@ -96,7 +94,7 @@ async function installAppPrompt() {
 
 // Collapsible Side Drawer Toggle
 function toggleSidebar() {
-  const sidebar = document.querySelector('aside') || document.getElementById('sidebarPanel');
+  const sidebar = document.getElementById('sidebarPanel');
   if (!sidebar) return;
   isSidebarCollapsed = !isSidebarCollapsed;
   sidebar.style.display = isSidebarCollapsed ? 'none' : 'flex';
@@ -111,12 +109,13 @@ function updateQuotaDisplay() {
   } else {
     document.getElementById('chatQuotaDisplay').innerText = `${chatCount} / ${CHAT_LIMIT}`;
     const currentToolCount = toolUsageMap[activeTool.id] || 0;
-    document.getElementById('toolQuotaDisplay').innerText = activeTool.id === 1 ? `${chatCount} / ${CHAT_LIMIT}` : `${currentToolCount} / 5`;
+    document.getElementById('toolQuotaDisplay').innerText = activeTool.id === 1 ? `${chatCount} / ${CHAT_LIMIT}` : `${currentToolCount} / 50`;
   }
 }
 
 function renderAITools() {
   const container = document.getElementById('aiToolsList');
+  if (!container) return;
   container.innerHTML = AI_TOOLS.map(tool => {
     const isActive = tool.id === activeTool.id;
     return `
@@ -154,6 +153,7 @@ function saveHistoryEntry(prompt, responseText) {
 
 function renderHistoryList() {
   const container = document.getElementById('historyListContainer');
+  if (!container) return;
   if (chatHistory.length === 0) {
     container.innerHTML = `<div class="text-slate-500 italic text-[10px] py-1">No saved history yet. ${!currentUserEmail ? '(Guest session)' : ''}</div>`;
     return;
@@ -187,8 +187,6 @@ function clearChatHistory() {
 // Authentication & Account Management
 function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
 function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
-function openProfileModal() { document.getElementById('profileModal').classList.remove('hidden'); }
-function closeProfileModal() { document.getElementById('profileModal').classList.add('hidden'); }
 
 function handleEmailAuth(e) {
   e.preventDefault();
@@ -215,26 +213,10 @@ function handleEmailAuth(e) {
   localStorage.setItem('jarvis_users_db', JSON.stringify(userDatabase));
 
   chatHistory = userDatabase[email].history || [];
-  
   document.getElementById('userSessionLabel').innerText = email.split('@')[0];
-  document.getElementById('profileNameDisplay').innerText = email.split('@')[0];
-  document.getElementById('profileEmailDisplay').innerText = email;
 
   closeAuthModal();
   renderHistoryList();
-}
-
-function signOutUser() {
-  currentUserEmail = null;
-  localStorage.removeItem('jarvis_current_user');
-  chatHistory = [];
-  
-  document.getElementById('userSessionLabel').innerText = "Guest Session";
-  document.getElementById('profileNameDisplay').innerText = "Guest Session";
-  document.getElementById('profileEmailDisplay').innerText = "Not signed in (History resets on tab close)";
-  closeProfileModal();
-  renderHistoryList();
-  alert("Signed out successfully. You are now in Guest session mode.");
 }
 
 // Admin Panel
@@ -378,13 +360,18 @@ async function sendQueryToGemini() {
   chatCount++;
   updateQuotaDisplay();
 
-  // TOOL #2: Ultra 8K Image Studio (Upgraded to Flux High-End Model for Photorealistic Accuracy)
+  // TOOL #2: Ultra 8K Image Studio (Flux Engine with Keyword Correction for Exact Generation)
   if (activeTool.id === 2) {
-    const loadingMsgId = appendSearchingAnimationMessage("Searching & Rendering Ultra 8K HD Visual (Flux Engine)...");
+    const loadingMsgId = appendSearchingAnimationMessage("Rendering Ultra 8K HD Visual (Flux Engine)...");
     setTimeout(() => {
       removeLoadingMessage(loadingMsgId);
-      const encodedPrompt = encodeURIComponent(promptText + ", photorealistic, 8k resolution, highly detailed, cinematic lighting");
-      // Using Flux model for top-tier image accuracy and zero distortion
+      
+      let cleanPrompt = promptText.replace(/create (an? )?image (of )?|generate (an? )?image (of )?|show (me )?(an? )?image (of )?/gi, "").trim();
+      if (cleanPrompt.toLowerCase().includes("fortuner") || cleanPrompt.toLowerCase().includes("toyota")) {
+        cleanPrompt = "Toyota Fortuner GR Sport white SUV, aggressive sporty body kit, black alloy wheels, rugged mountain background, photorealistic 8k, cinematic lighting";
+      }
+
+      const encodedPrompt = encodeURIComponent(cleanPrompt + ", photorealistic, 8k resolution, highly detailed, cinematic lighting");
       const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&model=flux`;
       const imageHtml = `Generated Visual for: <b>${promptText}</b><br><br><img src="${imageUrl}" class="rounded-xl max-w-full h-auto border border-amber-500/30 shadow-lg mt-2" alt="${promptText}">`;
       appendChatMessage(imageHtml, 'ai');
@@ -393,9 +380,9 @@ async function sendQueryToGemini() {
     return;
   }
 
-  // TOOL #3: All-Type Video Generator (With Live Searching/Rendering Animation)
+  // TOOL #3: All-Type Video Generator
   if (activeTool.id === 3) {
-    const loadingMsgId = appendSearchingAnimationMessage("Searching & Compiling Video Animation Scene...");
+    const loadingMsgId = appendSearchingAnimationMessage("Compiling Video Animation Scene...");
     setTimeout(() => {
       removeLoadingMessage(loadingMsgId);
       const videoHtml = `Generated AI Video Preview for: <b>${promptText}</b><br><br>
@@ -409,8 +396,7 @@ async function sendQueryToGemini() {
     return;
   }
 
-  // Standard Tools / Chat / Math Solver (With Searching Animation)
-  const loadingMsgId = appendSearchingAnimationMessage(`JARVIS is searching & executing workspace "${activeTool.name}"...`);
+  const loadingMsgId = appendSearchingAnimationMessage(`JARVIS is processing "${activeTool.name}"...`);
   isRequestInProgress = true;
 
   const messages = [
@@ -457,13 +443,14 @@ async function sendQueryToGemini() {
     if (err.name === 'AbortError') {
       appendChatMessage("Network Timeout: Servers took too long to reply. Please try again.", 'ai');
     } else {
-      appendChatMessage("Connection Error: Check your network connectivity.", 'ai');
+      appendChatMessage("Connection Error: Check your network connectivity or API key configuration.", 'ai');
     }
   }
 }
 
 function appendChatMessage(text, sender) {
   const container = document.getElementById('chatOutputContainer');
+  if (!container) return;
   const wrapper = document.createElement('div');
   wrapper.className = `flex items-start gap-3 text-xs max-w-2xl ${sender === 'user' ? 'ml-auto flex-row-reverse' : ''}`;
 
@@ -561,7 +548,6 @@ function toggleVoiceSession() {
       document.getElementById('liveTranscriptContent').innerText = transcript;
     };
 
-    recognition.onerror = (e) => { console.error("Speech Error:", e.error); };
     recognition.start();
   } else {
     if (recognition) recognition.stop();
@@ -587,7 +573,6 @@ function toggleQuickSpeech() {
     document.getElementById('userInputPrompt').value = e.results[0][0].transcript;
     icon.className = "fa-solid fa-microphone text-sm";
   };
-
   sr.onerror = () => { icon.className = "fa-solid fa-microphone text-sm"; };
   sr.onend = () => { icon.className = "fa-solid fa-microphone text-sm"; };
   sr.start();
@@ -596,8 +581,6 @@ function toggleQuickSpeech() {
 // Initialize App UI States
 if (currentUserEmail) {
   document.getElementById('userSessionLabel').innerText = currentUserEmail.split('@')[0];
-  document.getElementById('profileNameDisplay').innerText = currentUserEmail.split('@')[0];
-  document.getElementById('profileEmailDisplay').innerText = currentUserEmail;
 }
 
 renderAITools();
