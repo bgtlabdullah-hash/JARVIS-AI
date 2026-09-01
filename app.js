@@ -3,24 +3,23 @@
 // ==========================================
 
 let deferredPrompt = null;
-const installBtn = document.getElementById('installAppBtn');
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  if (installBtn) installBtn.classList.remove('hidden');
 });
 
-if (installBtn) {
-  installBtn.addEventListener('click', async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') console.log('PWA Installed successfully');
-      deferredPrompt = null;
-      installBtn.classList.add('hidden');
+async function triggerInstall() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('PWA Installed successfully');
     }
-  });
+    deferredPrompt = null;
+  } else {
+    alert("To install JARVIS AI HUB, tap your browser menu (three dots in Chrome/Edge or Share in Safari) and select 'Install app' or 'Add to Home Screen'.");
+  }
 }
 
 if ('serviceWorker' in navigator) {
@@ -205,7 +204,6 @@ function verifyAdminPass() {
     closeAdminAuthModal();
     document.getElementById('adminPanelModal').classList.remove('hidden');
     
-    // Calculate total sign-ins and VIP users
     const totalSignins = Object.keys(userDatabase).length;
     let totalVips = Object.values(userDatabase).filter(u => u.isVip).length;
     if (isVipActive && currentUserEmail && !userDatabase[currentUserEmail]?.isVip) {
@@ -316,6 +314,7 @@ async function sendQueryToAI() {
   if (isRequestInProgress) return;
 
   const inputEl = document.getElementById('userInputPrompt');
+  if (!inputEl) return;
   const promptText = inputEl.value.trim();
   if (!promptText && !selectedImageBase64) return;
 
@@ -329,17 +328,15 @@ async function sendQueryToAI() {
   chatCount++;
   updateQuotaDisplay();
 
-  // TOOL #2: Ultra 8K Image Studio (Flux Engine for High-Definition Visuals)
+  // TOOL #2: Ultra 8K Image Studio
   if (activeTool.id === 2) {
     const loadingMsgId = appendSearchingAnimationMessage("Rendering Ultra 8K Visual via Flux Engine...");
     setTimeout(() => {
       removeLoadingMessage(loadingMsgId);
-      
       let cleanPrompt = promptText.replace(/create (an? )?image (of )?|generate (an? )?image (of )?|show (me )?(an? )?image (of )?/gi, "").trim();
       if (cleanPrompt.toLowerCase().includes("reproduction") || cleanPrompt.toLowerCase().includes("cell") || cleanPrompt.toLowerCase().includes("biology")) {
         cleanPrompt = "Detailed educational scientific diagram showing cellular reproduction, mitosis phases, clear labels, high-resolution vector style";
       }
-
       const encodedPrompt = encodeURIComponent(cleanPrompt + ", photorealistic, 8k resolution, highly detailed, cinematic lighting");
       const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&model=flux`;
       const imageHtml = `Generated Visual for: <b>${promptText}</b><br><br>
@@ -407,13 +404,13 @@ async function sendQueryToAI() {
       appendChatMessage(aiText, 'ai');
       saveHistoryEntry(promptText, aiText);
     } else {
-      const errorMsg = data.error?.message || "Groq API request rejected. Check your API key.";
+      const errorMsg = data.error?.message || "Groq API key required or request rejected. Please configure your valid Groq API key in app.js.";
       appendChatMessage(`System Alert: ${errorMsg}`, 'ai');
     }
   } catch (err) {
     removeLoadingMessage(loadingMsgId);
     isRequestInProgress = false;
-    appendChatMessage("Connection Error: Check network connectivity or Groq API key configuration.", 'ai');
+    appendChatMessage("Connection Error: Check your network connectivity or ensure your Groq API key is configured correctly in app.js.", 'ai');
   }
 }
 
