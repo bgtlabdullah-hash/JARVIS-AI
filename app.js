@@ -1,15 +1,14 @@
 // ==========================================
-// JARVIS AI HUB - ULTIMATE QUANTUM ENGINE
+// JARVIS AI HUB - GROQ LLAMA 3.3 ENGINE
 // ==========================================
 
-// Register PWA Service Worker & Install Flow
 let deferredPrompt = null;
 const installBtn = document.getElementById('installAppBtn');
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  if (installBtn) installBtn.style.display = 'flex';
+  if (installBtn) installBtn.classList.remove('hidden');
 });
 
 if (installBtn) {
@@ -19,7 +18,7 @@ if (installBtn) {
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') console.log('PWA Installed successfully');
       deferredPrompt = null;
-      installBtn.style.display = 'none';
+      installBtn.classList.add('hidden');
     }
   });
 }
@@ -30,7 +29,8 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-const GROQ_API_KEY = "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";
+// GROQ API CONFIGURATION
+const GROQ_API_KEY = "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";
 const GROQ_MODEL_ID = "openai/gpt-oss-20b";
 const API_ENDPOINT_URL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -51,6 +51,7 @@ let isSidebarCollapsed = false;
 
 let currentUserEmail = localStorage.getItem('jarvis_current_user') || null;
 let userDatabase = JSON.parse(localStorage.getItem('jarvis_users_db') || '{}');
+let customPasskeys = JSON.parse(localStorage.getItem('jarvis_custom_passkeys') || '[]');
 let chatHistory = (currentUserEmail && userDatabase[currentUserEmail]) ? userDatabase[currentUserEmail].history : [];
 
 let dynamicPasskeys = {
@@ -62,7 +63,7 @@ let dynamicPasskeys = {
 };
 
 const AI_TOOLS = [
-  { id: 1, name: "JARVIS Chat Pro", icon: "fa-robot", placeholder: "Ask JARVIS AI anything...", instruction: "You are JARVIS AI Quantum OS, the most advanced AI ever created. Answer accurately, thoughtfully, and clearly." },
+  { id: 1, name: "JARVIS Chat Pro", icon: "fa-robot", placeholder: "Ask Groq Llama 3.3 anything...", instruction: "You are JARVIS AI powered by Groq Llama 3.3. Answer accurately, thoughtfully, and clearly." },
   { id: 2, name: "Ultra 8K Image Studio", icon: "fa-image", placeholder: "Describe image (cars, animals, cell reproduction diagram)...", instruction: "Generate high definition image." },
   { id: 3, name: "All-Type Video Generator", icon: "fa-video", placeholder: "Describe video scene to compile MP4 preview...", instruction: "Generate video simulation." },
   { id: 4, name: "Saved Creations Folder", icon: "fa-folder-open", placeholder: "Access saved projects...", instruction: "Manage outputs." },
@@ -91,8 +92,10 @@ function toggleSidebar() {
 function updateQuotaDisplay() {
   if (isVipActive) {
     document.getElementById('chatQuotaDisplay').innerText = "UNLIMITED (VIP)";
-    document.getElementById('tierBadgeLabel').innerText = "VIP QUANTUM PRO";
-    document.getElementById('tierBadgeLabel').className = "bg-amber-500 text-black px-2 py-0.5 rounded text-[9px] font-bold font-mono tracking-wider";
+    document.getElementById('tierBadgeLabel').innerText = "GROQ VIP TIER";
+    document.getElementById('tierBadgeLabel').className = "bg-emerald-500 text-black px-2 py-0.5 rounded text-[9px] font-bold font-mono tracking-wider";
+    document.getElementById('vipTimerLabel').innerText = "ACTIVE";
+    document.getElementById('vipTimerLabel').className = "text-emerald-400 font-bold";
   } else {
     document.getElementById('chatQuotaDisplay').innerText = `${chatCount} / ${CHAT_LIMIT}`;
   }
@@ -104,9 +107,9 @@ function renderAITools() {
   container.innerHTML = AI_TOOLS.map(tool => {
     const isActive = tool.id === activeTool.id;
     return `
-      <button onclick="selectToolFolder(${tool.id})" class="w-full text-left px-2.5 py-2 rounded-xl border ${isActive ? 'bg-amber-500/10 border-amber-500/40 text-amber-300 font-semibold' : 'hover:bg-[#0e1526] text-slate-300 border-transparent'} flex items-center justify-between transition">
-        <span class="truncate pr-1"><i class="fa-solid ${tool.icon} mr-2 ${isActive ? 'text-amber-400' : 'text-slate-400'}"></i>${tool.id}. ${tool.name}</span>
-        <span class="${isActive ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-800 text-slate-400'} text-[9px] px-1.5 py-0.5 rounded font-mono shrink-0">Module</span>
+      <button onclick="selectToolFolder(${tool.id})" class="w-full text-left px-2.5 py-2 rounded-xl border ${isActive ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300 font-semibold' : 'hover:bg-[#0e1526] text-slate-300 border-transparent'} flex items-center justify-between transition">
+        <span class="truncate pr-1"><i class="fa-solid ${tool.icon} mr-2 ${isActive ? 'text-emerald-400' : 'text-slate-400'}"></i>${tool.id}. ${tool.name}</span>
+        <span class="${isActive ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'} text-[9px] px-1.5 py-0.5 rounded font-mono shrink-0">Module</span>
       </button>
     `;
   }).join('');
@@ -117,7 +120,7 @@ function selectToolFolder(toolId) {
   renderAITools();
   document.getElementById('activeToolBadge').innerText = `${activeTool.id}. ${activeTool.name}`;
   document.getElementById('userInputPrompt').placeholder = activeTool.placeholder;
-  document.getElementById('toolWelcomeText').innerText = `Workspace Switched: ${activeTool.name}. JARVIS Quantum Ready.`;
+  document.getElementById('toolWelcomeText').innerText = `Workspace Switched: ${activeTool.name}. Groq Llama 3.3 Ready.`;
   updateQuotaDisplay();
 }
 
@@ -147,7 +150,7 @@ function renderHistoryList() {
   }
   container.innerHTML = chatHistory.map(item => `
     <div onclick="loadHistoryItem(${item.id})" class="p-2 bg-[#050914] hover:bg-slate-800/80 border border-slate-800/80 rounded-xl cursor-pointer transition">
-      <div class="text-[10px] text-amber-400 font-bold truncate">${item.tool}</div>
+      <div class="text-[10px] text-emerald-400 font-bold truncate">${item.tool}</div>
       <div class="text-[10px] text-slate-300 truncate">${item.prompt}</div>
     </div>
   `).join('');
@@ -175,7 +178,7 @@ function handleEmailAuth(e) {
   if (!email || !pass) return alert("Enter email and password.");
 
   if (!userDatabase[email]) {
-    userDatabase[email] = { password: pass, history: [] };
+    userDatabase[email] = { password: pass, history: [], isVip: false };
     alert("Cloud Account Registered & Signed In!");
   } else if (userDatabase[email].password !== pass) {
     return alert("Incorrect password.");
@@ -187,27 +190,67 @@ function handleEmailAuth(e) {
   localStorage.setItem('jarvis_current_user', email);
   localStorage.setItem('jarvis_users_db', JSON.stringify(userDatabase));
   chatHistory = userDatabase[email].history || [];
+  isVipActive = userDatabase[email].isVip || false;
   document.getElementById('userSessionLabel').innerText = email.split('@')[0];
   closeAuthModal();
   renderHistoryList();
+  updateQuotaDisplay();
 }
 
 function openAdminAuthModal() { document.getElementById('adminAuthModal').classList.remove('hidden'); }
 function closeAdminAuthModal() { document.getElementById('adminAuthModal').classList.add('hidden'); }
+
 function verifyAdminPass() {
   if (document.getElementById('adminPassInput').value === "Abdullah waheed123123") {
     closeAdminAuthModal();
     document.getElementById('adminPanelModal').classList.remove('hidden');
-    document.getElementById('appAgeDisplay').innerText = `Quantum Core Active Online`;
+    
+    // Calculate total sign-ins and VIP users
+    const totalSignins = Object.keys(userDatabase).length;
+    let totalVips = Object.values(userDatabase).filter(u => u.isVip).length;
+    if (isVipActive && currentUserEmail && !userDatabase[currentUserEmail]?.isVip) {
+      totalVips++;
+    }
+
+    document.getElementById('adminSigninsCount').innerText = totalSignins;
+    document.getElementById('adminVipsCount').innerText = totalVips;
     document.getElementById('passkeyDay').innerText = dynamicPasskeys.day;
     document.getElementById('passkeyWeek').innerText = dynamicPasskeys.week;
     document.getElementById('passkeyMonth').innerText = dynamicPasskeys.month;
     document.getElementById('passkeyYear').innerText = dynamicPasskeys.year;
+    renderCustomCodesList();
   } else {
     alert("Incorrect password.");
   }
 }
 function closeAdminPanelModal() { document.getElementById('adminPanelModal').classList.add('hidden'); }
+
+function generateCustomPasskey() {
+  const code = document.getElementById('customCodeInput').value.trim().toUpperCase();
+  const durationDays = document.getElementById('customCodeDuration').value;
+  if (!code) return alert("Enter a custom code string.");
+
+  customPasskeys.push({ code: code, duration: durationDays });
+  localStorage.setItem('jarvis_custom_passkeys', JSON.stringify(customPasskeys));
+  document.getElementById('customCodeInput').value = "";
+  renderCustomCodesList();
+  alert(`Custom passkey "${code}" created successfully!`);
+}
+
+function renderCustomCodesList() {
+  const container = document.getElementById('customCodesListContainer');
+  if (!container) return;
+  if (customPasskeys.length === 0) {
+    container.innerHTML = `<div class="text-slate-500 italic text-[11px]">No custom codes generated yet.</div>`;
+    return;
+  }
+  container.innerHTML = customPasskeys.map(item => `
+    <div class="flex items-center justify-between p-2 bg-[#0b0f19] border border-slate-800 rounded-xl text-[11px]">
+      <span class="text-emerald-400 font-bold">${item.code}</span>
+      <span class="text-slate-300">${item.duration === "9999" ? "Lifetime" : item.duration + " Days"}</span>
+    </div>
+  `).join('');
+}
 
 function triggerVipModal(plan) {
   currentSelectedPlan = plan;
@@ -220,11 +263,17 @@ function closeApplyCodeModal() { document.getElementById('applyCodeModal').class
 
 function validateVipCode() {
   const val = document.getElementById('vipCodeInput').value.trim().toUpperCase();
-  if (val === dynamicPasskeys.day || val === dynamicPasskeys.week || val === dynamicPasskeys.month || val === dynamicPasskeys.year || val === dynamicPasskeys.life) {
+  const isCustomMatch = customPasskeys.find(cp => cp.code === val);
+
+  if (val === dynamicPasskeys.day || val === dynamicPasskeys.week || val === dynamicPasskeys.month || val === dynamicPasskeys.year || val === dynamicPasskeys.life || isCustomMatch) {
     isVipActive = true;
+    if (currentUserEmail && userDatabase[currentUserEmail]) {
+      userDatabase[currentUserEmail].isVip = true;
+      localStorage.setItem('jarvis_users_db', JSON.stringify(userDatabase));
+    }
     updateQuotaDisplay();
     closeApplyCodeModal();
-    alert("VIP Quantum Pass Activated Successfully!");
+    alert("VIP Pass Activated Successfully!");
   } else {
     alert("Invalid Passkey.");
   }
@@ -253,7 +302,6 @@ function removeImage() {
   document.getElementById('imagePreviewContainer').classList.add('hidden');
 }
 
-// Text-to-Speech Voice Output for JARVIS Responses
 function speakText(text) {
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
@@ -281,9 +329,9 @@ async function sendQueryToAI() {
   chatCount++;
   updateQuotaDisplay();
 
-  // TOOL #2: Ultra 8K Image Studio (Supports cars, animals, non-living things, and cell reproduction biology diagrams)
+  // TOOL #2: Ultra 8K Image Studio (Flux Engine for High-Definition Visuals)
   if (activeTool.id === 2) {
-    const loadingMsgId = appendSearchingAnimationMessage("Rendering Ultra 8K High-Definition Visual (Flux Engine)...");
+    const loadingMsgId = appendSearchingAnimationMessage("Rendering Ultra 8K Visual via Flux Engine...");
     setTimeout(() => {
       removeLoadingMessage(loadingMsgId);
       
@@ -295,9 +343,9 @@ async function sendQueryToAI() {
       const encodedPrompt = encodeURIComponent(cleanPrompt + ", photorealistic, 8k resolution, highly detailed, cinematic lighting");
       const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&model=flux`;
       const imageHtml = `Generated Visual for: <b>${promptText}</b><br><br>
-        <img src="${imageUrl}" class="rounded-2xl max-w-full h-auto border border-amber-500/30 shadow-2xl mt-2" alt="${promptText}">
+        <img src="${imageUrl}" class="rounded-2xl max-w-full h-auto border border-emerald-500/30 shadow-2xl mt-2" alt="${promptText}">
         <div class="mt-3 flex gap-2">
-          <a href="${imageUrl}" target="_blank" download="jarvis-creation.png" class="px-3 py-1.5 bg-amber-500 text-black text-[11px] font-bold rounded-xl flex items-center gap-1 shadow"><i class="fa-solid fa-download"></i> Download HD</a>
+          <a href="${imageUrl}" target="_blank" download="jarvis-creation.png" class="px-3 py-1.5 bg-emerald-500 text-black text-[11px] font-bold rounded-xl flex items-center gap-1 shadow"><i class="fa-solid fa-download"></i> Download HD</a>
         </div>`;
       appendChatMessage(imageHtml, 'ai');
       saveHistoryEntry(promptText, `[Generated Image: ${promptText}]`);
@@ -311,8 +359,8 @@ async function sendQueryToAI() {
     setTimeout(() => {
       removeLoadingMessage(loadingMsgId);
       const videoHtml = `Generated AI Video Simulation for: <b>${promptText}</b><br><br>
-        <div class="relative rounded-2xl overflow-hidden border border-amber-500/30 bg-black p-4 text-center shadow-xl">
-          <div class="text-amber-400 font-mono text-xs mb-2"><i class="fa-solid fa-film animate-pulse mr-2"></i>MP4 Quantum Render Complete</div>
+        <div class="relative rounded-2xl overflow-hidden border border-emerald-500/30 bg-black p-4 text-center shadow-xl">
+          <div class="text-emerald-400 font-mono text-xs mb-2"><i class="fa-solid fa-film animate-pulse mr-2"></i>MP4 Render Complete</div>
           <div class="py-12 text-slate-400 italic text-xs bg-slate-900 rounded-xl border border-slate-800">Video sequence compiled successfully for prompt: "${promptText}"</div>
         </div>`;
       appendChatMessage(videoHtml, 'ai');
@@ -321,7 +369,7 @@ async function sendQueryToAI() {
     return;
   }
 
-  const loadingMsgId = appendSearchingAnimationMessage(`JARVIS is executing "${activeTool.name}"...`);
+  const loadingMsgId = appendSearchingAnimationMessage(`JARVIS is executing "${activeTool.name}" via Groq Llama 3.3...`);
   isRequestInProgress = true;
 
   const messages = [
@@ -359,12 +407,13 @@ async function sendQueryToAI() {
       appendChatMessage(aiText, 'ai');
       saveHistoryEntry(promptText, aiText);
     } else {
-      appendChatMessage(`System Alert: Neural response error.`, 'ai');
+      const errorMsg = data.error?.message || "Groq API request rejected. Check your API key.";
+      appendChatMessage(`System Alert: ${errorMsg}`, 'ai');
     }
   } catch (err) {
     removeLoadingMessage(loadingMsgId);
     isRequestInProgress = false;
-    appendChatMessage("Connection Error: Check network connectivity.", 'ai');
+    appendChatMessage("Connection Error: Check network connectivity or Groq API key configuration.", 'ai');
   }
 }
 
@@ -376,7 +425,7 @@ function appendChatMessage(text, sender) {
 
   const avatar = document.createElement('div');
   avatar.className = `w-7 h-7 rounded-xl flex items-center justify-center shrink-0 mt-0.5 font-bold font-mono text-xs ${
-    sender === 'user' ? 'bg-slate-700 text-amber-300' : 'bg-gradient-to-tr from-amber-600 to-amber-400 text-black shadow'
+    sender === 'user' ? 'bg-slate-700 text-emerald-300' : 'bg-gradient-to-tr from-emerald-600 to-emerald-400 text-black shadow'
   }`;
   avatar.innerText = sender === 'user' ? 'U' : 'J';
 
@@ -391,7 +440,7 @@ function appendChatMessage(text, sender) {
     bubble.innerHTML = text.replace(/\n/g, '<br>');
     if (sender === 'ai') {
       const speakBtn = document.createElement('button');
-      speakBtn.className = "mt-2 px-2.5 py-1 bg-[#131b2e] hover:bg-slate-800 text-amber-400 border border-slate-700 rounded-lg text-[10px] font-mono flex items-center gap-1 transition";
+      speakBtn.className = "mt-2 px-2.5 py-1 bg-[#131b2e] hover:bg-slate-800 text-emerald-400 border border-slate-700 rounded-lg text-[10px] font-mono flex items-center gap-1 transition";
       speakBtn.innerHTML = `<i class="fa-solid fa-volume-high"></i> Listen Aloud`;
       speakBtn.onclick = () => speakText(text);
       bubble.appendChild(speakBtn);
@@ -420,8 +469,8 @@ function appendSearchingAnimationMessage(customText) {
   wrapper.id = id;
   wrapper.className = "flex items-start gap-3 text-xs max-w-3xl";
   wrapper.innerHTML = `
-    <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-amber-600 to-amber-400 text-black flex items-center justify-center shrink-0 mt-0.5 font-bold font-mono text-xs shadow">J</div>
-    <div class="p-4 rounded-2xl bg-[#0b0f19] border border-slate-800/80 text-amber-400 italic font-mono flex items-center gap-2 shadow-xl">
+    <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 text-black flex items-center justify-center shrink-0 mt-0.5 font-bold font-mono text-xs shadow">J</div>
+    <div class="p-4 rounded-2xl bg-[#0b0f19] border border-slate-800/80 text-emerald-400 italic font-mono flex items-center gap-2 shadow-xl">
       <i class="fa-solid fa-atom animate-spin"></i> ${customText}
     </div>
   `;
@@ -499,7 +548,12 @@ function toggleQuickSpeech() {
   sr.start();
 }
 
-if (currentUserEmail) document.getElementById('userSessionLabel').innerText = currentUserEmail.split('@')[0];
+if (currentUserEmail) {
+  document.getElementById('userSessionLabel').innerText = currentUserEmail.split('@')[0];
+  if (userDatabase[currentUserEmail]) {
+    isVipActive = userDatabase[currentUserEmail].isVip || false;
+  }
+}
 renderAITools();
 renderHistoryList();
 updateQuotaDisplay();
