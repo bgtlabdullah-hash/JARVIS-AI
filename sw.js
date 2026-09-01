@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jarvis-ai-hub-quantum-v5';
+const CACHE_NAME = 'jarvis-ai-hub-groq-v2';
 const ASSETS = [
   './index.html',
   './app.js',
