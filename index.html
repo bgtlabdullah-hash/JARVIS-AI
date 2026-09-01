@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JARVIS AI HUB - Groq Engine Edition</title>
   
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- KaTeX for Math & LaTeX Equations -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
@@ -30,6 +33,7 @@
 </head>
 <body class="flex h-screen overflow-hidden">
 
+  <!-- SIDEBAR NAVIGATION DRAWER -->
   <aside id="sidebarPanel" class="w-81 bg-[#070b14] border-r border-slate-800/80 flex flex-col shrink-0 transition-all duration-300 z-20 shadow-2xl">
     <div class="p-4 border-b border-slate-800/80 flex items-center justify-between">
       <div class="flex items-center gap-2.5">
@@ -42,12 +46,14 @@
       <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white text-sm transition"><i class="fa-solid fa-bars-staggered"></i></button>
     </div>
 
+    <!-- METRICS & QUOTAS -->
     <div class="p-3 border-b border-slate-800/80 bg-[#090e1a] text-xs space-y-1.5 font-mono">
       <div class="flex justify-between text-slate-400"><span>VIP Status:</span><span id="vipTimerLabel" class="text-red-400 font-bold">INACTIVE</span></div>
       <div class="flex justify-between text-slate-400"><span>Neural Quota:</span><span id="chatQuotaDisplay" class="text-slate-200 font-bold">0 / 50</span></div>
       <div class="flex justify-between text-slate-400"><span>Engine Model:</span><span class="text-emerald-400 font-bold">Llama-3.3-70B</span></div>
     </div>
 
+    <!-- VIP PASSES -->
     <div class="p-3 border-b border-slate-800/80 space-y-2">
       <div class="text-[10px] font-bold text-emerald-400 tracking-wider font-mono flex items-center gap-1.5"><i class="fa-solid fa-crown"></i> UNLOCK VIP PASSES</div>
       <div class="grid grid-cols-2 gap-1.5">
@@ -73,11 +79,13 @@
       </button>
     </div>
 
+    <!-- CONTROLS -->
     <div class="p-3 border-b border-slate-800/80 flex items-center justify-between gap-2">
       <button onclick="openAdminAuthModal()" class="flex-1 py-1.5 bg-slate-800/60 hover:bg-slate-700 text-emerald-400 rounded-lg text-xs font-mono font-semibold transition"><i class="fa-solid fa-shield-halved mr-1"></i> Admin Portal</button>
       <button onclick="clearChatHistory()" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs transition" title="Clear History"><i class="fa-solid fa-trash"></i></button>
     </div>
 
+    <!-- HISTORY LIST -->
     <div class="px-3 py-2 text-[10px] font-bold text-slate-400 font-mono flex items-center justify-between">
       <span>CHAT HISTORY</span>
       <span id="userSessionLabel" class="text-emerald-400 font-bold">Guest Session</span>
@@ -86,11 +94,14 @@
       <div class="text-slate-500 italic text-[10px] py-1">No saved neural logs yet.</div>
     </div>
 
+    <!-- WORKSPACE MODULES (12 Folders) -->
     <div class="px-3 py-1 text-[10px] font-bold text-slate-400 font-mono">AI WORKSPACE MODULES (12)</div>
     <div id="aiToolsList" class="flex-1 overflow-y-auto px-3 pb-3 space-y-1.5"></div>
   </aside>
 
+  <!-- MAIN CHAT & WORKSPACE AREA -->
   <main class="flex-1 flex flex-col bg-[#03050b] relative overflow-hidden">
+    <!-- TOP HEADER BAR -->
     <header class="h-14 border-b border-slate-800/80 glass-panel px-4 flex items-center justify-between z-10">
       <div class="flex items-center gap-3">
         <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-bars"></i></button>
@@ -98,7 +109,7 @@
       </div>
       
       <div class="flex items-center gap-2.5">
-        <button id="installAppBtn" class="hidden px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs rounded-lg transition items-center gap-1.5 shadow-lg shadow-emerald-500/20">
+        <button id="installAppBtn" onclick="triggerInstall()" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs rounded-lg transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/20">
           <i class="fa-solid fa-download"></i> Install App
         </button>
         <button onclick="toggleLiveVoiceModal(true)" class="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-semibold text-xs rounded-lg transition flex items-center gap-1.5">
@@ -110,6 +121,7 @@
       </div>
     </header>
 
+    <!-- QUICK PROMPT ACCELERATOR CHIPS -->
     <div class="px-4 py-2 border-b border-slate-800/60 bg-[#050914] flex items-center gap-2 overflow-x-auto text-xs shrink-0">
       <span class="text-slate-500 font-mono text-[10px] uppercase font-bold shrink-0">Quick Queries:</span>
       <button onclick="quickPromptClick('Explain cell reproduction and mitosis in detail with diagram')" class="px-2.5 py-1 bg-[#0e1526] hover:bg-emerald-500/10 border border-slate-800 hover:border-emerald-500/40 text-slate-300 rounded-lg text-[11px] whitespace-nowrap transition">🧬 Cell Reproduction</button>
@@ -118,6 +130,7 @@
       <button onclick="quickPromptClick('Write a robust Python script to scrape website data and save to CSV')" class="px-2.5 py-1 bg-[#0e1526] hover:bg-emerald-500/10 border border-slate-800 hover:border-emerald-500/40 text-slate-300 rounded-lg text-[11px] whitespace-nowrap transition">🐍 Python Web Scraper</button>
     </div>
 
+    <!-- CHAT OUTPUT CONTAINER -->
     <div id="chatOutputContainer" class="flex-1 overflow-y-auto p-4 space-y-4">
       <div class="flex items-start gap-3 text-xs max-w-3xl">
         <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 text-black flex items-center justify-center shrink-0 mt-0.5 font-bold font-mono text-xs shadow-md">J</div>
@@ -128,6 +141,7 @@
       </div>
     </div>
 
+    <!-- INPUT DOCK -->
     <div class="p-4 border-t border-slate-800/80 glass-panel">
       <div id="imagePreviewContainer" class="hidden mb-2 p-2 bg-[#0e1526] border border-slate-800 rounded-xl flex items-center gap-2 max-w-xs"></div>
       
@@ -137,13 +151,14 @@
         
         <input type="text" id="userInputPrompt" onkeydown="if(event.key==='Enter') sendQueryToAI()" placeholder="Ask Groq Llama 3.3 anything..." class="flex-1 bg-transparent border-none outline-none text-xs text-slate-100 placeholder-slate-500 px-2">
         
-        <button onclick="sendQueryToAI()" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-bold text-xs rounded-xl transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/20">
+        <button onclick="sendQueryToAI()" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-bold text-xs rounded-xl transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 cursor-pointer">
           <span>Send</span> <i class="fa-solid fa-paper-plane"></i>
         </button>
       </div>
     </div>
   </main>
 
+  <!-- LIVE VOICE MODAL -->
   <div id="liveVoiceModal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4">
     <div class="bg-[#0b0f19] border border-slate-800 rounded-3xl w-full max-w-md p-6 text-center relative shadow-2xl">
       <button onclick="toggleLiveVoiceModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -161,6 +176,7 @@
     </div>
   </div>
 
+  <!-- AUTH MODAL -->
   <div id="authModal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4">
     <div class="bg-[#0b0f19] border border-slate-800 rounded-3xl w-full max-w-sm p-6 relative shadow-2xl">
       <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -180,6 +196,7 @@
     </div>
   </div>
 
+  <!-- ADMIN PORTAL MODAL -->
   <div id="adminAuthModal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4">
     <div class="bg-[#0b0f19] border border-slate-800 rounded-3xl w-full max-w-sm p-6 relative shadow-2xl">
       <button onclick="closeAdminAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -197,6 +214,7 @@
       <div id="appAgeDisplay" class="text-xs text-slate-400 font-mono mb-4">Groq Llama 3.3 Core Active Online</div>
       
       <div class="space-y-4 text-xs font-mono">
+        <!-- METRICS -->
         <div class="grid grid-cols-2 gap-3">
           <div class="p-3 bg-[#131b2e] border border-slate-800 rounded-xl text-center">
             <div class="text-slate-400 text-[10px]">TOTAL SIGN-INS</div>
@@ -208,6 +226,7 @@
           </div>
         </div>
 
+        <!-- DEFAULT PASSKEYS -->
         <div class="p-3.5 bg-[#131b2e] border border-slate-800 rounded-2xl space-y-1.5">
           <div class="text-slate-400 font-bold">ACTIVE SYSTEM PASSKEYS:</div>
           <div>1 Day: <span id="passkeyDay" class="text-emerald-400 font-bold"></span></div>
@@ -216,6 +235,7 @@
           <div>1 Year: <span id="passkeyYear" class="text-emerald-400 font-bold"></span></div>
         </div>
 
+        <!-- CUSTOM PASSKEY GENERATOR -->
         <div class="p-3.5 bg-[#131b2e] border border-slate-800 rounded-2xl space-y-3">
           <div class="text-emerald-400 font-bold flex items-center gap-1.5"><i class="fa-solid fa-wand-magic-sparkles"></i> CREATE CUSTOM PASSKEY</div>
           <div>
@@ -235,6 +255,7 @@
           <button onclick="generateCustomPasskey()" class="w-full py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl transition shadow">Save & Register Custom Passkey</button>
         </div>
 
+        <!-- ACTIVE CUSTOM CODES LIST -->
         <div class="p-3.5 bg-[#131b2e] border border-slate-800 rounded-2xl space-y-2">
           <div class="text-slate-400 font-bold">CUSTOM GENERATED CODES:</div>
           <div id="customCodesListContainer" class="space-y-1 max-h-24 overflow-y-auto">
@@ -245,6 +266,7 @@
     </div>
   </div>
 
+  <!-- VIP PASS OPTIONS MODAL -->
   <div id="vipOptionModal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4">
     <div class="bg-[#0b0f19] border border-slate-800 rounded-3xl w-full max-w-sm p-6 text-center relative shadow-2xl">
       <button onclick="closeVipOptionModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
