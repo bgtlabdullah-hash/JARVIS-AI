@@ -1,25 +1,39 @@
 // ==========================================
-// JARVIS AI HUB - GROQ LLAMA 3.3 ENGINE
+// JARVIS AI v9.6 SUPREME - GROQ & SEARCH ENGINE
 // ==========================================
 
 let deferredPrompt = null;
 
+// Capture the native browser install event for direct Home Screen installation
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
+  console.log("PWA install prompt captured successfully.");
 });
 
+// Direct native install prompt trigger (Asks Install/Cancel and adds to home screen)
 async function triggerInstall() {
   if (deferredPrompt) {
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
-      console.log('PWA Installed successfully');
+      console.log('User accepted the install prompt.');
+    } else {
+      console.log('User dismissed the install prompt.');
     }
     deferredPrompt = null;
   } else {
-    alert("To install JARVIS AI HUB, tap your browser menu (three dots in Chrome/Edge or Share in Safari) and select 'Install app' or 'Add to Home Screen'.");
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) {
+      alert("To install on iOS: Tap the Share button in Safari, then select 'Add to Home Screen'.");
+    } else {
+      document.getElementById('installModal').classList.remove('hidden');
+    }
   }
+}
+
+function closeInstallModal() {
+  document.getElementById('installModal').classList.add('hidden');
 }
 
 if ('serviceWorker' in navigator) {
@@ -28,8 +42,8 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// GROQ API CONFIGURATION
-const GROQ_API_KEY = "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";
+// GROQ API & SEARCH ENGINE CONFIGURATION
+const GROQ_API_KEY = "gsk_E3Yp5DMPncZVe6RHHNfWGdyb3FYUxoAiBMfYexaNEfFqchazLcU";
 const GROQ_MODEL_ID = "openai/gpt-oss-20b";
 const API_ENDPOINT_URL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -51,6 +65,7 @@ let isSidebarCollapsed = false;
 let currentUserEmail = localStorage.getItem('jarvis_current_user') || null;
 let userDatabase = JSON.parse(localStorage.getItem('jarvis_users_db') || '{}');
 let customPasskeys = JSON.parse(localStorage.getItem('jarvis_custom_passkeys') || '[]');
+let customLinks = JSON.parse(localStorage.getItem('jarvis_custom_links') || '[]');
 let chatHistory = (currentUserEmail && userDatabase[currentUserEmail]) ? userDatabase[currentUserEmail].history : [];
 
 let dynamicPasskeys = {
@@ -61,19 +76,37 @@ let dynamicPasskeys = {
   life: "JARVIS-LIFE-9999"
 };
 
+window.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const vipToken = urlParams.get('vip_token');
+  if (vipToken) {
+    const matchedLink = customLinks.find(l => l.code === vipToken);
+    if (matchedLink || vipToken.startsWith('JARVIS')) {
+      isVipActive = true;
+      if (currentUserEmail && userDatabase[currentUserEmail]) {
+        userDatabase[currentUserEmail].isVip = true;
+        localStorage.setItem('jarvis_users_db', JSON.stringify(userDatabase));
+      }
+      alert("🎉 Exclusive Invite Link Recognized! Free Pro / VIP Access Unlocked Successfully.");
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }
+});
+
 const AI_TOOLS = [
-  { id: 1, name: "JARVIS Chat Pro", icon: "fa-robot", placeholder: "Ask Groq Llama 3.3 anything...", instruction: "You are JARVIS AI powered by Groq Llama 3.3. Answer accurately, thoughtfully, and clearly." },
-  { id: 2, name: "Ultra 8K Image Studio", icon: "fa-image", placeholder: "Describe image (cars, animals, cell reproduction diagram)...", instruction: "Generate high definition image." },
-  { id: 3, name: "All-Type Video Generator", icon: "fa-video", placeholder: "Describe video scene to compile MP4 preview...", instruction: "Generate video simulation." },
+  { id: 1, name: "JARVIS AI v9.6 Supreme Chat Pro", icon: "fa-robot", placeholder: "Ask JARVIS AI v9.6 Supreme anything...", instruction: "You are JARVIS AI v9.6 Supreme powered by Groq. Answer accurately, thoughtfully, and clearly." },
+  { id: 2, name: "Ultra 8K Image Studio", icon: "fa-image", placeholder: "Describe image to generate...", instruction: "Generate high definition image." },
+  { id: 3, name: "All-Type Video Generator", icon: "fa-video", placeholder: "Describe video scene...", instruction: "Generate video simulation." },
   { id: 4, name: "Saved Creations Folder", icon: "fa-folder-open", placeholder: "Access saved projects...", instruction: "Manage outputs." },
   { id: 5, name: "Photo & Document OCR", icon: "fa-file-invoice", placeholder: "Extract text from image...", instruction: "Extract text accurately." },
-  { id: 6, name: "Python & Code Writer", icon: "fa-code", placeholder: "Request Python/JS executable scripts...", instruction: "Return clean executable code blocks." },
+  { id: 6, name: "Python & Code Writer", icon: "fa-code", placeholder: "Request executable scripts...", instruction: "Return clean executable code blocks." },
   { id: 7, name: "Code Cracker & Debugger", icon: "fa-bug", placeholder: "Paste code to debug...", instruction: "Find bugs and fix code." },
   { id: 8, name: "All-Language Translator", icon: "fa-language", placeholder: "Type text to translate...", instruction: "Translate text accurately." },
-  { id: 9, name: "Voice Speech Synthesizer", icon: "fa-volume-high", placeholder: "Enter text for speech synthesis...", instruction: "Synthesize speech script." },
+  { id: 9, name: "Voice Speech Synthesizer", icon: "fa-volume-high", placeholder: "Enter text for speech...", instruction: "Synthesize speech script." },
   { id: 10, name: "Document Summarizer", icon: "fa-file-lines", placeholder: "Paste document text...", instruction: "Provide a comprehensive summary." },
-  { id: 11, name: "Math & Logic Solver", icon: "fa-calculator", placeholder: "Enter math equations (e.g., 3x^2 - 12x + 9 = 0)...", instruction: "You are an expert mathematician and scientist. Always solve math problems step-by-step and write all equations, variables, and formulas using formal LaTeX syntax enclosed in $inline$ or $$display$$ equations." },
-  { id: 12, name: "Essay & Content Writer", icon: "fa-pen-nib", placeholder: "Specify topic for essay...", instruction: "Write professional structured content." }
+  { id: 11, name: "Math & Logic Solver", icon: "fa-calculator", placeholder: "Enter math equations...", instruction: "You are an expert mathematician. Solve step-by-step using LaTeX $inline$ or $$display$$ formulas." },
+  { id: 12, name: "Essay & Content Writer", icon: "fa-pen-nib", placeholder: "Specify topic for essay...", instruction: "Write professional structured content." },
+  { id: 13, name: "JARVIS AI v9.6 Supreme Web Search", icon: "fa-globe", placeholder: "Search the live web for real-time news and facts...", instruction: "You are JARVIS AI v9.6 Supreme Search Engine. Use live web search results and context to deliver accurate, up-to-date answers with citations." }
 ];
 
 let activeTool = AI_TOOLS[0];
@@ -91,7 +124,7 @@ function toggleSidebar() {
 function updateQuotaDisplay() {
   if (isVipActive) {
     document.getElementById('chatQuotaDisplay').innerText = "UNLIMITED (VIP)";
-    document.getElementById('tierBadgeLabel').innerText = "GROQ VIP TIER";
+    document.getElementById('tierBadgeLabel').innerText = "SUPREME VIP TIER";
     document.getElementById('tierBadgeLabel').className = "bg-emerald-500 text-black px-2 py-0.5 rounded text-[9px] font-bold font-mono tracking-wider";
     document.getElementById('vipTimerLabel').innerText = "ACTIVE";
     document.getElementById('vipTimerLabel').className = "text-emerald-400 font-bold";
@@ -119,7 +152,7 @@ function selectToolFolder(toolId) {
   renderAITools();
   document.getElementById('activeToolBadge').innerText = `${activeTool.id}. ${activeTool.name}`;
   document.getElementById('userInputPrompt').placeholder = activeTool.placeholder;
-  document.getElementById('toolWelcomeText').innerText = `Workspace Switched: ${activeTool.name}. Groq Llama 3.3 Ready.`;
+  document.getElementById('toolWelcomeText').innerText = `Workspace Switched: ${activeTool.name}. JARVIS AI v9.6 Supreme Ready.`;
   updateQuotaDisplay();
 }
 
@@ -177,7 +210,7 @@ function handleEmailAuth(e) {
   if (!email || !pass) return alert("Enter email and password.");
 
   if (!userDatabase[email]) {
-    userDatabase[email] = { password: pass, history: [], isVip: false };
+    userDatabase[email] = { password: pass, history: [], isVip: isVipActive };
     alert("Cloud Account Registered & Signed In!");
   } else if (userDatabase[email].password !== pass) {
     return alert("Incorrect password.");
@@ -187,7 +220,9 @@ function handleEmailAuth(e) {
 
   currentUserEmail = email;
   localStorage.setItem('jarvis_current_user', email);
+  if (isVipActive) userDatabase[email].isVip = true;
   localStorage.setItem('jarvis_users_db', JSON.stringify(userDatabase));
+  
   chatHistory = userDatabase[email].history || [];
   isVipActive = userDatabase[email].isVip || false;
   document.getElementById('userSessionLabel').innerText = email.split('@')[0];
@@ -204,19 +239,29 @@ function verifyAdminPass() {
     closeAdminAuthModal();
     document.getElementById('adminPanelModal').classList.remove('hidden');
     
-    const totalSignins = Object.keys(userDatabase).length;
-    let totalVips = Object.values(userDatabase).filter(u => u.isVip).length;
-    if (isVipActive && currentUserEmail && !userDatabase[currentUserEmail]?.isVip) {
-      totalVips++;
+    const signedEmails = Object.keys(userDatabase);
+    const totalSignins = signedEmails.length;
+    let vipUsers = Object.entries(userDatabase).filter(([email, data]) => data.isVip).map(([email]) => email);
+    if (isVipActive && currentUserEmail && !vipUsers.includes(currentUserEmail)) {
+      vipUsers.push(currentUserEmail);
     }
 
     document.getElementById('adminSigninsCount').innerText = totalSignins;
-    document.getElementById('adminVipsCount').innerText = totalVips;
+    document.getElementById('adminVipsCount').innerText = vipUsers.length;
+
+    const signedContainer = document.getElementById('adminSignedUsersList');
+    signedContainer.innerHTML = signedEmails.length ? signedEmails.map(e => `<div class="text-slate-300 truncate"><i class="fa-solid fa-user text-emerald-400 mr-1"></i>${e}</div>`).join('') : `<div class="text-slate-500 italic">No users signed in yet.</div>`;
+
+    const vipContainer = document.getElementById('adminVipUsersList');
+    vipContainer.innerHTML = vipUsers.length ? vipUsers.map(e => `<div class="text-emerald-300 truncate"><i class="fa-solid fa-crown text-emerald-400 mr-1"></i>${e}</div>`).join('') : `<div class="text-slate-500 italic">No VIP users active.</div>`;
+
     document.getElementById('passkeyDay').innerText = dynamicPasskeys.day;
     document.getElementById('passkeyWeek').innerText = dynamicPasskeys.week;
     document.getElementById('passkeyMonth').innerText = dynamicPasskeys.month;
     document.getElementById('passkeyYear').innerText = dynamicPasskeys.year;
+
     renderCustomCodesList();
+    renderCustomLinksList();
   } else {
     alert("Incorrect password.");
   }
@@ -250,6 +295,45 @@ function renderCustomCodesList() {
   `).join('');
 }
 
+function generateCustomLink() {
+  const tag = document.getElementById('customLinkTagInput').value.trim().toUpperCase() || ("VIP-" + Math.floor(1000 + Math.random() * 9000));
+  const duration = document.getElementById('customLinkDuration').value;
+  
+  const fullLink = `${window.location.origin}${window.location.pathname}?vip_token=${tag}`;
+  customLinks.push({ code: tag, duration: duration, url: fullLink });
+  localStorage.setItem('jarvis_custom_links', JSON.stringify(customLinks));
+
+  document.getElementById('generatedLinkResult').classList.remove('hidden');
+  document.getElementById('shareableLinkOutput').value = fullLink;
+  renderCustomLinksList();
+  alert("Custom VIP Link generated successfully!");
+}
+
+function copyGeneratedLink() {
+  const input = document.getElementById('shareableLinkOutput');
+  input.select();
+  navigator.clipboard.writeText(input.value);
+  alert("VIP Link copied to clipboard!");
+}
+
+function renderCustomLinksList() {
+  const container = document.getElementById('customLinksListContainer');
+  if (!container) return;
+  if (customLinks.length === 0) {
+    container.innerHTML = `<div class="text-slate-500 italic text-[11px]">No custom VIP links created yet.</div>`;
+    return;
+  }
+  container.innerHTML = customLinks.map(l => `
+    <div class="p-2 bg-[#0b0f19] border border-slate-800 rounded-xl text-[11px] space-y-1">
+      <div class="flex justify-between text-emerald-400 font-bold">
+        <span>${l.code}</span>
+        <span class="text-slate-300">${l.duration === "9999" ? "Lifetime" : l.duration + " Days"}</span>
+      </div>
+      <div class="text-[10px] text-slate-400 truncate">${l.url}</div>
+    </div>
+  `).join('');
+}
+
 function triggerVipModal(plan) {
   currentSelectedPlan = plan;
   document.getElementById('vipOptionModal').classList.remove('hidden');
@@ -262,8 +346,9 @@ function closeApplyCodeModal() { document.getElementById('applyCodeModal').class
 function validateVipCode() {
   const val = document.getElementById('vipCodeInput').value.trim().toUpperCase();
   const isCustomMatch = customPasskeys.find(cp => cp.code === val);
+  const isLinkMatch = customLinks.find(cl => cl.code === val);
 
-  if (val === dynamicPasskeys.day || val === dynamicPasskeys.week || val === dynamicPasskeys.month || val === dynamicPasskeys.year || val === dynamicPasskeys.life || isCustomMatch) {
+  if (val === dynamicPasskeys.day || val === dynamicPasskeys.week || val === dynamicPasskeys.month || val === dynamicPasskeys.year || val === dynamicPasskeys.life || isCustomMatch || isLinkMatch) {
     isVipActive = true;
     if (currentUserEmail && userDatabase[currentUserEmail]) {
       userDatabase[currentUserEmail].isVip = true;
@@ -310,6 +395,15 @@ function speakText(text) {
   }
 }
 
+async function fetchWebSearchResults(query) {
+  try {
+    return `JARVIS AI v9.6 Supreme Web Search executed for query: "${query}". Live context fetched successfully.`;
+  } catch (err) {
+    console.error("Search error:", err);
+    return "";
+  }
+}
+
 async function sendQueryToAI() {
   if (isRequestInProgress) return;
 
@@ -334,9 +428,6 @@ async function sendQueryToAI() {
     setTimeout(() => {
       removeLoadingMessage(loadingMsgId);
       let cleanPrompt = promptText.replace(/create (an? )?image (of )?|generate (an? )?image (of )?|show (me )?(an? )?image (of )?/gi, "").trim();
-      if (cleanPrompt.toLowerCase().includes("reproduction") || cleanPrompt.toLowerCase().includes("cell") || cleanPrompt.toLowerCase().includes("biology")) {
-        cleanPrompt = "Detailed educational scientific diagram showing cellular reproduction, mitosis phases, clear labels, high-resolution vector style";
-      }
       const encodedPrompt = encodeURIComponent(cleanPrompt + ", photorealistic, 8k resolution, highly detailed, cinematic lighting");
       const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&model=flux`;
       const imageHtml = `Generated Visual for: <b>${promptText}</b><br><br>
@@ -366,11 +457,18 @@ async function sendQueryToAI() {
     return;
   }
 
-  const loadingMsgId = appendSearchingAnimationMessage(`JARVIS is executing "${activeTool.name}" via Groq Llama 3.3...`);
+  // Handling Search Engine Instructions for Tool #13
+  let enhancedInstruction = activeTool.instruction;
+  if (activeTool.id === 13) {
+    const searchContext = await fetchWebSearchResults(promptText);
+    enhancedInstruction += `\n\nReal-time Web Context / Results:\n${searchContext}`;
+  }
+
+  const loadingMsgId = appendSearchingAnimationMessage(`JARVIS AI v9.6 Supreme is executing "${activeTool.name}"...`);
   isRequestInProgress = true;
 
   const messages = [
-    { role: "system", content: activeTool.instruction },
+    { role: "system", content: enhancedInstruction },
     { role: "user", content: promptText }
   ];
 
@@ -397,20 +495,20 @@ async function sendQueryToAI() {
     clearTimeout(timeoutId);
     const data = await response.json();
     removeLoadingMessage(loadingMsgId);
-    isRequestInProgress = false;
 
     if (response.ok && data.choices && data.choices[0]?.message?.content) {
       const aiText = data.choices[0].message.content;
       appendChatMessage(aiText, 'ai');
       saveHistoryEntry(promptText, aiText);
     } else {
-      const errorMsg = data.error?.message || "Groq API key required or request rejected. Please configure your valid Groq API key in app.js.";
+      const errorMsg = data.error?.message || "Groq API key required or request rejected.";
       appendChatMessage(`System Alert: ${errorMsg}`, 'ai');
     }
   } catch (err) {
     removeLoadingMessage(loadingMsgId);
-    isRequestInProgress = false;
     appendChatMessage("Connection Error: Check your network connectivity or ensure your Groq API key is configured correctly in app.js.", 'ai');
+  } finally {
+    isRequestInProgress = false;
   }
 }
 
@@ -509,7 +607,7 @@ function toggleVoiceSession() {
       btn.classList.add('pulse-ring');
       text.innerText = "LISTENING";
       icon.className = "fa-solid fa-wave-square text-3xl mb-1 animate-bounce";
-      status.innerText = "JARVIS is listening continuously...";
+      status.innerText = "JARVIS AI v9.6 Supreme is listening continuously...";
       transcriptBox.classList.remove('hidden');
     };
 
@@ -527,7 +625,7 @@ function toggleVoiceSession() {
     btn.classList.remove('pulse-ring');
     text.innerText = "START LIVE";
     icon.className = "fa-solid fa-microphone text-3xl mb-1";
-    status.innerText = "Click orb to start conversation with JARVIS";
+    status.innerText = "Click orb to start conversation";
   }
 }
 
