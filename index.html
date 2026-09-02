@@ -48,17 +48,16 @@
           <span class="text-[10px] text-emerald-400 font-mono tracking-widest font-semibold">SUPREME ENGINE</span>
         </div>
       </div>
-      <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800/55 transition"><i class="fa-solid fa-bars-staggered"></i></button>
     </div>
 
-    <!-- PWA Install Button (Direct Native Prompt) -->
+    <!-- PWA Install Button -->
     <div class="p-3 border-b border-slate-800/80">
       <button onclick="triggerInstall()" class="w-full py-2 px-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-black font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition">
         <i class="fa-solid fa-download"></i> Install App to Home Screen
       </button>
     </div>
 
-    <!-- AI Tools Modules List -->
+    <!-- AI Tools Modules List (12 Folders) -->
     <div class="flex-1 overflow-y-auto p-3 space-y-1.5">
       <div class="text-[10px] font-mono text-slate-400 px-2 uppercase tracking-wider mb-1">Supreme Modules</div>
       <div id="aiToolsList" class="space-y-1"></div>
@@ -86,9 +85,8 @@
     <!-- Top Header Bar -->
     <header class="h-14 border-b border-slate-800/80 bg-[#080c19]/80 backdrop-blur-md px-4 flex items-center justify-between z-10">
       <div class="flex items-center gap-3">
-        <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-bars"></i></button>
         <div>
-          <span id="activeToolBadge" class="text-xs font-bold text-white bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">1. JARVIS AI v9.6 Supreme Chat Pro</span>
+          <span id="activeToolBadge" class="text-xs font-bold text-white bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">1. JARVIS Chat Pro</span>
         </div>
       </div>
       <div class="flex items-center gap-2">
@@ -109,7 +107,7 @@
         <p id="toolWelcomeText" class="text-xs text-slate-400 max-w-md mx-auto">Powered by Groq high-speed inference and real-time Supreme Web Search Engine.</p>
         
         <div class="pt-4 flex flex-wrap justify-center gap-2">
-          <button onclick="quickPromptClick('Explain Quantum Computing with LaTeX equations')" class="px-3 py-1.5 bg-[#0b0f19] hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-xl text-xs transition">Quantum Computing</button>
+          <button onclick="quickPromptClick('Explain Quantum Computing with equations')" class="px-3 py-1.5 bg-[#0b0f19] hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-xl text-xs transition">Quantum Computing</button>
           <button onclick="quickPromptClick('Search latest AI developments in 2026')" class="px-3 py-1.5 bg-[#0b0f19] hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-xl text-xs transition">Search Latest AI News</button>
           <button onclick="quickPromptClick('Write an executable Python script for data sorting')" class="px-3 py-1.5 bg-[#0b0f19] hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-xl text-xs transition">Python Code Script</button>
         </div>
@@ -146,7 +144,7 @@
     <div id="historyListContainer" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
   </aside>
 
-  <!-- MODALS (Auth, Admin, VIP, Install Fallback, Live Voice) -->
+  <!-- MODALS -->
   <div id="installModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-[#080c19] border border-slate-800 rounded-3xl p-6 max-w-sm w-full space-y-4 text-center">
       <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mx-auto text-xl"><i class="fa-solid fa-download"></i></div>
@@ -236,46 +234,84 @@
         <div class="flex gap-2">
           <input type="text" id="customCodeInput" placeholder="Passkey code (e.g. SPECIAL-PRO)" class="flex-1 bg-[#0b0f19] border border-slate-800 rounded-xl p-2.5 text-xs text-white">
           <select id="customCodeDuration" class="bg-[#0b0f19] border border-slate-800 rounded-xl p-2.5 text-xs text-white">
-            <option value="1">1 Day</option>
-            <option value="7">7 Days</option>
-            <option value="30">30 Days</option>
-            <option value="365">1 Year</option>
-            <option value="9999">Lifetime</option>
+            <option value="1">1 Day Pass</option>
+            <option value="7">1 Week Pass</option>
+            <option value="30">1 Month Pass</option>
+            <option value="365">1 Year Pass</option>
+            <option value="9999">Whole Life Pass</option>
           </select>
           <button onclick="generateCustomPasskey()" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-xs">Create</button>
         </div>
         <div id="customCodesListContainer" class="space-y-1.5"></div>
       </div>
-
-      <div class="space-y-3 border-t border-slate-800 pt-4">
-        <h4 class="text-xs font-bold text-slate-300 font-mono uppercase">Generate Shareable VIP Invite Link</h4>
-        <div class="flex gap-2">
-          <input type="text" id="customLinkTagInput" placeholder="Invite Tag Code (e.g. VIP-GUEST)" class="flex-1 bg-[#0b0f19] border border-slate-800 rounded-xl p-2.5 text-xs text-white">
-          <select id="customLinkDuration" class="bg-[#0b0f19] border border-slate-800 rounded-xl p-2.5 text-xs text-white">
-            <option value="9999">Lifetime VIP Link</option>
-          </select>
-          <button onclick="generateCustomLink()" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-xs">Generate Link</button>
-        </div>
-        <div id="generatedLinkResult" class="hidden flex gap-2">
-          <input type="text" id="shareableLinkOutput" readonly class="flex-1 bg-[#0b0f19] border border-slate-800 rounded-xl p-2 text-[11px] text-emerald-400 font-mono">
-          <button onclick="copyGeneratedLink()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs">Copy</button>
-        </div>
-        <div id="customLinksListContainer" class="space-y-1.5"></div>
-      </div>
     </div>
   </div>
 
-  <!-- VIP Option & Passkey Modals -->
+  <!-- VIP Option Modal with All 5 Tiers & Safepay Links -->
   <div id="vipOptionModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-[#080c19] border border-slate-800 rounded-3xl p-6 max-w-sm w-full space-y-4 text-center">
-      <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mx-auto text-xl"><i class="fa-solid fa-crown"></i></div>
-      <h3 class="font-bold text-white text-base">Unlock VIP Supreme Access</h3>
-      <p class="text-xs text-slate-400">Choose how you want to unlock unlimited access.</p>
-      <div class="space-y-2 pt-2">
-        <button onclick="proceedGetCode()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-xs">Get Pass (Safepay Checkout)</button>
-        <button onclick="proceedApplyCode()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-xl text-xs font-semibold">I already have a Passkey</button>
+    <div class="bg-[#080c19] border border-slate-800 rounded-3xl p-6 max-w-md w-full space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold"><i class="fa-solid fa-crown"></i></div>
+          <div>
+            <h3 class="font-bold text-white text-sm">Unlock VIP Supreme Pass</h3>
+            <span class="text-[10px] text-emerald-400 font-mono">Select your preferred duration & Safepay pricing</span>
+          </div>
+        </div>
+        <button onclick="closeVipOptionModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
-      <button onclick="closeVipOptionModal()" class="text-slate-500 text-xs hover:underline pt-2">Cancel</button>
+
+      <!-- 5 Distinct VIP Pricing Tiers with Safepay -->
+      <div class="space-y-2.5">
+        <!-- 1 Day Pass -->
+        <div class="bg-[#0b0f19] border border-slate-800 hover:border-emerald-500/50 p-3 rounded-2xl flex items-center justify-between transition">
+          <div>
+            <div class="font-bold text-white text-xs">1 Day Supreme Pass</div>
+            <div class="text-[10px] text-emerald-400 font-mono font-semibold">Rs. 150 / day</div>
+          </div>
+          <button onclick="proceedSafepayCheckout('1 Day', 150, 'https://getsafepay.com/checkout?tier=1day')" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-[11px] rounded-xl shadow-lg shadow-emerald-500/20">Pay Safepay</button>
+        </div>
+
+        <!-- 1 Week Pass -->
+        <div class="bg-[#0b0f19] border border-slate-800 hover:border-emerald-500/50 p-3 rounded-2xl flex items-center justify-between transition">
+          <div>
+            <div class="font-bold text-white text-xs">1 Week Supreme Pass</div>
+            <div class="text-[10px] text-emerald-400 font-mono font-semibold">Rs. 500 / week</div>
+          </div>
+          <button onclick="proceedSafepayCheckout('1 Week', 500, 'https://getsafepay.com/checkout?tier=1week')" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-[11px] rounded-xl shadow-lg shadow-emerald-500/20">Pay Safepay</button>
+        </div>
+
+        <!-- 1 Month Pass -->
+        <div class="bg-[#0b0f19] border border-slate-800 hover:border-emerald-500/50 p-3 rounded-2xl flex items-center justify-between transition">
+          <div>
+            <div class="font-bold text-white text-xs">1 Month Supreme Pass</div>
+            <div class="text-[10px] text-emerald-400 font-mono font-semibold">Rs. 1,500 / month</div>
+          </div>
+          <button onclick="proceedSafepayCheckout('1 Month', 1500, 'https://getsafepay.com/checkout?tier=1month')" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-[11px] rounded-xl shadow-lg shadow-emerald-500/20">Pay Safepay</button>
+        </div>
+
+        <!-- 1 Year Pass -->
+        <div class="bg-[#0b0f19] border border-slate-800 hover:border-emerald-500/50 p-3 rounded-2xl flex items-center justify-between transition">
+          <div>
+            <div class="font-bold text-white text-xs">1 Year Supreme Pass</div>
+            <div class="text-[10px] text-emerald-400 font-mono font-semibold">Rs. 10,000 / year</div>
+          </div>
+          <button onclick="proceedSafepayCheckout('1 Year', 10000, 'https://getsafepay.com/checkout?tier=1year')" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-[11px] rounded-xl shadow-lg shadow-emerald-500/20">Pay Safepay</button>
+        </div>
+
+        <!-- Whole Life Pass -->
+        <div class="bg-[#0b0f19] border border-emerald-500/40 hover:border-emerald-500 p-3 rounded-2xl flex items-center justify-between transition bg-gradient-to-r from-emerald-500/5 to-transparent">
+          <div>
+            <div class="font-bold text-white text-xs flex items-center gap-1.5">Whole Life Supreme Pass <span class="bg-emerald-500/20 text-emerald-400 text-[9px] px-1.5 py-0.5 rounded font-mono">BEST VALUE</span></div>
+            <div class="text-[10px] text-emerald-400 font-mono font-semibold">Rs. 25,000 / lifetime</div>
+          </div>
+          <button onclick="proceedSafepayCheckout('Whole Life', 25000, 'https://getsafepay.com/checkout?tier=lifetime')" class="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-400 hover:opacity-90 text-black font-bold text-[11px] rounded-xl shadow-lg shadow-emerald-500/30">Pay Safepay</button>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-800 pt-3 text-center">
+        <button onclick="proceedApplyCode()" class="text-xs text-emerald-400 hover:underline font-mono">Already have a VIP Passkey? Click here to activate</button>
+      </div>
     </div>
   </div>
 
