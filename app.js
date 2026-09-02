@@ -43,7 +43,7 @@ if ('serviceWorker' in navigator) {
 }
 
 // GROQ API & SEARCH ENGINE CONFIGURATION
-const GROQ_API_KEY = "gsk_E3Yp5DMPncZVe6RHHNfWGdyb3FYUxoAiBMfYexaNEfFqchazLcU";
+const GROQ_API_KEY = "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";
 const GROQ_MODEL_ID = "openai/gpt-oss-20b";
 const API_ENDPOINT_URL = "https://api.groq.com/openai/v1/chat/completions";
 
