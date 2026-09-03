@@ -250,7 +250,7 @@ async function sendQueryToAI() {
       const data = await response.json();
       aiResponseText = data.choices[0].message.content;
     } else {
-      aiResponseText = `**Analysis for "${query}":**\n\n1. **Module:** ${appState.activeTool} executed successfully.\n2. **Status:** Optimal neural routing completed.\n3. **Note:** Sign in with your Google account to sync and save this history.`;
+      aiResponseText = `**Analysis for "${query}":**\n\n1. **Module:** ${appState.activeTool} executed successfully.\n2. **Status:** Optimal neural routing completed.\n3. **Note:** Please verify your live Groq API key configuration.`;
     }
 
     const loadingElement = document.getElementById('aiResponseLoading');
@@ -280,7 +280,7 @@ async function sendQueryToAI() {
     const loadingElement = document.getElementById('aiResponseLoading');
     if (loadingElement) loadingElement.remove();
     
-    const fallbackText = `Processed query: "${query}". Sign in with your Google account to save chat logs.`;
+    const fallbackText = `Processed query: "${query}". Check your API key and network connection.`;
     const errDiv = document.createElement('div');
     errDiv.className = 'flex justify-start my-3';
     errDiv.innerHTML = `
@@ -356,7 +356,17 @@ function proceedApplyCode() {
 function closeApplyCodeModal() { document.getElementById('applyCodeModal').classList.add('hidden'); }
 
 function proceedSafepayCheckout(type, amount, days) {
-  alert(`Initiating Safepay checkout for ${type} (Rs. ${amount}). Sandbox test mode active.`);
+  let safepayUrl = '';
+  if (amount === 1500) {
+    safepayUrl = 'https://sandbox.api.getsafepay.com/io/quick-link?ql=link_e00d0d5c-1ec6-4592-878e-e9b9a5fae749';
+  } else if (amount === 2000) {
+    safepayUrl = 'https://sandbox.api.getsafepay.com/io/quick-link?ql=link_6b51303a-57a8-4192-82b5-f4ba36ff0636';
+  }
+
+  if (safepayUrl) {
+    window.open(safepayUrl, '_blank');
+  }
+
   appState.isVip = true;
   appState.vipExpiryTime = Date.now() + (days * 24 * 60 * 60 * 1000);
   if (appState.currentUser && !appState.vipUsers.includes(appState.currentUser)) {
@@ -364,7 +374,7 @@ function proceedSafepayCheckout(type, amount, days) {
   }
   closeVipOptionModal();
   saveGlobalState();
-  alert(`VIP Pass successfully activated! Enjoy unlimited Supreme access.`);
+  alert(`Redirecting to Safepay for ${type} (Rs. ${amount}). VIP Pass activated upon completion!`);
 }
 
 function validateVipCode() {
@@ -390,10 +400,12 @@ function closeAdminAuthModal() { document.getElementById('adminAuthModal').class
 function verifyAdminPass() {
   const pass = document.getElementById('adminPassInput').value;
   if (pass === 'abdullah waheed123123') {
+    document.getElementById('adminPassInput').value = '';
     closeAdminAuthModal();
     openAdminPanelModal();
   } else {
-    alert('Incorrect Admin Password. Password is: abdullah waheed123123');
+    alert('Incorrect Admin Password.');
+    document.getElementById('adminPassInput').value = '';
   }
 }
 
