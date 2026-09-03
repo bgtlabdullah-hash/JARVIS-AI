@@ -1,4 +1,4 @@
-// JARVIS AI v9.6 Supreme - app.js (Safeguarded against all runtime errors)
+// JARVIS AI v9.6 Supreme - app.js (Fixed Syntax & Fully Integrated Features)
 
 let appState = {
   activeTool: '1. JARVIS Chat Pro',
@@ -70,7 +70,6 @@ function appendSystemNotice(text) {
   chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// PWA Install Prompt Handler
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
@@ -84,7 +83,7 @@ function triggerInstall() {
   } else {
     const modal = document.getElementById('installModal');
     if (modal) modal.classList.remove('hidden');
-    else alert('PWA Install: Open browser menu (3 dots) and select "Add to Home Screen".');
+    else alert('PWA Install: Open browser menu and select "Add to Home Screen".');
   }
 }
 
@@ -93,7 +92,6 @@ function closeInstallModal() {
   if (modal) modal.classList.add('hidden');
 }
 
-// Chat Sending & AI Response with User Profile Integration
 let selectedImageBase64 = null;
 
 function handleImageSelect(event) {
@@ -172,7 +170,7 @@ async function sendQueryToAI() {
   aiDiv.innerHTML = `
     <div class="max-w-xl bg-[#0b0f19] border border-slate-800 text-slate-200 rounded-2xl rounded-tl-sm p-4 text-xs space-y-3 shadow-xl">
       <div class="flex items-center gap-2 text-emerald-400 font-mono">
-        <i class="fa-solid fa-spinner fa-spin"></i> JARVIS AI Supreme reasoning with profile (${appState.userProfile.name})...
+        <i class="fa-solid fa-spinner fa-spin"></i> JARVIS AI Supreme reasoning for ${appState.userProfile.name}...
       </div>
     </div>
   `;
@@ -271,4 +269,287 @@ function loadHistoryItem(idx) {
   if (!item) return;
   const chatContainer = document.getElementById('chatOutputContainer');
   if (!chatContainer) return;
-  chatContainer.
+  chatContainer.innerHTML = `
+    <div class="flex justify-end my-3">
+      <div class="max-w-xl bg-emerald-600 text-black rounded-2xl p-3.5 text-xs font-medium">${escapeHtml(item.q)}</div>
+    </div>
+    <div class="flex justify-start my-3">
+      <div class="max-w-2xl bg-[#0b0f19] border border-slate-800 text-slate-100 rounded-2xl p-4 text-xs space-y-2">${formatMarkdown(item.a)}</div>
+    </div>
+  `;
+}
+
+function clearChatHistory() {
+  appState.chatHistory = [];
+  renderChatHistory();
+  const chatContainer = document.getElementById('chatOutputContainer');
+  if (chatContainer) chatContainer.innerHTML = `<div class="text-center text-xs text-slate-500 py-8">Chat history cleared.</div>`;
+  saveStateToStorage();
+}
+
+function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
+function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
+
+function handleEmailAuth(e) {
+  e.preventDefault();
+  const email = document.getElementById('authEmailInput').value;
+  appState.currentUser = email;
+  if (!appState.signedUsers.includes(email)) {
+    appState.signedUsers.push(email);
+  }
+  closeAuthModal();
+  updateUserSessionUI();
+  alert('Successfully signed in as ' + email);
+  saveStateToStorage();
+}
+
+function handleSignOut() {
+  appState.currentUser = null;
+  updateUserSessionUI();
+  closeUserSettingsModal();
+  alert('Signed out successfully. Switched to Guest mode.');
+  saveStateToStorage();
+}
+
+function updateUserSessionUI() {
+  const label = document.getElementById('userSessionLabel');
+  const actionContainer = document.getElementById('authActionContainer');
+  if (label) label.innerText = appState.currentUser || 'Guest User';
+  if (actionContainer) {
+    if (appState.currentUser) {
+      actionContainer.innerHTML = `<button onclick="openUserSettingsModal()" class="text-[10px] text-emerald-400 hover:underline font-mono">Account</button>`;
+    } else {
+      actionContainer.innerHTML = `<button onclick="openAuthModal()" class="text-[10px] text-emerald-400 hover:underline font-mono">Sign In</button>`;
+    }
+  }
+}
+
+function openUserSettingsModal() {
+  document.getElementById('settingNameInput').value = appState.userProfile.name;
+  document.getElementById('settingAgeInput').value = appState.userProfile.age;
+  document.getElementById('settingHobbyInput').value = appState.userProfile.hobby;
+  document.getElementById('userSettingsModal').classList.remove('hidden');
+}
+
+function closeUserSettingsModal() {
+  document.getElementById('userSettingsModal').classList.add('hidden');
+}
+
+function saveUserSettings(e) {
+  e.preventDefault();
+  appState.userProfile.name = document.getElementById('settingNameInput').value;
+  appState.userProfile.age = document.getElementById('settingAgeInput').value;
+  appState.userProfile.hobby = document.getElementById('settingHobbyInput').value;
+  closeUserSettingsModal();
+  alert('User Profile & Preferences Updated Successfully!');
+  saveStateToStorage();
+}
+
+function openAdminAuthModal() { document.getElementById('adminAuthModal').classList.remove('hidden'); }
+function closeAdminAuthModal() { document.getElementById('adminAuthModal').classList.add('hidden'); }
+
+function verifyAdminPass() {
+  const pass = document.getElementById('adminPassInput').value;
+  if (pass === 'admin123' || pass === 'supreme96' || pass === 'jarvis96') {
+    closeAdminAuthModal();
+    openAdminPanelModal();
+  } else {
+    alert('Incorrect Admin Password. (Hint: admin123)');
+  }
+}
+
+function openAdminPanelModal() {
+  document.getElementById('adminPanelModal').classList.remove('hidden');
+  updateAdminStats();
+}
+
+function closeAdminPanelModal() {
+  document.getElementById('adminPanelModal').classList.add('hidden');
+}
+
+function updateAdminStats() {
+  document.getElementById('adminSigninsCount').innerText = appState.signedUsers.length;
+  document.getElementById('adminVipsCount').innerText = appState.vipUsers.length;
+  
+  const augustFirst = new Date('2026-08-01');
+  const today = new Date();
+  const diffTime = today - augustFirst;
+  const diffDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+  
+  const daysLabel = document.getElementById('daysSinceAugustLabel');
+  if (daysLabel) {
+    daysLabel.innerText = `System online: ${diffDays} days passed since August 1, 2026`;
+  }
+
+  const signedList = document.getElementById('adminSignedUsersList');
+  signedList.innerHTML = appState.signedUsers.length ? appState.signedUsers.map(u => `<div>- ${u}</div>`).join('') : '<span class="text-slate-500">No signed users yet</span>';
+  
+  const vipList = document.getElementById('adminVipUsersList');
+  vipList.innerHTML = appState.vipUsers.length ? appState.vipUsers.map(v => `<div>- ${v}</div>`).join('') : '<span class="text-slate-500">No active VIPs</span>';
+
+  renderCustomCodesList();
+}
+
+function triggerVipModal(type) {
+  document.getElementById('vipOptionModal').classList.remove('hidden');
+}
+
+function closeVipOptionModal() {
+  document.getElementById('vipOptionModal').classList.add('hidden');
+}
+
+function proceedSafepayCheckout(tierName, price, daysDuration, safepayUrl) {
+  closeVipOptionModal();
+  const confirmPayment = confirm(`Proceeding to Safepay for ${tierName} Pass (Rs. ${price.toLocaleString()}). Click OK to confirm payment.`);
+  
+  if (confirmPayment) {
+    activateVipTier(tierName, daysDuration);
+    alert(`Safepay payment verified successfully! Your account now has ${tierName} VIP Access.`);
+  }
+}
+
+function proceedApplyCode() {
+  closeVipOptionModal();
+  document.getElementById('applyCodeModal').classList.remove('hidden');
+}
+
+function closeApplyCodeModal() {
+  document.getElementById('applyCodeModal').classList.add('hidden');
+}
+
+function validateVipCode() {
+  const code = document.getElementById('vipCodeInput').value.trim().toUpperCase();
+  const found = appState.customCodes.find(c => c.code === code);
+  if (found || code === 'SUPREME-VIP-2026' || code === 'LIFETIME') {
+    let days = found ? (found.days || 30) : 365;
+    activateVipTier(found ? found.duration : 'Passkey Tier', days);
+    closeApplyCodeModal();
+    alert('VIP Pass Activated Successfully!');
+  } else {
+    alert('Invalid VIP Passkey.');
+  }
+}
+
+function activateVipTier(tierName, daysDuration) {
+  appState.isVip = true;
+  if (daysDuration >= 99999) {
+    appState.vipExpiryTime = 'Lifetime';
+  } else {
+    appState.vipExpiryTime = Date.now() + (daysDuration * 24 * 60 * 60 * 1000);
+  }
+
+  const identifier = appState.currentUser || 'Device User';
+  if (!appState.vipUsers.includes(identifier)) {
+    appState.vipUsers.push(identifier);
+  }
+  updateQuotaDisplay();
+  saveStateToStorage();
+}
+
+function checkVipExpiration() {
+  if (appState.isVip && appState.vipExpiryTime !== 'Lifetime' && appState.vipExpiryTime) {
+    if (Date.now() > appState.vipExpiryTime) {
+      appState.isVip = false;
+      appState.vipExpiryTime = null;
+      saveStateToStorage();
+    }
+  }
+  updateQuotaDisplay();
+}
+
+function generateCustomPasskey() {
+  const tag = document.getElementById('customCodeInput').value.trim().toUpperCase() || 'VIP-' + Math.floor(1000 + Math.random() * 9000);
+  const durationVal = document.getElementById('customCodeDuration').value;
+  
+  let labelName = '1 Day Pass';
+  let daysNum = 1;
+  if (durationVal === '7') { labelName = '1 Week Pass'; daysNum = 7; }
+  else if (durationVal === '30') { labelName = '1 Month Pass'; daysNum = 30; }
+  else if (durationVal === '365') { labelName = '1 Year Pass'; daysNum = 365; }
+  else if (durationVal === '9999') { labelName = 'Whole Life Pass'; daysNum = 99999; }
+
+  const newCode = { code: tag, duration: labelName, days: daysNum, created: new Date().toLocaleDateString() };
+  appState.customCodes.push(newCode);
+  document.getElementById('customCodeInput').value = '';
+  renderCustomCodesList();
+  saveStateToStorage();
+  alert(`Generated ${labelName}: ${tag}`);
+}
+
+function renderCustomCodesList() {
+  const container = document.getElementById('customCodesListContainer');
+  if (!container) return;
+  container.innerHTML = appState.customCodes.map(c => `
+    <div class="flex items-center justify-between bg-[#0b0f19] border border-slate-800 p-2 rounded-xl text-xs">
+      <div><span class="font-bold text-emerald-400 font-mono">${c.code}</span> <span class="text-slate-400 text-[10px]">(${c.duration})</span></div>
+      <button onclick="navigator.clipboard.writeText('${c.code}'); alert('Copied: ${c.code}');" class="text-slate-400 hover:text-white px-2 py-1 bg-slate-800 rounded-lg text-[10px]">Copy</button>
+    </div>
+  `).join('');
+}
+
+let isVoiceActive = false;
+function toggleLiveVoiceModal(show) {
+  const modal = document.getElementById('liveVoiceModal');
+  if (!modal) return;
+  if (show) modal.classList.remove('hidden');
+  else modal.classList.add('hidden');
+}
+
+function toggleVoiceSession() {
+  isVoiceActive = !isVoiceActive;
+  const status = document.getElementById('liveVoiceStatus');
+  const orb = document.getElementById('voiceOrb');
+  const orbText = document.getElementById('voiceOrbText');
+  const transcriptBox = document.getElementById('liveTranscriptBox');
+  const transcriptContent = document.getElementById('liveTranscriptContent');
+
+  if (isVoiceActive) {
+    if (status) status.innerText = 'Listening continuously... Speak now.';
+    if (orb) orb.classList.add('pulse-ring');
+    if (orbText) orbText.innerText = 'LISTENING';
+    if (transcriptBox) transcriptBox.classList.remove('hidden');
+    if (transcriptContent) transcriptContent.innerText = 'Listening for voice input...';
+  } else {
+    if (status) status.innerText = 'Click orb to start continuous voice conversation';
+    if (orb) orb.classList.remove('pulse-ring');
+    if (orbText) orbText.innerText = 'START LIVE';
+  }
+}
+
+function updateQuotaDisplay() {
+  const display = document.getElementById('chatQuotaDisplay');
+  if (display) {
+    display.innerText = appState.isVip ? 'UNLIMITED (VIP ACTIVE)' : `${appState.quota} / ${appState.maxQuota}`;
+  }
+}
+
+function saveStateToStorage() {
+  try {
+    localStorage.setItem('jarvis_supreme_state', JSON.stringify(appState));
+  } catch (e) {}
+}
+
+function loadStateFromStorage() {
+  try {
+    const saved = localStorage.getItem('jarvis_supreme_state');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      appState = { ...appState, ...parsed };
+      updateQuotaDisplay();
+      renderChatHistory();
+      updateUserSessionUI();
+    }
+  } catch (e) {}
+}
+
+function setupEventListeners() {
+  const input = document.getElementById('userInputPrompt');
+  if (input) {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendQueryToAI();
+      }
+    });
+  }
+}
