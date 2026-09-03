@@ -8,7 +8,7 @@ let appState = {
   vipExpiryTime: null,
   currentUser: null,
   currentUserName: '',
-  groqApiKey: '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',
+  groqApiKey: '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',
   userProfile: {
     name: 'Abdullah Waheed',
     age: '18',
@@ -237,7 +237,7 @@ async function sendQueryToAI() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: "llama-3.1-8b-instant", // Updated to a universally supported model ID
         messages: [
           { role: "system", content: `You are JARVIS AI v9.6 Supreme, assisting ${appState.userProfile.name} who specializes in ${appState.userProfile.hobby}.` },
           { role: "user", content: query }
@@ -251,7 +251,7 @@ async function sendQueryToAI() {
       aiResponseText = data.choices[0].message.content;
     } else {
       const errorBody = await response.text();
-      aiResponseText = `**Groq API Error (Status ${response.status}):**\n\`\`\`\n${errorBody}\n\`\`\`\n*Please check your Groq API key on Line 11.*`;
+      aiResponseText = `**Groq API Error (Status ${response.status}):**\n\`\`\`\n${errorBody}\n\`\`\`\n*Please verify your Groq API key on Line 11.*`;
     }
 
     const loadingElement = document.getElementById('aiResponseLoading');
