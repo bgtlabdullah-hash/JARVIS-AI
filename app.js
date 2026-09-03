@@ -230,7 +230,7 @@ async function sendQueryToAI() {
 
   try {
     let aiResponseText = "";
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
       method: "POST",
       headers: {
         "Authorization": `Bearer ${appState.groqApiKey}`,
