@@ -29,7 +29,6 @@
 </head>
 <body class="h-screen flex overflow-hidden">
 
-  <!-- SIDEBAR PANEL -->
   <aside id="sidebarPanel" class="w-72 bg-[#080c19] border-r border-slate-800/80 flex flex-col z-20 shrink-0">
     <div class="p-4 border-b border-slate-800/80 flex items-center justify-between">
       <div class="flex items-center gap-2">
@@ -41,20 +40,17 @@
       </div>
     </div>
 
-    <!-- PWA Install Button -->
     <div class="p-3 border-b border-slate-800/80">
       <button onclick="triggerInstall()" class="w-full py-2 px-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-black font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition">
         <i class="fa-solid fa-download"></i> Install App to Home Screen
       </button>
     </div>
 
-    <!-- AI Tools Modules List (12 Folders) -->
     <div class="flex-1 overflow-y-auto p-3 space-y-1.5">
       <div class="text-[10px] font-mono text-slate-400 px-2 uppercase tracking-wider mb-1">Supreme Modules</div>
       <div id="aiToolsList" class="space-y-1"></div>
     </div>
 
-    <!-- User Session & Quota Footer -->
     <div class="p-3 border-t border-slate-800/80 bg-[#060914] space-y-2">
       <div class="flex items-center justify-between text-xs">
         <span class="text-slate-400 flex items-center gap-1.5 truncate"><i class="fa-solid fa-user-shield text-emerald-400"></i><span id="userSessionLabel">Guest User</span></span>
@@ -75,10 +71,8 @@
     </div>
   </aside>
 
-  <!-- MAIN CHAT AREA -->
   <main class="flex-1 flex flex-col bg-[#050914] relative">
     
-    <!-- Top Header Bar -->
     <header class="h-14 border-b border-slate-800/80 bg-[#080c19]/80 backdrop-blur-md px-4 flex items-center justify-between z-10">
       <div class="flex items-center gap-3">
         <div>
@@ -95,7 +89,6 @@
       </div>
     </header>
 
-    <!-- Chat Output Scrollable Area -->
     <div id="chatOutputContainer" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
       <div class="max-w-3xl mx-auto text-center py-8 space-y-3">
         <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 to-emerald-400 mx-auto flex items-center justify-center text-black font-bold text-2xl font-mono shadow-2xl shadow-emerald-500/30">J</div>
@@ -110,7 +103,6 @@
       </div>
     </div>
 
-    <!-- Input Bar Footer -->
     <div class="p-4 bg-[#080c19] border-t border-slate-800/80">
       <div class="max-w-4xl mx-auto space-y-2">
         <div id="imagePreviewContainer" class="hidden flex items-center gap-2 p-2 bg-[#0b0f19] border border-slate-800 rounded-xl w-fit"></div>
@@ -131,7 +123,6 @@
     </div>
   </main>
 
-  <!-- HISTORY SIDEBAR (Right) -->
   <aside class="w-64 bg-[#080c19] border-l border-slate-800/80 hidden xl:flex flex-col z-10 shrink-0">
     <div class="p-4 border-b border-slate-800/80 flex items-center justify-between">
       <span class="text-xs font-bold font-mono text-slate-300 uppercase tracking-wider">Neural Logs</span>
@@ -140,7 +131,6 @@
     <div id="historyListContainer" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
   </aside>
 
-  <!-- MODALS -->
   <div id="installModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-[#080c19] border border-slate-800 rounded-3xl p-6 max-w-sm w-full space-y-4 text-center">
       <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mx-auto text-xl"><i class="fa-solid fa-download"></i></div>
@@ -168,7 +158,6 @@
     </div>
   </div>
 
-  <!-- Auth Modal -->
   <div id="authModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-[#080c19] border border-slate-800 rounded-3xl p-6 max-w-sm w-full space-y-4">
       <div class="flex justify-between items-center">
@@ -183,7 +172,6 @@
     </div>
   </div>
 
-  <!-- User Profile & Settings Modal -->
   <div id="userSettingsModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-[#080c19] border border-slate-800 rounded-3xl p-6 max-w-md w-full space-y-4">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -212,7 +200,6 @@
     </div>
   </div>
 
-  <!-- Admin Auth Modal -->
   <div id="adminAuthModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-[#080c19] border border-slate-800 rounded-3xl p-6 max-w-sm w-full space-y-4">
       <div class="flex justify-between items-center">
@@ -224,7 +211,6 @@
     </div>
   </div>
 
-  <!-- Admin Control Panel Modal -->
   <div id="adminPanelModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
     <div class="bg-[#080c19] border border-slate-800 rounded-3xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-6">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -272,7 +258,6 @@
     </div>
   </div>
 
-  <!-- VIP Option Modal with Updated Pricing (100, 500, 800, 1000, 1200) -->
   <div id="vipOptionModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-[#080c19] border border-slate-800 rounded-3xl p-6 max-w-md w-full space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -286,9 +271,7 @@
         <button onclick="closeVipOptionModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
 
-      <!-- 5 Tiers with Updated Pricing -->
       <div class="space-y-2.5">
-        <!-- 1 Day Pass: Rs. 100 -->
         <div class="bg-[#0b0f19] border border-slate-800 hover:border-emerald-500/50 p-3 rounded-2xl flex items-center justify-between transition">
           <div>
             <div class="font-bold text-white text-xs">1 Day Supreme Pass</div>
@@ -297,7 +280,6 @@
           <button onclick="proceedSafepayCheckout('1 Day', 100, 1, 'https://getsafepay.com/checkout?tier=1day')" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-[11px] rounded-xl shadow-lg shadow-emerald-500/20">Pay Safepay</button>
         </div>
 
-        <!-- 1 Week Pass: Rs. 500 -->
         <div class="bg-[#0b0f19] border border-slate-800 hover:border-emerald-500/50 p-3 rounded-2xl flex items-center justify-between transition">
           <div>
             <div class="font-bold text-white text-xs">1 Week Supreme Pass</div>
@@ -306,7 +288,6 @@
           <button onclick="proceedSafepayCheckout('1 Week', 500, 7, 'https://getsafepay.com/checkout?tier=1week')" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-[11px] rounded-xl shadow-lg shadow-emerald-500/20">Pay Safepay</button>
         </div>
 
-        <!-- 1 Month Pass: Rs. 800 -->
         <div class="bg-[#0b0f19] border border-slate-800 hover:border-emerald-500/50 p-3 rounded-2xl flex items-center justify-between transition">
           <div>
             <div class="font-bold text-white text-xs">1 Month Supreme Pass</div>
@@ -315,7 +296,6 @@
           <button onclick="proceedSafepayCheckout('1 Month', 800, 30, 'https://getsafepay.com/checkout?tier=1month')" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-[11px] rounded-xl shadow-lg shadow-emerald-500/20">Pay Safepay</button>
         </div>
 
-        <!-- 1 Year Pass: Rs. 1000 -->
         <div class="bg-[#0b0f19] border border-slate-800 hover:border-emerald-500/50 p-3 rounded-2xl flex items-center justify-between transition">
           <div>
             <div class="font-bold text-white text-xs">1 Year Supreme Pass</div>
@@ -324,7 +304,6 @@
           <button onclick="proceedSafepayCheckout('1 Year', 1000, 365, 'https://getsafepay.com/checkout?tier=1year')" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-[11px] rounded-xl shadow-lg shadow-emerald-500/20">Pay Safepay</button>
         </div>
 
-        <!-- Whole Life Pass: Rs. 1200 -->
         <div class="bg-[#0b0f19] border border-emerald-500/40 hover:border-emerald-500 p-3 rounded-2xl flex items-center justify-between transition bg-gradient-to-r from-emerald-500/5 to-transparent">
           <div>
             <div class="font-bold text-white text-xs flex items-center gap-1.5">Whole Life Supreme Pass <span class="bg-emerald-500/20 text-emerald-400 text-[9px] px-1.5 py-0.5 rounded font-mono">BEST VALUE</span></div>
