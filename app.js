@@ -250,7 +250,8 @@ async function sendQueryToAI() {
       const data = await response.json();
       aiResponseText = data.choices[0].message.content;
     } else {
-      aiResponseText = `**Analysis for "${query}":**\n\n1. **Module:** ${appState.activeTool} executed successfully.\n2. **Status:** Optimal neural routing completed.\n3. **Note:** Please verify your live Groq API key configuration.`;
+      const errorBody = await response.text();
+      aiResponseText = `**Groq API Error (Status ${response.status}):**\n\`\`\`\n${errorBody}\n\`\`\`\n*Please check your Groq API key on Line 11.*`;
     }
 
     const loadingElement = document.getElementById('aiResponseLoading');
@@ -270,7 +271,7 @@ async function sendQueryToAI() {
     chatContainer.appendChild(finalAiDiv);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
-    if (appState.currentUser) {
+    if (appState.currentUser && response.ok) {
       appState.chatHistory.push({ q: query, a: aiResponseText, time: new Date().toLocaleTimeString() });
       renderChatHistory();
       saveUserHistory(appState.currentUser);
@@ -280,13 +281,12 @@ async function sendQueryToAI() {
     const loadingElement = document.getElementById('aiResponseLoading');
     if (loadingElement) loadingElement.remove();
     
-    const fallbackText = `Processed query: "${query}". Check your API key and network connection.`;
     const errDiv = document.createElement('div');
     errDiv.className = 'flex justify-start my-3';
     errDiv.innerHTML = `
       <div class="max-w-2xl bg-[#0b0f19] border border-slate-800 text-slate-100 rounded-2xl rounded-tl-sm p-4 text-xs space-y-3 shadow-xl">
-        <div class="font-mono text-emerald-400 font-bold">JARVIS AI v9.6 Supreme</div>
-        <div class="text-slate-200">${formatMarkdown(fallbackText)}</div>
+        <div class="font-mono text-red-400 font-bold">Network Exception Error</div>
+        <div class="text-slate-200">${escapeHtml(err.message)}</div>
       </div>
     `;
     chatContainer.appendChild(errDiv);
