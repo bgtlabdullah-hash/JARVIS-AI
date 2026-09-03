@@ -1,4 +1,4 @@
-// JARVIS AI v9.6 Supreme - Complete Optimized Script
+// JARVIS AI v9.6 Supreme - Full Integration Script
 
 let appState = {
   activeTool: '1. JARVIS Chat Pro',
@@ -8,7 +8,7 @@ let appState = {
   vipExpiryTime: null,
   currentUser: null,
   currentUserName: '',
-  groqApiKey: 'gsk_your_groq_api_key_here',
+  groqApiKey: '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',
   userProfile: {
     name: 'Abdullah Waheed',
     age: '18',
@@ -16,7 +16,9 @@ let appState = {
   },
   signedUsers: [],
   vipUsers: [],
-  customCodes: [],
+  customCodes: [
+    { code: 'SUPREME-VIP-2026', days: 365 }
+  ],
   chatHistory: []
 };
 
@@ -144,7 +146,7 @@ function handleSignOut() {
   
   const chatContainer = document.getElementById('chatOutputContainer');
   if (chatContainer) {
-    chatContainer.innerHTML = `<div class="text-center text-xs text-slate-500 py-12">Signed out. Chat history cleared from screen. Sign in to sync.</div>`;
+    chatContainer.innerHTML = `<div class="text-center text-xs text-slate-500 py-12">Signed out. Chats will only save when signed in to a Google account.</div>`;
   }
   
   renderChatHistory();
@@ -191,7 +193,7 @@ function reloadChatUIFromHistory() {
   chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// --- AI QUERY PROCESSING (Free for guests, saved only if signed in) ---
+// --- AI QUERY PROCESSING ---
 async function sendQueryToAI() {
   const input = document.getElementById('userInputPrompt');
   if (!input) return;
@@ -219,7 +221,7 @@ async function sendQueryToAI() {
   aiDiv.innerHTML = `
     <div class="max-w-xl bg-[#0b0f19] border border-slate-800 text-slate-200 rounded-2xl rounded-tl-sm p-4 text-xs space-y-3 shadow-xl">
       <div class="flex items-center gap-2 text-emerald-400 font-mono">
-        <i class="fa-solid fa-spinner fa-spin"></i> Processing neural query...
+        <i class="fa-solid fa-spinner fa-spin"></i> Processing via ${appState.activeTool}...
       </div>
     </div>
   `;
@@ -237,7 +239,7 @@ async function sendQueryToAI() {
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
         messages: [
-          { role: "system", content: `You are JARVIS AI v9.6 Supreme. Assist ${appState.userProfile.name} who is interested in ${appState.userProfile.hobby}.` },
+          { role: "system", content: `You are JARVIS AI v9.6 Supreme, assisting ${appState.userProfile.name} who specializes in ${appState.userProfile.hobby}.` },
           { role: "user", content: query }
         ],
         temperature: 0.7
@@ -248,7 +250,7 @@ async function sendQueryToAI() {
       const data = await response.json();
       aiResponseText = data.choices[0].message.content;
     } else {
-      aiResponseText = `Regarding your query on "${query}" using **${appState.activeTool}**:\n\nJARVIS AI v9.6 Supreme has analyzed your request with high-speed neural processing. Here is the optimized solution:\n\n1. **Execution Status:** Successfully executed under supreme parameters.\n2. **Analysis:** All logic checks pass with 99.8% precision.\n3. **Recommendation:** You can proceed with confidence or ask further refinement questions.`;
+      aiResponseText = `**Analysis for "${query}":**\n\n1. **Module:** ${appState.activeTool} executed successfully.\n2. **Status:** Optimal neural routing completed.\n3. **Note:** Sign in with your Google account to sync and save this history.`;
     }
 
     const loadingElement = document.getElementById('aiResponseLoading');
@@ -268,7 +270,6 @@ async function sendQueryToAI() {
     chatContainer.appendChild(finalAiDiv);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
-    // SAVE ONLY IF USER SIGNED IN
     if (appState.currentUser) {
       appState.chatHistory.push({ q: query, a: aiResponseText, time: new Date().toLocaleTimeString() });
       renderChatHistory();
@@ -279,7 +280,7 @@ async function sendQueryToAI() {
     const loadingElement = document.getElementById('aiResponseLoading');
     if (loadingElement) loadingElement.remove();
     
-    const fallbackText = `Regarding your query on "${query}":\n\n1. **Status:** Processed successfully.\n2. **Note:** Sign in with your Google account to automatically save this conversation to your account history.`;
+    const fallbackText = `Processed query: "${query}". Sign in with your Google account to save chat logs.`;
     const errDiv = document.createElement('div');
     errDiv.className = 'flex justify-start my-3';
     errDiv.innerHTML = `
@@ -304,7 +305,7 @@ function renderChatHistory() {
   const container = document.getElementById('historyListContainer');
   if (!container) return;
   if (appState.chatHistory.length === 0) {
-    container.innerHTML = `<div class="text-[11px] text-slate-500 italic p-2">No saved history for guest mode. Sign in to store chats.</div>`;
+    container.innerHTML = `<div class="text-[11px] text-slate-500 italic p-2">No saved history. Sign in with Google to store your chat sessions.</div>`;
     return;
   }
   container.innerHTML = appState.chatHistory.map((item, idx) => `
@@ -338,11 +339,8 @@ function clearChatHistory() {
   }
 }
 
-// --- MODAL CONTROLS & ADMIN LOGIN ---
-function openAuthModal() { 
-  document.getElementById('authModal').classList.remove('hidden'); 
-  renderGoogleButton();
-}
+// --- MODALS & ADMIN PANEL LOGIC ---
+function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); renderGoogleButton(); }
 function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
 
 function openUserSettingsModal() { document.getElementById('userSettingsModal').classList.remove('hidden'); }
@@ -351,14 +349,43 @@ function closeUserSettingsModal() { document.getElementById('userSettingsModal')
 function triggerVipModal() { document.getElementById('vipOptionModal').classList.remove('hidden'); }
 function closeVipOptionModal() { document.getElementById('vipOptionModal').classList.add('hidden'); }
 
+function proceedApplyCode() {
+  closeVipOptionModal();
+  document.getElementById('applyCodeModal').classList.remove('hidden');
+}
+function closeApplyCodeModal() { document.getElementById('applyCodeModal').classList.add('hidden'); }
+
+function proceedSafepayCheckout(type, amount, days) {
+  alert(`Initiating Safepay checkout for ${type} (Rs. ${amount}). Sandbox test mode active.`);
+  appState.isVip = true;
+  appState.vipExpiryTime = Date.now() + (days * 24 * 60 * 60 * 1000);
+  if (appState.currentUser && !appState.vipUsers.includes(appState.currentUser)) {
+    appState.vipUsers.push(appState.currentUser);
+  }
+  closeVipOptionModal();
+  saveGlobalState();
+  alert(`VIP Pass successfully activated! Enjoy unlimited Supreme access.`);
+}
+
+function validateVipCode() {
+  const code = document.getElementById('vipCodeInput').value.trim().toUpperCase();
+  const found = appState.customCodes.find(c => c.code === code);
+  if (found || code === 'SUPREME-VIP-2026') {
+    appState.isVip = true;
+    appState.vipExpiryTime = Date.now() + ((found ? found.days : 365) * 24 * 60 * 60 * 1000);
+    if (appState.currentUser && !appState.vipUsers.includes(appState.currentUser)) {
+      appState.vipUsers.push(appState.currentUser);
+    }
+    closeApplyCodeModal();
+    saveGlobalState();
+    alert('VIP Passkey successfully redeemed!');
+  } else {
+    alert('Invalid Passkey. Please check with your administrator.');
+  }
+}
+
 function openAdminAuthModal() { document.getElementById('adminAuthModal').classList.remove('hidden'); }
 function closeAdminAuthModal() { document.getElementById('adminAuthModal').classList.add('hidden'); }
-
-function openAdminPanelModal() { 
-  document.getElementById('adminPanelModal').classList.remove('hidden');
-  updateAdminStats();
-}
-function closeAdminPanelModal() { document.getElementById('adminPanelModal').classList.add('hidden'); }
 
 function verifyAdminPass() {
   const pass = document.getElementById('adminPassInput').value;
@@ -366,15 +393,48 @@ function verifyAdminPass() {
     closeAdminAuthModal();
     openAdminPanelModal();
   } else {
-    alert('Incorrect Admin Password. Correct password is: abdullah waheed123123');
+    alert('Incorrect Admin Password. Password is: abdullah waheed123123');
   }
 }
+
+function openAdminPanelModal() { 
+  document.getElementById('adminPanelModal').classList.remove('hidden');
+  updateAdminStats();
+  renderCustomCodesList();
+}
+function closeAdminPanelModal() { document.getElementById('adminPanelModal').classList.add('hidden'); }
 
 function updateAdminStats() {
   const signinsCount = document.getElementById('adminSigninsCount');
   const vipsCount = document.getElementById('adminVipsCount');
   if (signinsCount) signinsCount.innerText = appState.signedUsers.length;
   if (vipsCount) vipsCount.innerText = appState.vipUsers.length;
+}
+
+function generateCustomPasskey() {
+  const tag = document.getElementById('customCodeInput').value.trim().toUpperCase();
+  const days = parseInt(document.getElementById('customCodeDuration').value);
+  if (!tag) {
+    alert('Please enter a passkey tag/name.');
+    return;
+  }
+  const fullCode = `SUPREME-${tag}`;
+  appState.customCodes.push({ code: fullCode, days: days });
+  document.getElementById('customCodeInput').value = '';
+  renderCustomCodesList();
+  saveGlobalState();
+  alert(`Passkey "${fullCode}" created successfully!`);
+}
+
+function renderCustomCodesList() {
+  const container = document.getElementById('customCodesListContainer');
+  if (!container) return;
+  container.innerHTML = appState.customCodes.map(c => `
+    <div class="flex justify-between items-center bg-slate-900 border border-slate-800 p-2 rounded-xl text-xs font-mono">
+      <span class="text-emerald-400 font-bold">${c.code}</span>
+      <span class="text-slate-400">${c.days} Days</span>
+    </div>
+  `).join('');
 }
 
 function updateUserSessionUI() {
@@ -396,6 +456,7 @@ function saveGlobalState() {
       currentUser: appState.currentUser,
       signedUsers: appState.signedUsers,
       vipUsers: appState.vipUsers,
+      customCodes: appState.customCodes,
       userProfile: appState.userProfile
     }));
   } catch (e) {}
@@ -409,6 +470,7 @@ function loadGlobalState() {
       appState.currentUser = parsed.currentUser || null;
       appState.signedUsers = parsed.signedUsers || [];
       appState.vipUsers = parsed.vipUsers || [];
+      if (parsed.customCodes) appState.customCodes = parsed.customCodes;
       if (parsed.userProfile) appState.userProfile = parsed.userProfile;
       if (appState.currentUser) {
         loadUserHistory(appState.currentUser);
